@@ -109,15 +109,14 @@
   .tag-agents { background: #e0f2fe; color: #0c4a6e; }
   .no-tags { color: var(--no-tags); font-size: 0.75rem; }
 
-  .episode-title { font-weight: 600; color: var(--stat-fg); }
+  a.episode-title-link { font-weight: 600; color: var(--stat-fg); text-decoration: none; }
+  a.episode-title-link:hover { color: var(--accent); text-decoration: underline; }
   .podcast-name { color: var(--text-muted); font-size: 0.78rem; }
   .topic-tags { color: var(--text-faint); font-size: 0.78rem; margin-top: 2px; }
   .rating-note { color: var(--text); font-size: 0.78rem; font-style: italic; }
   .hosts { color: var(--text-muted); font-size: 0.78rem; }
   .guests { color: var(--text); font-size: 0.78rem; }
 
-  a.listen-link { color: var(--link); text-decoration: none; font-size: 0.78rem; white-space: nowrap; }
-  a.listen-link:hover { text-decoration: underline; }
 
   .row-count { font-size: 0.82rem; color: var(--text-faint); padding: 0 2rem 0.5rem; }
 
@@ -198,7 +197,6 @@
       <th data-col="7">&#9733; <span class="sort-icon">&#8597;</span></th>
       <th>Begrunnelse</th>
       <th>Tags</th>
-      <th>Lytt</th>
     </tr>
   </thead>
   <tbody id="tableBody"></tbody>
@@ -416,7 +414,7 @@ function renderTable(rows) {
     if (newEpisodeKeys.has(podcast + '||' + title)) tr.classList.add('ep-new');
     tr.innerHTML = `
       <td><span class="podcast-name">${esc(podcast)}</span></td>
-      <td><span class="episode-title">${esc(title)}</span></td>
+      <td><a class="episode-title-link" href="${safeUrl(link)}" target="_blank" rel="noopener noreferrer">${esc(title)}</a></td>
       <td><span class="lang-badge ${lang === 'English' ? 'lang-en' : 'lang-no'}">${lang === 'English' ? 'EN' : 'NO'}</span></td>
       <td style="white-space:nowrap">${esc(date)}</td>
       <td><span class="hosts">${esc(hosts)}</span></td>
@@ -425,7 +423,6 @@ function renderTable(rows) {
       <td style="text-align:center"><span class="rating-badge${[1,2,3,4,5,6].includes(rating) ? ' r'+rating : ''}">${rating > 0 ? rating : 'N/A'}</span></td>
       <td><span class="rating-note">${esc(note)}</span></td>
       <td>${renderTags(tags)}</td>
-      <td><a class="listen-link" href="${safeUrl(link)}" target="_blank" rel="noopener noreferrer">&#9654; Lytt</a></td>
     `;
     tbody.appendChild(tr);
   });
