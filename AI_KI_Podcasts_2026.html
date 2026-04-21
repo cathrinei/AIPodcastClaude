@@ -72,6 +72,8 @@
   .reset-btn:hover { background: var(--stat-bg); }
   .update-btn { padding: 0.45rem 0.9rem; border: none; border-radius: 6px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); font-size: 0.82rem; cursor: pointer; color: #fff; box-shadow: 0 2px 8px rgba(99,102,241,0.45); transition: box-shadow 0.15s ease, background 0.15s ease; }
   .update-btn:hover { background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); box-shadow: 0 4px 14px rgba(99,102,241,0.6); }
+  .fetch-btn { padding: 0.45rem 0.9rem; border: none; border-radius: 6px; background: linear-gradient(135deg, #059669 0%, #047857 100%); font-size: 0.82rem; cursor: pointer; color: #fff; box-shadow: 0 2px 8px rgba(5,150,105,0.45); transition: box-shadow 0.15s ease, background 0.15s ease; text-decoration: none; display: inline-flex; align-items: center; }
+  .fetch-btn:hover { background: linear-gradient(135deg, #047857 0%, #065f46 100%); box-shadow: 0 4px 14px rgba(5,150,105,0.6); }
   #updateStatus { font-size: 0.8rem; color: var(--text-muted); }
 
   .table-wrap { overflow-x: auto; padding: 1rem 2rem 2rem; }
@@ -176,6 +178,7 @@
     </select>
   </label>
   <button class="reset-btn" id="resetBtn">Nullstill</button>
+  <a class="fetch-btn" href="https://github.com/cathrinei/AIPodcastClaude/actions/workflows/update_podcasts.yml" target="_blank" rel="noopener" title="Kjør daglig RSS-henting manuelt på GitHub Actions">&#8635; Hent nye data</a>
   <button class="update-btn" id="updateBtn">&#8593; Last inn CSV</button>
   <input type="file" id="csvFile" accept=".csv" style="display:none">
   <span id="updateStatus"></span>

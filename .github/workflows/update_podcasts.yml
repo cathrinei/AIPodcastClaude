@@ -1,0 +1,37 @@
+name: Hent nye podkast-episoder
+
+on:
+  schedule:
+    - cron: '0 9 * * *'   # 11:00 norsk sommertid (CEST = UTC+2)
+  workflow_dispatch:        # kan også kjøres manuelt fra GitHub
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Hent kode
+        uses: actions/checkout@v4
+
+      - name: Sett opp Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Kjør update_podcasts.py
+        run: python update_podcasts.py
+
+      - name: Commit og push hvis CSV er endret
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add AI_KI_Podcasts_2026.csv
+          if git diff --cached --quiet; then
+            echo "Ingen nye episoder – ingen endringer å committe."
+          else
+            git commit -m "Auto-oppdatering: nye podkast-episoder $(date +'%Y-%m-%d')"
+            git push
+          fi
