@@ -165,6 +165,25 @@ These shows are in the episode list but have no RSS feed in `update_podcasts.py`
 - **Norske:** Bouvet Bobler *(no RSS feed found)*
 - **Engelske:** The Journal (WSJ) *(has RSS but produces many off-topic episodes — manual curation needed)*
 
+## Git workflow
+Bruk feature-brancher for alle endringer — aldri commit direkte til `main`.
+
+```bash
+# Start ny arbeidsøkt
+git checkout main && git pull
+git checkout -b session/YYYY-MM-DD   # eller feature/kort-beskrivelse
+
+# Etter endringer
+git add <filer>
+git commit -m "kort beskrivelse av hva og hvorfor"
+git push -u origin session/YYYY-MM-DD
+gh pr create --base main --title "..." --body "..."
+```
+
+Branch-navnekonvensjon:
+- `session/YYYY-MM-DD` — vanlig oppdateringsøkt (episoder, rydding)
+- `feature/beskrivelse` — ny funksjonalitet i HTML eller skript
+
 ## Workflow
 1. `python update_podcasts.py` — fetches new episodes, flags overdue unrated ones
 2. **Check for duplicates** before adding anything: `python3 -c "import csv; rows=list(csv.reader(open('AI_KI_Podcasts_2026.csv',encoding='utf-8')))[1:]; seen={}; [print(f'DUP: {r[0]} – {r[1][:60]}') or seen.update({(r[0].lower(),r[1].lower()):1}) for r in rows if (r[0].lower(),r[1].lower()) in seen]"`
