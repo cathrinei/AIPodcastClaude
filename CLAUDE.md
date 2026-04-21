@@ -1,0 +1,176 @@
+# AIPodcastClaude – Project Context
+
+## Purpose
+This project collects and curates podcast episodes on artificial intelligence (AI / KI / kunstig intelligens), including the sub-topic of vibe coding, published in 2026. Both Norwegian-language and English-language podcasts are in scope.
+
+## Files
+- `AI_KI_Podcasts_2026.csv` — master data, one row per episode
+- `AI_KI_Podcasts_2026.html` — interactive table with filtering, sorting, stats, CSV import
+- `update_podcasts.py` — RSS fetcher; adds new episodes (Rating=0) since last known date per podcast
+- `rejected_episodes.csv` — denylist of already-reviewed non-AI episodes; prevents re-fetching noise
+
+## CSV columns
+
+| Column | Description |
+|---|---|
+| Podcast Name | Official show name |
+| Episode Title | Specific episode title |
+| Language | English or Norwegian |
+| Published Date | YYYY-MM-DD |
+| Host(s) | Host names |
+| Guest(s) | Guest names (if notable) |
+| Main Topic(s) | Key AI/KI subjects covered |
+| Rating (1–6) | See rubric below |
+| Rating Notes | 1–2 sentence justification |
+| Tags | vibe / openclaw / agents / combinations (or empty) |
+| Platform / Link | URL to episode or show |
+
+## CSV policy
+- **Only episodes rated 4–6 are kept.** Episodes rated 1–3 are removed entirely.
+- **Unrated episodes (Rating=0 / N/A)** are kept temporarily — pending manual review.
+- Always update the CSV **before** the HTML when making data changes. CSV is the source of truth.
+- Do not add short videos, teasers, trailers, or highlight compilations — full-length episodes only.
+
+## Rating rubric (1–6)
+
+| Score | Label | Meaning |
+|---|---|---|
+| 6 | Exceptional | Deep AI focus, expert guests/hosts, high practical or research value |
+| 5 | Very useful | Solid AI content, clear focus, reliable and informative |
+| 4 | Useful | Relevant AI coverage; may be surface-level or AI is one of several topics |
+| 3 | Somewhat relevant | Not kept — removed from CSV |
+| 2 | Marginal | Not kept — removed from CSV |
+| 1 | Not relevant | Not kept — removed from CSV |
+
+## Standardiserte vertnavn
+Bruk disse navnene konsekvent ved rating av nye episoder:
+- **Latent Space**: Shawn Wang, Alessio Fanelli *(ikke swyx eller Swyx)*
+- **Hard Fork (NYT)**: Kevin Roose, Casey Newton
+- **The Cognitive Revolution**: Nathan Labenz
+- **No Priors**: Sarah Guo, Elad Gil
+- **AI-Snakk**: Audun Kvitland Røstad
+- **AI Forklart**: Niclas Kvanvig, Celine Haaland-Johansen
+
+## False positive filtering
+- **KI** must mean *kunstig intelligens* (artificial intelligence), not a company abbreviation or person's name.
+- **AI** must refer to artificial intelligence technology, not Amnesty International or other uses.
+- When in doubt about relevance, keep the episode and let the user decide. Only remove episodes that are obviously off-topic.
+
+## Search sources used
+- **English**: Latent Space, Lex Fridman, Hard Fork (NYT), No Priors, The AI Daily Brief, TWIML AI Podcast, The Cognitive Revolution, Practical AI, Gradient Dissent (W&B), The Artificial Intelligence Show, The AI Breakdown, The Journal (WSJ), Today Explained (Vox), Agile Mentors Podcast, Win-Win with Liv Boeree, The Implement AI Podcast
+- **Norwegian**: AI-Snakk (aisnakk.no), E24-podden, Shifter, Digi.no, lorn.tech, nora.ai, HR-podden, Teknologi og mennesker (Atea), Bouvet Bobler
+- **Podcast directories**: Apple Podcasts, Spotify, listennotes.com, podchaser.com
+
+## Key findings (Jan 2026 – 21.04.26)
+- **164 episodes** across **26 shows** (116 English, 48 Norwegian) — 164 rated (4–6)
+- **Vibe coding** was a dominant cross-show theme — tagged across multiple series
+- **OpenClaw** (formerly Clawdbot/Moltbot) emerged as a major cross-show topic — 10+ episodes tagged
+- **Top-rated English episodes (6/6):** Latent Space × 5, Lex Fridman #490 + #491, No Priors (Karpathy), TWIML × 2 — 10 total
+- **Best Norwegian source:** AI-Snakk — weekly episodes Jan–Apr, consistent quality, Norwegian AI news with local relevance
+- **Norwegian sources:** AI Forklart (Niclas Kvanvig & Celine Haaland-Johansen), Heis, KI til Kaffen, Shifter, Kode24-podkasten
+- **Anthropic vs. Pentagon**, **SaaSpocalypse** and **OpenClaw** were recurring cross-show news events
+
+## HTML – tekniske noter
+
+### Data array
+The `data` array in the HTML is populated from the CSV. When changes are made to episode data, update the CSV first, then sync the HTML data array. Unrated episodes (Rating=0) display as **N/A** in the rating badge and always pass through the rating filter regardless of the minimum rating setting.
+
+### Stats
+`updateStats()` computes all stats automatically from the `data` array:
+- Total episodes, shows, English/Norwegian counts, top-rated (6/6) count, unrated (N/A) count
+
+### "↑ Last inn CSV"-knappen
+1. Opens a file picker (`<input type="file" accept=".csv">`)
+2. Reads file with `FileReader` (UTF-8)
+3. `parseCSV()` parses content — handles commas in quoted fields and CRLF/LF
+4. `data` array is cleared and refilled; header row skipped
+5. Rating field (column 7) parsed with `parseInt` + `isNaN` fallback to 0
+6. `updateStats()` and `refresh()` run immediately
+
+### Dark mode
+- Toggle button (☾ Mørk / ☀ Lys) in the top-right of the header
+- Preference persisted in `localStorage` (`darkMode` key: `'1'` = dark, `'0'` = light)
+- Implemented via CSS custom properties on `:root`; `body.dark` overrides all color variables
+- Light mode is the default
+
+### Design / visuell stil
+- **Accent**: `--accent: #6366f1` (lys: indigo, mørk: `#818cf8`) — brukes på knapp, focus-outline, rad-hover-kant
+- **Header**: `linear-gradient(135deg, #0f0c29, #302b63, #1a1a4e)` + `border-top: 4px solid var(--accent)`; invertert i dark mode (`#e8eaf0` bg / `#1a1a2e` tekst)
+- **Stats-bokser**: subtil gradient-bakgrunn, 3D-bunnkant (`box-shadow: 0 4px 0 #c0c4dc`), tall i `font-size: 1.9rem / font-weight: 800`
+- **Tabelloverskrift**: gradient matcher headeren (`#0f0c29 → #302b63`); kolonner skilt med `border-right: 1px solid rgba(255,255,255,0.15)`; tekst uppercase + `letter-spacing: 0.07em`
+- **Radhovering**: leaderboard-stil — `inset 4px 0 0 var(--accent)` + lys lilla bakgrunn; smooth `0.12s ease` transisjon
+- **Zebrastriping**: annenhver rad bruker `--row-alt` (`#f5f7fc` lys / `#1f2235` mørk)
+- **Rating-badge**: `32px`, `font-weight: 800`; r4/r5/r6 har glow (`box-shadow: 0 0 0 3px rgba(...)`)
+- **"Last inn CSV"-knapp**: gradient + glow (`box-shadow: 0 2px 8px rgba(99,102,241,0.45)`)
+- Ingen eksterne fonter eller ressurser — holder CSP intakt
+
+### Ny-markering av episoder
+- Nye episoder markeres med amber venstrekant (`inset 3px 0 0 #f59e0b`) + svak amber bakgrunn ved CSV-innlasting
+- Implementert via `localStorage.seenEpisodeKeys` (JSON-array av `"podcast||title"`-nøkler fra forrige innlasting)
+- `newEpisodeKeys` (global `Set`) populeres ved CSV-innlasting: episoder ikke i `prevSeenKeys` legges til
+- Første innlasting (ingen `localStorage`): ingen markering (`hasPrevData = false`)
+- `localStorage` oppdateres med alle nøkler fra ny CSV etter hver innlasting — så neste runde starter ferskt
+- Statuslinjen viser f.eks. `✓ 160 episoder lastet inn … · 4 nye` når nye episoder finnes
+- `renderTable` sjekker `newEpisodeKeys` og setter `tr.classList.add('ep-new')` der det passer
+- Hover på `ep-new`-rad: lilla accent-stripe tar over (`.ep-new:hover` overstyrer amber)
+- Dark mode: `rgba(245,158,11,0.10)` + `#fbbf24` stripe
+- CSS-klasser: `tbody tr.ep-new`, `body.dark tbody tr.ep-new`, `tbody tr.ep-new:hover`
+
+### Øvrige tekniske noter
+- Sort state: `sort` object (`col`, `asc`); `RATING_COL = 7`, `DATE_COL = 3`, `CSV_MAX_BYTES` constants
+- Default sort: date descending (nyeste øverst); rating og dato starter begge med synkende rekkefølge ved klikk
+- Column sort handlers use `data-col` attributes + event listeners — no inline `onclick`
+- Tags whitelisted via `tagMeta` object — unknown tag values ignored; current tags: `vibe`, `openclaw`, `agents`
+- `safeUrl()` blocks non-HTTP(S) URLs to prevent `javascript:` injection
+- CSP: `default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'`
+- `parseCSV` trims only unquoted fields — preserves whitespace in quoted titles
+- Default filter on load: rating 4+; N/A episodes always shown regardless of filter
+- Search is fuzzy: exact substring match first, then subsequence fallback (e.g. `"krpthy"` matches `"Karpathy"`)
+- Tag filter uses exact split match — `tags.split(',').map(t => t.trim()).includes(tagFilter)` — prevents substring false positives
+- Rating class injection hardened: `'r'+rating` only applied when rating is strictly in `[1,2,3,4,5,6]`
+- CSV upload capped at 5 MB — `CSV_MAX_BYTES` constant; `reader.onerror` handler added
+- `parseInt` called with explicit radix 10 throughout
+- WCAG AA color contrast fixed: `--text-faint` and `--no-tags` adjusted in both light and dark mode; `:focus-visible` outlines added for all interactive elements; `.r6` badge `#15803d` (was `#16a34a`), `--no-tags` light `#767676` (was `#888888`), N/A badge default `#6b7280` (was `#ccc`) — all pass 4.5:1
+
+## update_podcasts.py – tekniske noter
+- `FEEDS` dict: add new podcasts with name (must match CSV) and RSS URL — 26 feeds currently
+- Fetches only episodes newer than last known date per podcast (`latest_date_per_podcast`)
+- New episodes get `Rating=0` — must be reviewed manually
+- `pending_review()` runs at end of every execution — flags unrated episodes older than 2 days
+- Early return removed: review check always runs even when no new episodes are found
+- `REVIEW_AFTER_DAYS = 2` constant controls the threshold
+- Errors distinguish between HTTP errors and network errors
+- Loads `rejected_episodes.csv` at startup via `load_rejected()` — returns `set` of `(podcast.lower(), title.lower())` pairs
+- Builds `existing_keys` from current CSV rows to prevent duplicates
+- Fetched episodes filtered against both sets before being added — skipped count reported in output
+
+### Regler mot duplikater og feil språk
+- **`LANGUAGE_OVERRIDE`-dict**: Tvinger riktig språk for kjente norske podcaster uavhengig av RSS-feedens `<language>`-tag. Heis og andre norske feeder kan mangle eller returnere feil kode — overriden sikrer at episodene alltid får "Norwegian". Legg til nye norske podcaster her ved behov.
+- **Samme-dato-advarsel**: Når en ny episode har samme (podcast, dato) som en allerede eksisterende episode i CSV-en, skrives `⚠  Mulig duplikat (samme dato finnes)` i output. Krever manuell sjekk — noen podcaster publiserer legitimt flere episoder samme dag.
+
+### Kjente fallgruver ved episodefetching
+- **Gamle «siste kjente dato»**: Dersom en podcast ikke har blitt kjørt på en stund (eller har få episoder i CSV), kan `latest_date_per_podcast()` returnere en gammel dato — og hele gapet siden da hentes inn som «nye» episoder. Eksempel: Lex Fridman siste i CSV: 2026-02-12 → episodene #492–#495 (mars/april) fanget opp først ved neste kjøring.
+- **RSS-titteldrift gir duplikater**: Noen feeder endrer tittelformatering over tid (em-strek vs bindestrek, apostrof-encoding, mellomrom vs bindestrek). `existing_keys` bruker eksakt match på `title.lower()`, så minimale titteldifferanser sniker seg gjennom som nye episoder. Løsning: kjør duplikatsjekk (workflow steg 2) etter `update_podcasts.py` og fjern eventuelle dobbeltoppføringer manuelt.
+
+## rejected_episodes.csv – format og bruk
+- Columns: `Podcast Name`, `Episode Title` (header row required)
+- Each row is an episode that has been reviewed and rejected as off-topic/non-AI
+- Matching is case-insensitive: `(podcast_name.lower(), title.lower())`
+- To reject an episode permanently: add a row with exact podcast name and episode title
+- `update_podcasts.py` will never re-add a rejected episode, even if it reappears in the RSS feed
+- Pre-populated with ~75 rejected entries from: Lex Fridman, No Priors, The Journal (WSJ), Today Explained (Vox), Shifter, HR-podden, Teknologi og mennesker, Heis, Big Take Asia
+
+## Podcasts without RSS (check manually)
+These shows are in the episode list but have no RSS feed in `update_podcasts.py` — check periodically for new episodes:
+- **Norske:** Bouvet Bobler *(no RSS feed found)*
+- **Engelske:** The Journal (WSJ) *(has RSS but produces many off-topic episodes — manual curation needed)*
+
+## Workflow
+1. `python update_podcasts.py` — fetches new episodes, flags overdue unrated ones
+2. **Check for duplicates** before adding anything: `python3 -c "import csv; rows=list(csv.reader(open('AI_KI_Podcasts_2026.csv',encoding='utf-8')))[1:]; seen={}; [print(f'DUP: {r[0]} – {r[1][:60]}') or seen.update({(r[0].lower(),r[1].lower()):1}) for r in rows if (r[0].lower(),r[1].lower()) in seen]"`
+3. Open HTML → click **↑ Last inn CSV** → select `AI_KI_Podcasts_2026.csv`
+4. Unrated (N/A) episodes always visible — review and rate manually
+5. Rate relevant episodes (4–6) and fill in Host(s), Guest(s), Main Topic(s), Tags
+6. Remove episodes rated 1–3 from CSV; they do not belong in the list
+7. **Add rejected episodes to `rejected_episodes.csv`** — any off-topic episode removed in step 6 should be added here so it is never re-fetched
+8. To add a new podcast: add RSS feed to `FEEDS` dict in `update_podcasts.py`
