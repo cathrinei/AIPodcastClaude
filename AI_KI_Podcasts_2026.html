@@ -58,14 +58,15 @@
   body.dark #darkToggle { border-color: rgba(0,0,0,0.2); background: rgba(0,0,0,0.08); color: #1a1a2e; }
   body.dark #darkToggle:hover { background: rgba(0,0,0,0.15); }
 
-  .summary { display: flex; flex-wrap: wrap; gap: 1rem; padding: 1.2rem 2rem; background: var(--surface); border-bottom: 1px solid var(--border); }
-  .stat { background: linear-gradient(160deg, #ffffff 0%, #f5f6ff 100%); border-radius: 10px; box-shadow: 0 4px 0 #c0c4dc, 0 2px 12px rgba(0,0,0,0.08); padding: 0.65rem 1.2rem; font-size: 0.85rem; color: var(--text); cursor: pointer; user-select: none; transition: box-shadow 0.12s ease, transform 0.1s ease; }
-  .stat:hover { box-shadow: 0 4px 0 var(--accent), 0 2px 12px rgba(99,102,241,0.18); }
-  .stat:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--accent); }
-  .stat.active { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .stat strong { display: block; font-size: 1.9rem; font-weight: 800; color: #4f46e5; }
-  body.dark .stat { background: linear-gradient(160deg, #1e2140 0%, #252840 100%); box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 2px 12px rgba(0,0,0,0.3); }
-  body.dark .stat strong { color: #818cf8; }
+  .summary { display: flex; flex-wrap: wrap; gap: 0.75rem; padding: 1.2rem 2rem; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .stat { background: #fff; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); padding: 0.85rem 1.4rem 0.75rem; text-align: center; cursor: pointer; user-select: none; transition: border-color 0.12s ease, box-shadow 0.12s ease, transform 0.1s ease; min-width: 90px; }
+  .stat:hover { border-color: var(--accent); box-shadow: 0 2px 10px rgba(99,102,241,0.15); }
+  .stat:active { transform: translateY(1px); }
+  .stat.active { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.18); }
+  .stat strong { display: block; font-size: 2rem; font-weight: 800; color: var(--stat-fg); line-height: 1.1; }
+  .stat-label { display: block; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-top: 0.25rem; }
+  body.dark .stat { background: #1e2140; border-color: var(--border); }
+  body.dark .stat:hover { border-color: #818cf8; }
 
   .controls { display: flex; flex-wrap: wrap; gap: 0.8rem; padding: 1rem 2rem; background: var(--surface); border-bottom: 1px solid var(--border); align-items: center; }
   .controls input[type=text] { padding: 0.45rem 0.8rem; border: 1px solid var(--input-border); border-radius: 6px; font-size: 0.85rem; width: 220px; max-width: 100%; background: var(--surface); color: var(--text); }
@@ -204,10 +205,10 @@
 </header>
 
 <div class="summary">
-  <div class="stat" id="statCardTotal" role="button" tabindex="0" aria-label="Vis alle episoder"><strong id="statTotal">–</strong> episoder totalt</div>
-  <div class="stat" id="statCardEn" role="button" tabindex="0" aria-label="Filtrer engelske episoder"><strong id="statEn">–</strong> engelske episoder</div>
-  <div class="stat" id="statCardNo" role="button" tabindex="0" aria-label="Filtrer norske episoder"><strong id="statNo">–</strong> norske episoder</div>
-  <div class="stat" id="statCardTop" role="button" tabindex="0" aria-label="Filtrer toppkarakter 6/6"><strong id="statTop">–</strong> toppkarakter (6/6)</div>
+  <div class="stat" id="statCardTotal" role="button" tabindex="0" aria-label="Vis alle episoder"><strong id="statTotal">–</strong><span class="stat-label">Episoder</span></div>
+  <div class="stat" id="statCardEn" role="button" tabindex="0" aria-label="Filtrer engelske episoder"><strong id="statEn">–</strong><span class="stat-label">Engelske</span></div>
+  <div class="stat" id="statCardNo" role="button" tabindex="0" aria-label="Filtrer norske episoder"><strong id="statNo">–</strong><span class="stat-label">Norske</span></div>
+  <div class="stat" id="statCardTop" role="button" tabindex="0" aria-label="Filtrer toppkarakter 6/6"><strong id="statTop">–</strong><span class="stat-label">Topp&shy;karakter</span></div>
 </div>
 
 <div class="controls">
