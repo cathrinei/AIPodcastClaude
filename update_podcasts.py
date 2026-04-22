@@ -12,6 +12,8 @@ Skriptet:
 """
 
 import csv
+import json
+import re
 import urllib.request
 import urllib.error
 import xml.etree.ElementTree as ET
@@ -23,8 +25,9 @@ import sys
 # Sikre UTF-8 output i alle terminaler (Windows/Mac/Linux)
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-CSV_PATH      = os.path.join(os.path.dirname(__file__), "AI_KI_Podcasts_2026.csv")
-REJECTED_PATH = os.path.join(os.path.dirname(__file__), "rejected_episodes.csv")
+CSV_PATH          = os.path.join(os.path.dirname(__file__), "AI_KI_Podcasts_2026.csv")
+REJECTED_PATH     = os.path.join(os.path.dirname(__file__), "rejected_episodes.csv")
+DESCRIPTIONS_PATH = os.path.join(os.path.dirname(__file__), "pending_descriptions.json")
 
 UNRATED = "0"  # Markør for episoder som mangler manuell vurdering
 REVIEW_AFTER_DAYS = 2  # Antall dager før urangerte episoder flagges for vurdering
@@ -112,6 +115,10 @@ def latest_date_per_podcast(rows):
     return latest
 
 
+def strip_html(text):
+    return re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', ' ', text)).strip()
+
+
 def fetch_feed(url):
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
     try:
@@ -170,6 +177,10 @@ def fetch_new_episodes(podcast_name, feed_url, after_dt):
             enclosure = item.find("enclosure")
             link = enclosure.attrib.get("url", "") if enclosure is not None else ""
 
+        desc_el = item.find("description")
+        desc_raw = desc_el.text if desc_el is not None and desc_el.text else ""
+        description = strip_html(desc_raw)[:600]
+
         new_eps.append([
             podcast_name,
             title,
@@ -182,6 +193,7 @@ def fetch_new_episodes(podcast_name, feed_url, after_dt):
             "Ny episode — ikke vurdert ennå",
             "",        # Tags
             link,
+            description,  # index 11 — temp, fjernes før CSV-skriving
         ])
 
     new_eps.sort(key=lambda r: r[3])
@@ -249,8 +261,13 @@ def main():
     if not all_new:
         print("\nIngen nye episoder funnet.\n")
     else:
+        descriptions = {f"{ep[0]}||{ep[1]}": ep[11] for ep in all_new if len(ep) > 11 and ep[11]}
+        if descriptions:
+            with open(DESCRIPTIONS_PATH, "w", encoding="utf-8") as f:
+                json.dump(descriptions, f, ensure_ascii=False, indent=2)
+        all_new_csv = [ep[:11] for ep in all_new]
         with open(CSV_PATH, "w", encoding="utf-8", newline="") as f:
-            csv.writer(f).writerows([header] + existing_rows + all_new)
+            csv.writer(f).writerows([header] + existing_rows + all_new_csv)
         print(f"\n{len(all_new)} nye episode(r) lagt til i CSV.")
         print("Åpne HTML-siden og klikk 'Last inn CSV' for å laste inn oppdaterte data.")
         print(f"NB: Nye episoder har Rating={UNRATED} og må vurderes manuelt.\n")
