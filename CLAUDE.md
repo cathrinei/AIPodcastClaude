@@ -6,8 +6,10 @@ This project collects and curates podcast episodes on artificial intelligence (A
 ## Files
 - `AI_KI_Podcasts_2026.csv` — master data, one row per episode
 - `AI_KI_Podcasts_2026.html` — interactive table with filtering, sorting, stats, CSV import
-- `update_podcasts.py` — RSS fetcher; adds new episodes (Rating=0) since last known date per podcast
+- `update_podcasts.py` — RSS fetcher; adds new episodes (Rating=0) and saves RSS descriptions to `pending_descriptions.json`
+- `rate_episodes.py` — keyword-based auto-rater; processes Rating=0 episodes after fetch
 - `rejected_episodes.csv` — denylist of already-reviewed non-AI episodes; prevents re-fetching noise
+- `pending_descriptions.json` — temp sidecar written by `update_podcasts.py`, read and deleted by `rate_episodes.py`; gitignored
 
 ## CSV columns
 
@@ -99,9 +101,11 @@ The `data` array in the HTML is populated from the CSV. When changes are made to
 
 ### Design / visuell stil
 - **Accent**: `--accent: #6366f1` (lys: indigo, mørk: `#818cf8`) — brukes på knapp, focus-outline, rad-hover-kant
-- **Header**: `linear-gradient(135deg, #0f0c29, #302b63, #1a1a4e)` + `border-top: 4px solid var(--accent)`; invertert i dark mode (`#e8eaf0` bg / `#1a1a2e` tekst)
-- **Stats-bokser**: subtil gradient-bakgrunn, 3D-bunnkant (`box-shadow: 0 4px 0 #c0c4dc`), tall i `font-size: 1.9rem / font-weight: 800`; klikkbare — hover gir accent-bunnkant, `.active` gir `outline: 2px solid var(--accent)`
-- **Tabelloverskrift**: gradient matcher headeren (`#0f0c29 → #302b63`); kolonner skilt med `border-right: 1px solid rgba(255,255,255,0.15)`; tekst uppercase + `letter-spacing: 0.07em`
+- **Header**: `var(--surface)` (hvit/mørk via variabel) + `border-top: 3px solid var(--accent)` + `border-bottom: 1px solid var(--border)`; ingen dark-mode-override nødvendig — CSS-variabler håndterer det automatisk
+- **Mørk-toggle**: bruker `var(--border)` / `var(--text-muted)` — ingen hardkodede dark-overrides
+- **Stats-bokser**: hvit bakgrunn, `border: 1px solid var(--border)`, `border-radius: 12px`; tall i `font-size: 2rem / font-weight: 800`; klikkbare — hover gir accent-kant, `.active` gir `box-shadow: 0 0 0 3px rgba(99,102,241,0.18)`
+- **Tabelloverskrift**: `background: #f0f1f5` (nøytral off-white); tekst `#6b7280`; kolonner skilt med `border-right: 1px solid var(--border)`; sortert kolonne får `color: var(--accent)`; dark mode: `#252840`
+- **Kontrollfelt**: `background: var(--bg)` (litt mørkere enn `--surface`) — visuelt skilt fra stat-raden over
 - **Radhovering**: leaderboard-stil — `inset 4px 0 0 var(--accent)` + lys lilla bakgrunn; smooth `0.12s ease` transisjon
 - **Zebrastriping**: annenhver rad bruker `--row-alt` (`#f5f7fc` lys / `#1f2235` mørk)
 - **Rating-badge**: `32px`, `font-weight: 800`; r4/r5/r6 har glow (`box-shadow: 0 0 0 3px rgba(...)`)
@@ -140,11 +144,11 @@ The `data` array in the HTML is populated from the CSV. When changes are made to
 ## update_podcasts.py – tekniske noter
 - `FEEDS` dict: add new podcasts with name (must match CSV) and RSS URL — 26 feeds currently
 - Fetches only episodes newer than last known date per podcast (`latest_date_per_podcast`)
-- New episodes get `Rating=0` — must be reviewed manually
-- `pending_review()` runs at end of every execution — flags unrated episodes older than 2 days
-- Early return removed: review check always runs even when no new episodes are found
+- New episodes get `Rating=0` — passed to `rate_episodes.py` for auto-rating
+- Extracts RSS `<description>` for each new episode (HTML stripped, truncated to 600 chars); saves to `pending_descriptions.json` keyed by `"podcast||title"`
+- Description is NOT written to CSV — it's a temp sidecar for the rating step only
+- `pending_review()` runs at end of every execution — flags still-unrated episodes older than 2 days
 - `REVIEW_AFTER_DAYS = 2` constant controls the threshold
-- Errors distinguish between HTTP errors and network errors
 - Loads `rejected_episodes.csv` at startup via `load_rejected()` — returns `set` of `(podcast.lower(), title.lower())` pairs
 - Builds `existing_keys` from current CSV rows to prevent duplicates
 - Fetched episodes filtered against both sets before being added — skipped count reported in output
@@ -156,6 +160,24 @@ The `data` array in the HTML is populated from the CSV. When changes are made to
 ### Kjente fallgruver ved episodefetching
 - **Gamle «siste kjente dato»**: Dersom en podcast ikke har blitt kjørt på en stund (eller har få episoder i CSV), kan `latest_date_per_podcast()` returnere en gammel dato — og hele gapet siden da hentes inn som «nye» episoder. Eksempel: Lex Fridman siste i CSV: 2026-02-12 → episodene #492–#495 (mars/april) fanget opp først ved neste kjøring.
 - **RSS-titteldrift gir duplikater**: Noen feeder endrer tittelformatering over tid (em-strek vs bindestrek, apostrof-encoding, mellomrom vs bindestrek). `existing_keys` bruker eksakt match på `title.lower()`, så minimale titteldifferanser sniker seg gjennom som nye episoder. Løsning: kjør duplikatsjekk (workflow steg 2) etter `update_podcasts.py` og fjern eventuelle dobbeltoppføringer manuelt.
+
+## rate_episodes.py – tekniske noter
+- Runs after `update_podcasts.py`; reads Rating=0 rows from CSV and classifies each one
+- Reads `pending_descriptions.json` (keyed `"podcast||title"`) for RSS description context; deletes it after use
+- **Pure AI podcasts** (`PURE_AI_PODCASTS` set): skip AI check, go straight to rating logic
+- **Mixed podcasts**: `ai_score()` checks title (weighted higher) and description for `STRONG_AI` / `MEDIUM_AI` keywords
+  - score 0 → reject (appended to `rejected_episodes.csv`, removed from CSV)
+  - score 1–2 → review (stays at Rating=0 for manual check)
+  - score ≥ 3 → rate (continues to rating logic)
+- **Rating logic** (`auto_rating()`):
+  - Any name in `KNOWN_EXPERTS` found in title/description → **rating 6** (e.g. "Andrej Karpathy", "Dario Amodei")
+  - 2+ depth signals OR 4+ strong AI keywords → **rating 5** (technical/focused episode)
+  - Depth signal + 2+ strong AI keywords → **rating 5**
+  - Otherwise → **rating 4**
+- `KNOWN_EXPERTS`: AI researchers, lab founders/CEOs, prominent voices; update list when adding new notable guests
+- `DEPTH_SIGNALS`: research, paper, technical, alignment, interpretability, scaling law, rlhf, etc.
+- Output shows `[4]`/`[5]`/`[6]` per kept episode and `[✗]` per rejected — easy to spot auto-upgrades
+- GitHub Actions runs both scripts in sequence daily; commits both `AI_KI_Podcasts_2026.csv` and `rejected_episodes.csv`
 
 ## rejected_episodes.csv – format og bruk
 - Columns: `Podcast Name`, `Episode Title` (header row required)
@@ -190,11 +212,12 @@ Branch-navnekonvensjon:
 - `feature/beskrivelse` — ny funksjonalitet i HTML eller skript
 
 ## Workflow
-1. `python update_podcasts.py` — fetches new episodes, flags overdue unrated ones
-2. **Check for duplicates** before adding anything: `python3 -c "import csv; rows=list(csv.reader(open('AI_KI_Podcasts_2026.csv',encoding='utf-8')))[1:]; seen={}; [print(f'DUP: {r[0]} – {r[1][:60]}') or seen.update({(r[0].lower(),r[1].lower()):1}) for r in rows if (r[0].lower(),r[1].lower()) in seen]"`
-3. Open HTML → click **↑ Last inn CSV** → select `AI_KI_Podcasts_2026.csv`
-4. Unrated (N/A) episodes always visible — review and rate manually
-5. Rate relevant episodes (4–6) and fill in Host(s), Guest(s), Main Topic(s), Tags
-6. Remove episodes rated 1–3 from CSV; they do not belong in the list
-7. **Add rejected episodes to `rejected_episodes.csv`** — any off-topic episode removed in step 6 should be added here so it is never re-fetched
-8. To add a new podcast: add RSS feed to `FEEDS` dict in `update_podcasts.py`
+1. `python update_podcasts.py` — fetches new episodes (Rating=0), saves RSS descriptions to `pending_descriptions.json`
+2. `python rate_episodes.py` — auto-rates Rating=0 episodes; deletes `pending_descriptions.json` when done
+3. **Check for duplicates**: `python3 -c "import csv; rows=list(csv.reader(open('AI_KI_Podcasts_2026.csv',encoding='utf-8')))[1:]; seen={}; [print(f'DUP: {r[0]} – {r[1][:60]}') or seen.update({(r[0].lower(),r[1].lower()):1}) for r in rows if (r[0].lower(),r[1].lower()) in seen]"`
+4. Open HTML → click **↑ Last inn CSV** → select `AI_KI_Podcasts_2026.csv`
+5. Review auto-rated episodes: upgrade to 5/6 if warranted; fill in Host(s), Guest(s), Main Topic(s), Tags
+6. Any remaining Rating=0 (N/A) episodes need manual review
+7. Remove episodes rated 1–3 from CSV; they do not belong in the list
+8. **Add rejected episodes to `rejected_episodes.csv`** — any off-topic episode removed in step 7 should be added here so it is never re-fetched
+9. To add a new podcast: add RSS feed to `FEEDS` dict in `update_podcasts.py`; add to `PURE_AI_PODCASTS` in `rate_episodes.py` if it's an AI-only show
