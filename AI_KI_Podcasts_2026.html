@@ -59,7 +59,10 @@
   body.dark #darkToggle:hover { background: rgba(0,0,0,0.15); }
 
   .summary { display: flex; flex-wrap: wrap; gap: 1rem; padding: 1.2rem 2rem; background: var(--surface); border-bottom: 1px solid var(--border); }
-  .stat { background: linear-gradient(160deg, #ffffff 0%, #f5f6ff 100%); border-radius: 10px; box-shadow: 0 4px 0 #c0c4dc, 0 2px 12px rgba(0,0,0,0.08); padding: 0.65rem 1.2rem; font-size: 0.85rem; color: var(--text); }
+  .stat { background: linear-gradient(160deg, #ffffff 0%, #f5f6ff 100%); border-radius: 10px; box-shadow: 0 4px 0 #c0c4dc, 0 2px 12px rgba(0,0,0,0.08); padding: 0.65rem 1.2rem; font-size: 0.85rem; color: var(--text); cursor: pointer; user-select: none; transition: box-shadow 0.12s ease, transform 0.1s ease; }
+  .stat:hover { box-shadow: 0 4px 0 var(--accent), 0 2px 12px rgba(99,102,241,0.18); }
+  .stat:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--accent); }
+  .stat.active { outline: 2px solid var(--accent); outline-offset: 2px; }
   .stat strong { display: block; font-size: 1.9rem; font-weight: 800; color: #4f46e5; }
   body.dark .stat { background: linear-gradient(160deg, #1e2140 0%, #252840 100%); box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 2px 12px rgba(0,0,0,0.3); }
   body.dark .stat strong { color: #818cf8; }
@@ -201,12 +204,10 @@
 </header>
 
 <div class="summary">
-  <div class="stat"><strong id="statTotal">–</strong> episoder totalt</div>
-  <div class="stat"><strong id="statShows">–</strong> podkastserier</div>
-  <div class="stat"><strong id="statEn">–</strong> engelske episoder</div>
-  <div class="stat"><strong id="statNo">–</strong> norske episoder</div>
-  <div class="stat"><strong id="statTop">–</strong> toppkarakter (6/6)</div>
-  <div class="stat"><strong id="statUnrated">–</strong> episoder uten rating</div>
+  <div class="stat" id="statCardTotal" role="button" tabindex="0" aria-label="Vis alle episoder"><strong id="statTotal">–</strong> episoder totalt</div>
+  <div class="stat" id="statCardEn" role="button" tabindex="0" aria-label="Filtrer engelske episoder"><strong id="statEn">–</strong> engelske episoder</div>
+  <div class="stat" id="statCardNo" role="button" tabindex="0" aria-label="Filtrer norske episoder"><strong id="statNo">–</strong> norske episoder</div>
+  <div class="stat" id="statCardTop" role="button" tabindex="0" aria-label="Filtrer toppkarakter 6/6"><strong id="statTop">–</strong> toppkarakter (6/6)</div>
 </div>
 
 <div class="controls">
@@ -512,17 +513,13 @@ function renderTable(rows) {
 }
 
 function updateStats() {
-  const shows   = new Set(data.map(r => r[0])).size;
-  const en      = data.filter(r => r[2] === 'English').length;
-  const no      = data.filter(r => r[2] === 'Norwegian').length;
-  const top     = data.filter(r => r[7] === 6).length;
-  const unrated = data.filter(r => r[7] === 0).length;
-  document.getElementById('statTotal').textContent   = data.length;
-  document.getElementById('statShows').textContent   = shows;
-  document.getElementById('statEn').textContent      = en;
-  document.getElementById('statNo').textContent      = no;
-  document.getElementById('statTop').textContent     = top;
-  document.getElementById('statUnrated').textContent = unrated;
+  const en  = data.filter(r => r[2] === 'English').length;
+  const no  = data.filter(r => r[2] === 'Norwegian').length;
+  const top = data.filter(r => r[7] === 6).length;
+  document.getElementById('statTotal').textContent = data.length;
+  document.getElementById('statEn').textContent    = en;
+  document.getElementById('statNo').textContent    = no;
+  document.getElementById('statTop').textContent   = top;
 }
 
 function fuzzyMatch(query, haystack) {
@@ -714,6 +711,50 @@ function buildPodcastFilter() {
   // Keep current selection only if still valid
   sel.value = pods.includes(current) ? current : '';
 }
+
+// Stat card click handlers
+function applyStatFilter(action) {
+  // Clear all active markers
+  document.querySelectorAll('.stat').forEach(s => s.classList.remove('active'));
+  // Reset common filters
+  document.getElementById('searchBox').value = '';
+  document.getElementById('podcastFilter').value = '';
+
+  if (action === 'en') {
+    document.getElementById('langFilter').value = 'English';
+    document.getElementById('ratingFilter').value = '4';
+    document.getElementById('statCardEn').classList.add('active');
+  } else if (action === 'no') {
+    document.getElementById('langFilter').value = 'Norwegian';
+    document.getElementById('ratingFilter').value = '4';
+    document.getElementById('statCardNo').classList.add('active');
+  } else if (action === 'top') {
+    document.getElementById('langFilter').value = '';
+    document.getElementById('ratingFilter').value = '6';
+    document.getElementById('statCardTop').classList.add('active');
+  } else {
+    // total — reset everything
+    document.getElementById('langFilter').value = '';
+    document.getElementById('ratingFilter').value = '4';
+    document.getElementById('statCardTotal').classList.add('active');
+  }
+  buildPodcastFilter();
+  refresh();
+}
+
+['statCardTotal', 'statCardEn', 'statCardNo', 'statCardTop'].forEach(id => {
+  const el = document.getElementById(id);
+  const action = { statCardTotal: 'total', statCardEn: 'en', statCardNo: 'no', statCardTop: 'top' }[id];
+  el.addEventListener('click', () => applyStatFilter(action));
+  el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); applyStatFilter(action); } });
+});
+
+// Also clear active stat card when user manually changes a filter
+['langFilter', 'ratingFilter', 'podcastFilter', 'searchBox'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    document.querySelectorAll('.stat').forEach(s => s.classList.remove('active'));
+  });
+});
 
 // Initial render
 buildPodcastFilter();
