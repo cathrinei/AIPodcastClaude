@@ -59,13 +59,16 @@
   body.dark #darkToggle:hover { background: rgba(0,0,0,0.15); }
 
   .summary { display: flex; flex-wrap: wrap; gap: 1rem; padding: 1.2rem 2rem; background: var(--surface); border-bottom: 1px solid var(--border); }
-  .stat { background: linear-gradient(160deg, #ffffff 0%, #f5f6ff 100%); border-radius: 10px; box-shadow: 0 4px 0 #c0c4dc, 0 2px 12px rgba(0,0,0,0.08); padding: 0.65rem 1.2rem; font-size: 0.85rem; color: var(--text); }
+  .stat { background: linear-gradient(160deg, #ffffff 0%, #f5f6ff 100%); border-radius: 10px; box-shadow: 0 4px 0 #c0c4dc, 0 2px 12px rgba(0,0,0,0.08); padding: 0.65rem 1.2rem; font-size: 0.85rem; color: var(--text); cursor: pointer; user-select: none; transition: box-shadow 0.12s ease, transform 0.1s ease; }
+  .stat:hover { box-shadow: 0 4px 0 var(--accent), 0 2px 12px rgba(99,102,241,0.18); }
+  .stat:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--accent); }
+  .stat.active { outline: 2px solid var(--accent); outline-offset: 2px; }
   .stat strong { display: block; font-size: 1.9rem; font-weight: 800; color: #4f46e5; }
   body.dark .stat { background: linear-gradient(160deg, #1e2140 0%, #252840 100%); box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 2px 12px rgba(0,0,0,0.3); }
   body.dark .stat strong { color: #818cf8; }
 
   .controls { display: flex; flex-wrap: wrap; gap: 0.8rem; padding: 1rem 2rem; background: var(--surface); border-bottom: 1px solid var(--border); align-items: center; }
-  .controls input[type=text] { padding: 0.45rem 0.8rem; border: 1px solid var(--input-border); border-radius: 6px; font-size: 0.85rem; width: 220px; background: var(--surface); color: var(--text); }
+  .controls input[type=text] { padding: 0.45rem 0.8rem; border: 1px solid var(--input-border); border-radius: 6px; font-size: 0.85rem; width: 220px; max-width: 100%; background: var(--surface); color: var(--text); }
   .controls select { padding: 0.45rem 0.8rem; border: 1px solid var(--input-border); border-radius: 6px; font-size: 0.85rem; background: var(--surface); color: var(--text); }
   .controls label { font-size: 0.85rem; color: var(--text-muted); }
   .reset-btn { padding: 0.45rem 0.9rem; border: 1px solid var(--input-border); border-radius: 6px; background: var(--surface); font-size: 0.82rem; cursor: pointer; color: var(--text-muted); }
@@ -131,9 +134,62 @@
   body.dark select:focus-visible,
   body.dark a:focus-visible { outline-color: #818cf8; }
 
-  @media (max-width: 700px) {
-    .table-wrap { padding: 0.5rem; }
-    header, .summary, .controls { padding-left: 1rem; padding-right: 1rem; }
+  /* === CARD LIST (mobile) === */
+  .card-list { display: none; padding: 0.75rem 1rem 2rem; }
+  .ep-card {
+    background: var(--surface);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.09);
+    border: 1px solid var(--border);
+    padding: 0.85rem 1rem;
+    margin-bottom: 0.75rem;
+    transition: box-shadow 0.12s ease;
+  }
+  .ep-card:hover { box-shadow: inset 4px 0 0 var(--accent), 0 2px 8px rgba(0,0,0,0.09); }
+  .ep-card.ep-new { background: rgba(245,158,11,0.07); box-shadow: inset 3px 0 0 #f59e0b; }
+  body.dark .ep-card.ep-new { background: rgba(245,158,11,0.10); box-shadow: inset 3px 0 0 #fbbf24; }
+  .ep-card.ep-new:hover { box-shadow: inset 4px 0 0 var(--accent); }
+  .card-meta { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.45rem; flex-wrap: wrap; }
+  .card-date { font-size: 0.78rem; color: var(--text-muted); }
+  .card-title-link { display: block; font-weight: 700; font-size: 0.95rem; color: var(--stat-fg); text-decoration: none; margin-bottom: 0.3rem; line-height: 1.35; }
+  .card-title-link:hover { color: var(--accent); text-decoration: underline; }
+  .card-podcast { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.25rem; }
+  .card-hosts { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.3rem; }
+  .card-tags-row { margin-top: 0.3rem; }
+
+  /* Shared: reduced padding at ≤900px */
+  @media (max-width: 900px) {
+    header, .summary, .controls, .row-count { padding-left: 1rem; padding-right: 1rem; }
+    .table-wrap { padding: 0.5rem 0.5rem 1.5rem; }
+  }
+
+  /* Mobile: ≤600px — switch to card layout */
+  @media (max-width: 600px) {
+    header { flex-direction: column; align-items: flex-start; padding: 1rem 1rem 0.75rem; gap: 0.5rem; }
+    header h1 { font-size: 1.25rem; }
+    header p  { font-size: 0.8rem; }
+    #darkToggle { align-self: flex-end; margin-top: -2rem; }
+    .summary { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; padding: 0.75rem 1rem; }
+    .stat { font-size: 0.8rem; padding: 0.5rem 0.8rem; }
+    .stat strong { font-size: 1.4rem; }
+    .controls { flex-direction: column; align-items: stretch; padding: 0.75rem 1rem; gap: 0.6rem; }
+    .controls label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.8rem; }
+    .controls input[type=text] { width: 100%; max-width: 100%; font-size: 0.9rem; }
+    .controls select { width: 100%; font-size: 0.9rem; }
+    .reset-btn, .update-btn, .fetch-btn { width: 100%; justify-content: center; font-size: 0.85rem; padding: 0.6rem 0.9rem; }
+    #updateStatus { text-align: center; }
+    .row-count { padding: 0.4rem 1rem; }
+    .table-wrap { display: none; }
+    .card-list { display: block; }
+  }
+
+  /* Small mobile: ≤400px (iPhone SE) */
+  @media (max-width: 400px) {
+    header h1 { font-size: 1.1rem; }
+    #darkToggle { font-size: 0.75rem; padding: 0.3rem 0.6rem; }
+    .stat strong { font-size: 1.2rem; }
+    .ep-card { padding: 0.7rem 0.85rem; }
+    .card-title-link { font-size: 0.88rem; }
   }
 </style>
 </head>
@@ -148,12 +204,10 @@
 </header>
 
 <div class="summary">
-  <div class="stat"><strong id="statTotal">–</strong> episoder totalt</div>
-  <div class="stat"><strong id="statShows">–</strong> podkastserier</div>
-  <div class="stat"><strong id="statEn">–</strong> engelske episoder</div>
-  <div class="stat"><strong id="statNo">–</strong> norske episoder</div>
-  <div class="stat"><strong id="statTop">–</strong> toppkarakter (6/6)</div>
-  <div class="stat"><strong id="statUnrated">–</strong> episoder uten rating</div>
+  <div class="stat" id="statCardTotal" role="button" tabindex="0" aria-label="Vis alle episoder"><strong id="statTotal">–</strong> episoder totalt</div>
+  <div class="stat" id="statCardEn" role="button" tabindex="0" aria-label="Filtrer engelske episoder"><strong id="statEn">–</strong> engelske episoder</div>
+  <div class="stat" id="statCardNo" role="button" tabindex="0" aria-label="Filtrer norske episoder"><strong id="statNo">–</strong> norske episoder</div>
+  <div class="stat" id="statCardTop" role="button" tabindex="0" aria-label="Filtrer toppkarakter 6/6"><strong id="statTop">–</strong> toppkarakter (6/6)</div>
 </div>
 
 <div class="controls">
@@ -205,6 +259,7 @@
   <tbody id="tableBody"></tbody>
 </table>
 </div>
+<div id="cardList" class="card-list"></div>
 
 <script>
 let newEpisodeKeys = new Set();
@@ -411,10 +466,18 @@ function renderTags(tags) {
 function renderTable(rows) {
   const tbody = document.getElementById('tableBody');
   tbody.innerHTML = '';
+  const cardList = document.getElementById('cardList');
+  cardList.innerHTML = '';
+
   rows.forEach(row => {
     const [podcast, title, lang, date, hosts, guests, topics, rating, note, tags, link] = row;
+    const isNew = newEpisodeKeys.has(podcast + '||' + title);
+    const ratingClass = [1,2,3,4,5,6].includes(rating) ? ' r'+rating : '';
+    const ratingLabel = rating > 0 ? rating : 'N/A';
+
+    // Table row (desktop)
     const tr = document.createElement('tr');
-    if (newEpisodeKeys.has(podcast + '||' + title)) tr.classList.add('ep-new');
+    if (isNew) tr.classList.add('ep-new');
     tr.innerHTML = `
       <td><span class="podcast-name">${esc(podcast)}</span></td>
       <td><a class="episode-title-link" href="${safeUrl(link)}" target="_blank" rel="noopener noreferrer">${esc(title)}</a></td>
@@ -423,27 +486,40 @@ function renderTable(rows) {
       <td><span class="hosts">${esc(hosts)}</span></td>
       <td><span class="guests">${esc(guests)}</span></td>
       <td><span class="topic-tags">${esc(topics)}</span></td>
-      <td style="text-align:center"><span class="rating-badge${[1,2,3,4,5,6].includes(rating) ? ' r'+rating : ''}">${rating > 0 ? rating : 'N/A'}</span></td>
+      <td style="text-align:center"><span class="rating-badge${ratingClass}">${ratingLabel}</span></td>
       <td><span class="rating-note">${esc(note)}</span></td>
       <td>${renderTags(tags)}</td>
     `;
     tbody.appendChild(tr);
+
+    // Card (mobile)
+    const card = document.createElement('div');
+    card.className = 'ep-card' + (isNew ? ' ep-new' : '');
+    card.innerHTML = `
+      <div class="card-meta">
+        <span class="rating-badge${ratingClass}">${ratingLabel}</span>
+        <span class="lang-badge ${lang === 'English' ? 'lang-en' : 'lang-no'}">${lang === 'English' ? 'EN' : 'NO'}</span>
+        <span class="card-date">${esc(date)}</span>
+      </div>
+      <a class="card-title-link" href="${safeUrl(link)}" target="_blank" rel="noopener noreferrer">${esc(title)}</a>
+      <div class="card-podcast">${esc(podcast)}</div>
+      ${hosts && hosts !== '—' ? `<div class="card-hosts">${esc(hosts)}</div>` : ''}
+      <div class="card-tags-row">${renderTags(tags)}</div>
+    `;
+    cardList.appendChild(card);
   });
+
   document.getElementById('rowCount').textContent = `Viser ${rows.length} av ${data.length} episoder`;
 }
 
 function updateStats() {
-  const shows   = new Set(data.map(r => r[0])).size;
-  const en      = data.filter(r => r[2] === 'English').length;
-  const no      = data.filter(r => r[2] === 'Norwegian').length;
-  const top     = data.filter(r => r[7] === 6).length;
-  const unrated = data.filter(r => r[7] === 0).length;
-  document.getElementById('statTotal').textContent   = data.length;
-  document.getElementById('statShows').textContent   = shows;
-  document.getElementById('statEn').textContent      = en;
-  document.getElementById('statNo').textContent      = no;
-  document.getElementById('statTop').textContent     = top;
-  document.getElementById('statUnrated').textContent = unrated;
+  const en  = data.filter(r => r[2] === 'English').length;
+  const no  = data.filter(r => r[2] === 'Norwegian').length;
+  const top = data.filter(r => r[7] === 6).length;
+  document.getElementById('statTotal').textContent = data.length;
+  document.getElementById('statEn').textContent    = en;
+  document.getElementById('statNo').textContent    = no;
+  document.getElementById('statTop').textContent   = top;
 }
 
 function fuzzyMatch(query, haystack) {
@@ -635,6 +711,50 @@ function buildPodcastFilter() {
   // Keep current selection only if still valid
   sel.value = pods.includes(current) ? current : '';
 }
+
+// Stat card click handlers
+function applyStatFilter(action) {
+  // Clear all active markers
+  document.querySelectorAll('.stat').forEach(s => s.classList.remove('active'));
+  // Reset common filters
+  document.getElementById('searchBox').value = '';
+  document.getElementById('podcastFilter').value = '';
+
+  if (action === 'en') {
+    document.getElementById('langFilter').value = 'English';
+    document.getElementById('ratingFilter').value = '4';
+    document.getElementById('statCardEn').classList.add('active');
+  } else if (action === 'no') {
+    document.getElementById('langFilter').value = 'Norwegian';
+    document.getElementById('ratingFilter').value = '4';
+    document.getElementById('statCardNo').classList.add('active');
+  } else if (action === 'top') {
+    document.getElementById('langFilter').value = '';
+    document.getElementById('ratingFilter').value = '6';
+    document.getElementById('statCardTop').classList.add('active');
+  } else {
+    // total — reset everything
+    document.getElementById('langFilter').value = '';
+    document.getElementById('ratingFilter').value = '4';
+    document.getElementById('statCardTotal').classList.add('active');
+  }
+  buildPodcastFilter();
+  refresh();
+}
+
+['statCardTotal', 'statCardEn', 'statCardNo', 'statCardTop'].forEach(id => {
+  const el = document.getElementById(id);
+  const action = { statCardTotal: 'total', statCardEn: 'en', statCardNo: 'no', statCardTop: 'top' }[id];
+  el.addEventListener('click', () => applyStatFilter(action));
+  el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); applyStatFilter(action); } });
+});
+
+// Also clear active stat card when user manually changes a filter
+['langFilter', 'ratingFilter', 'podcastFilter', 'searchBox'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    document.querySelectorAll('.stat').forEach(s => s.classList.remove('active'));
+  });
+});
 
 // Initial render
 buildPodcastFilter();

@@ -77,7 +77,11 @@ The `data` array in the HTML is populated from the CSV. When changes are made to
 
 ### Stats
 `updateStats()` computes all stats automatically from the `data` array:
-- Total episodes, shows, English/Norwegian counts, top-rated (6/6) count, unrated (N/A) count
+- Total episodes, English count, Norwegian count, top-rated (6/6) count
+- "Podkastserier" and "episoder uten rating" cards removed
+- Each stat card is clickable: applies a corresponding filter and marks itself `.active`; clicking "total" resets all filters
+- `applyStatFilter(action)` handles card clicks — sets `langFilter`/`ratingFilter` and calls `buildPodcastFilter()` + `refresh()`
+- Active state clears automatically when the user touches any manual filter control (`input` event)
 
 ### "↑ Last inn CSV"-knappen
 1. Opens a file picker (`<input type="file" accept=".csv">`)
@@ -96,7 +100,7 @@ The `data` array in the HTML is populated from the CSV. When changes are made to
 ### Design / visuell stil
 - **Accent**: `--accent: #6366f1` (lys: indigo, mørk: `#818cf8`) — brukes på knapp, focus-outline, rad-hover-kant
 - **Header**: `linear-gradient(135deg, #0f0c29, #302b63, #1a1a4e)` + `border-top: 4px solid var(--accent)`; invertert i dark mode (`#e8eaf0` bg / `#1a1a2e` tekst)
-- **Stats-bokser**: subtil gradient-bakgrunn, 3D-bunnkant (`box-shadow: 0 4px 0 #c0c4dc`), tall i `font-size: 1.9rem / font-weight: 800`
+- **Stats-bokser**: subtil gradient-bakgrunn, 3D-bunnkant (`box-shadow: 0 4px 0 #c0c4dc`), tall i `font-size: 1.9rem / font-weight: 800`; klikkbare — hover gir accent-bunnkant, `.active` gir `outline: 2px solid var(--accent)`
 - **Tabelloverskrift**: gradient matcher headeren (`#0f0c29 → #302b63`); kolonner skilt med `border-right: 1px solid rgba(255,255,255,0.15)`; tekst uppercase + `letter-spacing: 0.07em`
 - **Radhovering**: leaderboard-stil — `inset 4px 0 0 var(--accent)` + lys lilla bakgrunn; smooth `0.12s ease` transisjon
 - **Zebrastriping**: annenhver rad bruker `--row-alt` (`#f5f7fc` lys / `#1f2235` mørk)
