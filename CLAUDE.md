@@ -99,9 +99,11 @@ The `data` array in the HTML is populated from the CSV. When changes are made to
 
 ### Design / visuell stil
 - **Accent**: `--accent: #6366f1` (lys: indigo, mørk: `#818cf8`) — brukes på knapp, focus-outline, rad-hover-kant
-- **Header**: `linear-gradient(135deg, #0f0c29, #302b63, #1a1a4e)` + `border-top: 4px solid var(--accent)`; invertert i dark mode (`#e8eaf0` bg / `#1a1a2e` tekst)
-- **Stats-bokser**: subtil gradient-bakgrunn, 3D-bunnkant (`box-shadow: 0 4px 0 #c0c4dc`), tall i `font-size: 1.9rem / font-weight: 800`; klikkbare — hover gir accent-bunnkant, `.active` gir `outline: 2px solid var(--accent)`
-- **Tabelloverskrift**: gradient matcher headeren (`#0f0c29 → #302b63`); kolonner skilt med `border-right: 1px solid rgba(255,255,255,0.15)`; tekst uppercase + `letter-spacing: 0.07em`
+- **Header**: `var(--surface)` (hvit/mørk via variabel) + `border-top: 3px solid var(--accent)` + `border-bottom: 1px solid var(--border)`; ingen dark-mode-override nødvendig — CSS-variabler håndterer det automatisk
+- **Mørk-toggle**: bruker `var(--border)` / `var(--text-muted)` — ingen hardkodede dark-overrides
+- **Stats-bokser**: hvit bakgrunn, `border: 1px solid var(--border)`, `border-radius: 12px`; tall i `font-size: 2rem / font-weight: 800`; klikkbare — hover gir accent-kant, `.active` gir `box-shadow: 0 0 0 3px rgba(99,102,241,0.18)`
+- **Tabelloverskrift**: `background: #f0f1f5` (nøytral off-white); tekst `#6b7280`; kolonner skilt med `border-right: 1px solid var(--border)`; sortert kolonne får `color: var(--accent)`; dark mode: `#252840`
+- **Kontrollfelt**: `background: var(--bg)` (litt mørkere enn `--surface`) — visuelt skilt fra stat-raden over
 - **Radhovering**: leaderboard-stil — `inset 4px 0 0 var(--accent)` + lys lilla bakgrunn; smooth `0.12s ease` transisjon
 - **Zebrastriping**: annenhver rad bruker `--row-alt` (`#f5f7fc` lys / `#1f2235` mørk)
 - **Rating-badge**: `32px`, `font-weight: 800`; r4/r5/r6 har glow (`box-shadow: 0 0 0 3px rgba(...)`)
