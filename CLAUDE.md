@@ -6,10 +6,14 @@ This project collects and curates podcast episodes on artificial intelligence (A
 ## Files
 - `AI_KI_Podcasts_2026.csv` — master data, one row per episode
 - `AI_KI_Podcasts_2026.html` — interactive table with filtering, sorting, stats, CSV import
+- `index.html` — redirect fra rot-URL til `AI_KI_Podcasts_2026.html` (GitHub Pages)
 - `update_podcasts.py` — RSS fetcher; adds new episodes (Rating=0) and saves RSS descriptions to `pending_descriptions.json`
 - `rate_episodes.py` — keyword-based auto-rater; processes Rating=0 episodes after fetch
 - `rejected_episodes.csv` — denylist of already-reviewed non-AI episodes; prevents re-fetching noise
 - `pending_descriptions.json` — temp sidecar written by `update_podcasts.py`, read and deleted by `rate_episodes.py`; gitignored
+
+## Live URL
+`https://cathrinei.github.io/AIPodcastClaude/` — serves the latest committed HTML + CSV automatically. GitHub Actions updates the CSV daily at 11:00 CEST; Pages rebuilds on every push to `main`.
 
 ## CSV columns
 
@@ -85,7 +89,15 @@ The `data` array in the HTML is populated from the CSV. When changes are made to
 - `applyStatFilter(action)` handles card clicks — sets `langFilter`/`ratingFilter` and calls `buildPodcastFilter()` + `refresh()`
 - Active state clears automatically when the user touches any manual filter control (`input` event)
 
+### Auto-fetch CSV (GitHub Pages)
+- On page load, an async IIFE calls `fetch('./AI_KI_Podcasts_2026.csv')` (same-origin)
+- If successful: parses CSV, replaces `data` array, calls `buildPodcastFilter()` + `updateStats()` + `refresh()`
+- Status bar shows `✓ X episoder lastet inn automatisk [· Y nye]`
+- Silently falls back to the built-in `data` array when opened as `file://` (fetch fails due to CORS) or on network error
+- CSP `connect-src 'self'` already allows same-origin fetch — no changes needed
+
 ### "↑ Last inn CSV"-knappen
+Manual fallback — still works for local use or when you want to load a specific CSV file:
 1. Opens a file picker (`<input type="file" accept=".csv">`)
 2. Reads file with `FileReader` (UTF-8)
 3. `parseCSV()` parses content — handles commas in quoted fields and CRLF/LF
@@ -215,7 +227,7 @@ Branch-navnekonvensjon:
 1. `python update_podcasts.py` — fetches new episodes (Rating=0), saves RSS descriptions to `pending_descriptions.json`
 2. `python rate_episodes.py` — auto-rates Rating=0 episodes; deletes `pending_descriptions.json` when done
 3. **Check for duplicates**: `python3 -c "import csv; rows=list(csv.reader(open('AI_KI_Podcasts_2026.csv',encoding='utf-8')))[1:]; seen={}; [print(f'DUP: {r[0]} – {r[1][:60]}') or seen.update({(r[0].lower(),r[1].lower()):1}) for r in rows if (r[0].lower(),r[1].lower()) in seen]"`
-4. Open HTML → click **↑ Last inn CSV** → select `AI_KI_Podcasts_2026.csv`
+4. Open `https://cathrinei.github.io/AIPodcastClaude/` — CSV loads automatically. Or open HTML locally and click **↑ Last inn CSV** for local use.
 5. Review auto-rated episodes: upgrade to 5/6 if warranted; fill in Host(s), Guest(s), Main Topic(s), Tags
 6. Any remaining Rating=0 (N/A) episodes need manual review
 7. Remove episodes rated 1–3 from CSV; they do not belong in the list

@@ -794,6 +794,38 @@ function applyStatFilter(action) {
 buildPodcastFilter();
 updateStats();
 refresh();
+
+// Auto-fetch CSV from same origin (GitHub Pages).
+// Silently skipped when opened as a local file:// — built-in data array used instead.
+(async function autoLoadCSV() {
+  try {
+    const resp = await fetch('./AI_KI_Podcasts_2026.csv');
+    if (!resp.ok) return;
+    const text = await resp.text();
+    const rows = parseCSV(text);
+    if (rows.length < 2) return;
+    const prevSeenKeys = new Set(JSON.parse(localStorage.getItem('seenEpisodeKeys') || '[]'));
+    const hasPrevData = prevSeenKeys.size > 0;
+    newEpisodeKeys.clear();
+    data.length = 0;
+    rows.slice(1).forEach(r => {
+      const rating = parseInt(r[7], 10);
+      data.push([r[0], r[1], r[2], r[3], r[4], r[5], r[6], isNaN(rating) ? 0 : rating, r[8], r[9], r[10]]);
+      const epKey = r[0] + '||' + r[1];
+      if (hasPrevData && !prevSeenKeys.has(epKey)) newEpisodeKeys.add(epKey);
+    });
+    localStorage.setItem('seenEpisodeKeys', JSON.stringify(data.map(r => r[0] + '||' + r[1])));
+    buildPodcastFilter();
+    updateStats();
+    refresh();
+    const status = document.getElementById('updateStatus');
+    const newCount = newEpisodeKeys.size;
+    status.textContent = '✓ ' + data.length + ' episoder lastet inn automatisk' + (newCount > 0 ? ' · ' + newCount + ' nye' : '');
+    status.style.color = '#16a34a';
+  } catch (e) {
+    // file:// or network error — built-in data stays
+  }
+})();
 </script>
 </body>
 </html>
