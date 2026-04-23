@@ -35,7 +35,7 @@ This project collects and curates podcast episodes on artificial intelligence (A
 
 ## CSV policy
 - **Only episodes rated 4–6 are kept.** Episodes rated 1–3 are removed entirely.
-- **Unrated episodes (Rating=0 / N/A)** are kept temporarily — pending manual review.
+- **Unrated episodes (Rating=0)** lagres i `pending_episodes.csv` — aldri i hoved-CSV.
 - Always update the CSV **before** the HTML when making data changes. CSV is the source of truth.
 - Do not add short videos, teasers, trailers, or highlight compilations — full-length episodes only.
 
