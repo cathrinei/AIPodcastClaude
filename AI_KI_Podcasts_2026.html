@@ -109,10 +109,12 @@
   .lang-en { background: #dbeafe; color: #1e40af; }
   .lang-no { background: #dcfce7; color: #166534; }
 
-  .tag { display: inline-block; border-radius: 4px; padding: 1px 7px; font-size: 0.72rem; font-weight: 600; margin-right: 2px; }
+  .tag { display: inline-block; border-radius: 4px; padding: 1px 7px; font-size: 0.72rem; font-weight: 600; margin-right: 2px; cursor: pointer; transition: box-shadow 0.1s ease, opacity 0.1s ease; }
+  .tag:hover { opacity: 0.8; }
   .tag-vibe { background: #fef3c7; color: #92400e; }
   .tag-openclaw { background: #fce7f3; color: #9d174d; }
   .tag-agents { background: #e0f2fe; color: #0c4a6e; }
+  .tag.tag-active { box-shadow: 0 0 0 2px currentColor; }
   .no-tags { color: var(--no-tags); font-size: 0.75rem; }
 
   a.episode-title-link { font-weight: 600; color: var(--stat-fg); text-decoration: none; }
@@ -435,6 +437,7 @@ const RATING_COL = 7;
 const DATE_COL = 3;
 const CSV_MAX_BYTES = 5 * 1024 * 1024;
 const sort = { col: DATE_COL, asc: false };
+let tagFilter = '';
 
 const tagMeta = {
   vibe:     { label: 'Vibe coding', cls: 'tag-vibe' },
@@ -458,10 +461,19 @@ function safeUrl(url) {
 function renderTags(tags) {
   if (!tags) return '<span class="no-tags">–</span>';
   const html = tags.split(',').map(t => {
-    const meta = tagMeta[t.trim()];
-    return meta ? `<span class="tag ${meta.cls}">${meta.label}</span>` : '';
+    const key = t.trim();
+    const meta = tagMeta[key];
+    if (!meta) return '';
+    const activeClass = tagFilter === key ? ' tag-active' : '';
+    return `<span class="tag ${meta.cls}${activeClass}" data-tag="${key}" role="button" tabindex="0" aria-pressed="${tagFilter === key}" aria-label="Filtrer: ${meta.label}">${meta.label}</span>`;
   }).filter(Boolean).join(' ');
   return html || '<span class="no-tags">–</span>';
+}
+
+function setTagFilter(tag) {
+  tagFilter = tag;
+  document.querySelectorAll('.stat').forEach(s => s.classList.remove('active'));
+  refresh();
 }
 
 function renderTable(rows) {
@@ -510,7 +522,8 @@ function renderTable(rows) {
     cardList.appendChild(card);
   });
 
-  document.getElementById('rowCount').textContent = `Viser ${rows.length} av ${data.length} episoder`;
+  const tagLabel = tagFilter && tagMeta[tagFilter] ? ` · Tag: ${tagMeta[tagFilter].label}` : '';
+  document.getElementById('rowCount').textContent = `Viser ${rows.length} av ${data.length} episoder${tagLabel}`;
 }
 
 function updateStats() {
@@ -544,6 +557,10 @@ function getFiltered() {
     if (lang && language !== lang) return false;
     if (podcastFilter && podcast !== podcastFilter) return false;
     if (rating > 0 && rating < minRating) return false;
+    if (tagFilter) {
+      const rowTags = tags ? tags.split(',').map(t => t.trim()) : [];
+      if (!rowTags.includes(tagFilter)) return false;
+    }
     if (search) {
       const haystack = [podcast, title, hosts, guests, topics, note].join(' ').toLowerCase();
       if (!fuzzyMatch(search, haystack)) return false;
@@ -579,6 +596,7 @@ function refresh() {
 }
 
 function resetFilters() {
+  tagFilter = '';
   document.getElementById('searchBox').value = '';
   document.getElementById('langFilter').value = '';
   document.getElementById('podcastFilter').value = '';
@@ -681,6 +699,20 @@ document.querySelectorAll('thead th[data-col]').forEach(th =>
   th.addEventListener('click', () => sortTable(parseInt(th.dataset.col, 10)))
 );
 
+// Tag click — event delegation so it works after every re-render
+function handleTagInteraction(e) {
+  const tagEl = e.target.closest('[data-tag]');
+  if (!tagEl) return;
+  if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+  if (e.type === 'keydown') e.preventDefault();
+  const tag = tagEl.dataset.tag;
+  setTagFilter(tagFilter === tag ? '' : tag); // toggle off if already active
+}
+['tableBody', 'cardList'].forEach(id => {
+  document.getElementById(id).addEventListener('click', handleTagInteraction);
+  document.getElementById(id).addEventListener('keydown', handleTagInteraction);
+});
+
 // Dark mode toggle
 const darkToggle = document.getElementById('darkToggle');
 function applyDark(on) {
@@ -715,6 +747,7 @@ function buildPodcastFilter() {
 
 // Stat card click handlers
 function applyStatFilter(action) {
+  tagFilter = '';
   // Clear all active markers
   document.querySelectorAll('.stat').forEach(s => s.classList.remove('active'));
   // Reset common filters
