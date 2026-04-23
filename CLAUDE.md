@@ -140,7 +140,7 @@ Manual fallback — still works for local use or when you want to load a specifi
 ### Øvrige tekniske noter
 - Sort state: `sort` object (`col`, `asc`); `RATING_COL = 7`, `DATE_COL = 3`, `CSV_MAX_BYTES` constants
 - Default sort: date descending (nyeste øverst); rating og dato starter begge med synkende rekkefølge ved klikk
-- Column sort handlers use `data-col` attributes + event listeners — no inline `onclick`
+- Column sort handlers use `data-col` attributes + click + keydown (Enter/Space) event listeners — no inline `onclick`
 - Tags whitelisted via `tagMeta` object — unknown tag values ignored; current tags: `vibe`, `openclaw`, `agents`
 - `safeUrl()` blocks non-HTTP(S) URLs to prevent `javascript:` injection
 - CSP: `default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'`
@@ -151,7 +151,35 @@ Manual fallback — still works for local use or when you want to load a specifi
 - Rating class injection hardened: `'r'+rating` only applied when rating is strictly in `[1,2,3,4,5,6]`
 - CSV upload capped at 5 MB — `CSV_MAX_BYTES` constant; `reader.onerror` handler added
 - `parseInt` called with explicit radix 10 throughout
-- WCAG AA color contrast fixed: `--text-faint` and `--no-tags` adjusted in both light and dark mode; `:focus-visible` outlines added for all interactive elements; `.r6` badge `#15803d` (was `#16a34a`), `--no-tags` light `#767676` (was `#888888`), N/A badge default `#6b7280` (was `#ccc`) — all pass 4.5:1
+
+### WCAG AA – tilgjengelighet
+Alle kjente WCAG AA-problemer er fikset. Gjeldende status:
+
+**Kontrast (1.4.3):**
+- `thead th`: `#4b5563` på `#f0f1f5` (~5.9:1) ✅ — var `#6b7280` (4.3:1, feilet)
+- `--text-faint: #595959`, `--no-tags: #767676` på hvit — begge ≥ 4.5:1 ✅
+- `.r6` badge `#15803d` på hvit tekst — 4.8:1 ✅
+- Alle tag-badges (`tag-vibe`, `tag-openclaw`, `tag-agents`) og språk-badges (`lang-en`, `lang-no`) — alle ≥ 4.5:1 ✅
+
+**Semantikk / ARIA (1.3.1):**
+- Alle `<th>` har `scope="col"` ✅
+- Sortérbare `<th>` har `aria-sort="none/ascending/descending"` — oppdateres dynamisk i `sortTable()` ✅
+- `<table>` har `aria-label="Podkast-episoder om kunstig intelligens"` ✅
+- Karakter-kolonne (`★`) har `aria-label="Karakter"` ✅
+- `.sort-icon`-span har `aria-hidden="true"` — dekorative ikoner skjult for skjermlesere ✅
+
+**Tilstand (4.1.2):**
+- Stat-kort: `aria-pressed="true/false"` — oppdateres i `applyStatFilter()` ✅
+- `#darkToggle`: `aria-pressed="true/false"` — oppdateres i `applyDark()` ✅
+- Tags: `aria-pressed="${tagFilter === key}"` — settes ved `renderTags()` ✅
+
+**Fokus (2.4.7):**
+- `:focus-visible` dekker: `button`, `input`, `select`, `a`, `[role="button"]`, `thead th` ✅
+- Mørk modus: outline-farge `#818cf8` ✅
+
+**Tastatur (2.1.1):**
+- Alle `<th data-col>`: keydown-handler (Enter/Space) for sortering ✅
+- Stat-kort, tags: Enter/Space aktiverer filteret ✅
 
 ## update_podcasts.py – tekniske noter
 - `FEEDS` dict: add new podcasts with name (must match CSV) and RSS URL — 26 feeds currently

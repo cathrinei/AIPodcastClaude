@@ -78,7 +78,7 @@
   .table-wrap { overflow-x: auto; padding: 1rem 2rem 2rem; }
   table { width: 100%; border-collapse: collapse; font-size: 0.82rem; background: var(--surface); border-radius: 10px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.10); }
   thead tr { background: #f0f1f5; border-bottom: 2px solid var(--border); }
-  thead th { padding: 0.65rem 0.8rem; text-align: left; white-space: nowrap; cursor: pointer; user-select: none; font-size: 0.70rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #6b7280; border-right: 1px solid var(--border); }
+  thead th { padding: 0.65rem 0.8rem; text-align: left; white-space: nowrap; cursor: pointer; user-select: none; font-size: 0.70rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #4b5563; border-right: 1px solid var(--border); }
   thead th:last-child { border-right: none; }
   thead th:hover { background: #e8eaf0; color: var(--text); }
   thead th.sorted { color: var(--accent); }
@@ -131,11 +131,15 @@
   button:focus-visible,
   input:focus-visible,
   select:focus-visible,
-  a:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
+  a:focus-visible,
+  [role="button"]:focus-visible,
+  thead th:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
   body.dark button:focus-visible,
   body.dark input:focus-visible,
   body.dark select:focus-visible,
-  body.dark a:focus-visible { outline-color: #818cf8; }
+  body.dark a:focus-visible,
+  body.dark [role="button"]:focus-visible,
+  body.dark thead th:focus-visible { outline-color: #818cf8; }
 
   /* === CARD LIST (mobile) === */
   .card-list { display: none; padding: 0.75rem 1rem 2rem; }
@@ -203,14 +207,14 @@
     <h1>AI / KI Podcasts &mdash; 2026</h1>
     <p>Engelske og norske podkast-episoder om kunstig intelligens &bull; Januar 2026 &ndash; <span id="todayDate"></span></p>
   </div>
-  <button id="darkToggle" title="Bytt mellom lys og mørk visning">&#9790; Mørk</button>
+  <button id="darkToggle" aria-pressed="false" title="Bytt mellom lys og mørk visning">&#9790; Mørk</button>
 </header>
 
 <div class="summary">
-  <div class="stat" id="statCardTotal" role="button" tabindex="0" aria-label="Vis alle episoder"><strong id="statTotal">–</strong><span class="stat-label">Episoder</span></div>
-  <div class="stat" id="statCardEn" role="button" tabindex="0" aria-label="Filtrer engelske episoder"><strong id="statEn">–</strong><span class="stat-label">Engelske</span></div>
-  <div class="stat" id="statCardNo" role="button" tabindex="0" aria-label="Filtrer norske episoder"><strong id="statNo">–</strong><span class="stat-label">Norske</span></div>
-  <div class="stat" id="statCardTop" role="button" tabindex="0" aria-label="Filtrer toppkarakter 6/6"><strong id="statTop">–</strong><span class="stat-label">Topp&shy;karakter</span></div>
+  <div class="stat" id="statCardTotal" role="button" tabindex="0" aria-label="Vis alle episoder" aria-pressed="false"><strong id="statTotal">–</strong><span class="stat-label">Episoder</span></div>
+  <div class="stat" id="statCardEn" role="button" tabindex="0" aria-label="Filtrer engelske episoder" aria-pressed="false"><strong id="statEn">–</strong><span class="stat-label">Engelske</span></div>
+  <div class="stat" id="statCardNo" role="button" tabindex="0" aria-label="Filtrer norske episoder" aria-pressed="false"><strong id="statNo">–</strong><span class="stat-label">Norske</span></div>
+  <div class="stat" id="statCardTop" role="button" tabindex="0" aria-label="Filtrer toppkarakter 6/6" aria-pressed="false"><strong id="statTop">–</strong><span class="stat-label">Topp&shy;karakter</span></div>
 </div>
 
 <div class="controls">
@@ -244,19 +248,19 @@
 <div class="row-count" id="rowCount"></div>
 
 <div class="table-wrap">
-<table id="mainTable">
+<table id="mainTable" aria-label="Podkast-episoder om kunstig intelligens">
   <thead>
     <tr>
-      <th data-col="0">Podkast <span class="sort-icon">&#8597;</span></th>
-      <th data-col="1">Episode <span class="sort-icon">&#8597;</span></th>
-      <th data-col="2">Spr. <span class="sort-icon">&#8597;</span></th>
-      <th data-col="3" class="sorted">Dato <span class="sort-icon">&#8595;</span></th>
-      <th data-col="4">Vert(er) <span class="sort-icon">&#8597;</span></th>
-      <th data-col="5">Gjest(er) <span class="sort-icon">&#8597;</span></th>
-      <th data-col="6">Emner <span class="sort-icon">&#8597;</span></th>
-      <th data-col="7">&#9733; <span class="sort-icon">&#8597;</span></th>
-      <th>Begrunnelse</th>
-      <th>Tags</th>
+      <th data-col="0" scope="col" aria-sort="none" tabindex="0">Podkast <span class="sort-icon" aria-hidden="true">&#8597;</span></th>
+      <th data-col="1" scope="col" aria-sort="none" tabindex="0">Episode <span class="sort-icon" aria-hidden="true">&#8597;</span></th>
+      <th data-col="2" scope="col" aria-sort="none" tabindex="0">Spr. <span class="sort-icon" aria-hidden="true">&#8597;</span></th>
+      <th data-col="3" scope="col" aria-sort="descending" class="sorted" tabindex="0">Dato <span class="sort-icon" aria-hidden="true">&#8595;</span></th>
+      <th data-col="4" scope="col" aria-sort="none" tabindex="0">Vert(er) <span class="sort-icon" aria-hidden="true">&#8597;</span></th>
+      <th data-col="5" scope="col" aria-sort="none" tabindex="0">Gjest(er) <span class="sort-icon" aria-hidden="true">&#8597;</span></th>
+      <th data-col="6" scope="col" aria-sort="none" tabindex="0">Emner <span class="sort-icon" aria-hidden="true">&#8597;</span></th>
+      <th data-col="7" scope="col" aria-sort="none" aria-label="Karakter" tabindex="0">&#9733; <span class="sort-icon" aria-hidden="true">&#8597;</span></th>
+      <th scope="col">Begrunnelse</th>
+      <th scope="col">Tags</th>
     </tr>
   </thead>
   <tbody id="tableBody"></tbody>
@@ -584,9 +588,11 @@ function sortTable(col) {
   sort.col = col;
   document.querySelectorAll('thead th[data-col]').forEach(th => {
     const c = parseInt(th.dataset.col);
-    th.classList.toggle('sorted', c === col);
+    const isActive = c === col;
+    th.classList.toggle('sorted', isActive);
+    th.setAttribute('aria-sort', isActive ? (sort.asc ? 'ascending' : 'descending') : 'none');
     const icon = th.querySelector('.sort-icon');
-    if (icon) icon.textContent = c === col ? (sort.asc ? '↑' : '↓') : '↕';
+    if (icon) icon.textContent = isActive ? (sort.asc ? '↑' : '↓') : '↕';
   });
   refresh();
 }
@@ -695,9 +701,15 @@ document.getElementById('csvFile').addEventListener('change', function () {
   };
   reader.readAsText(file, 'UTF-8');
 });
-document.querySelectorAll('thead th[data-col]').forEach(th =>
-  th.addEventListener('click', () => sortTable(parseInt(th.dataset.col, 10)))
-);
+document.querySelectorAll('thead th[data-col]').forEach(th => {
+  th.addEventListener('click', () => sortTable(parseInt(th.dataset.col, 10)));
+  th.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      sortTable(parseInt(th.dataset.col, 10));
+    }
+  });
+});
 
 // Tag click — event delegation so it works after every re-render
 function handleTagInteraction(e) {
@@ -718,6 +730,7 @@ const darkToggle = document.getElementById('darkToggle');
 function applyDark(on) {
   document.body.classList.toggle('dark', on);
   darkToggle.textContent = on ? '\u2600 Lys' : '\u263E M\u00F8rk';
+  darkToggle.setAttribute('aria-pressed', on ? 'true' : 'false');
 }
 applyDark(localStorage.getItem('darkMode') === '1');
 darkToggle.addEventListener('click', () => {
@@ -748,30 +761,36 @@ function buildPodcastFilter() {
 // Stat card click handlers
 function applyStatFilter(action) {
   tagFilter = '';
-  // Clear all active markers
-  document.querySelectorAll('.stat').forEach(s => s.classList.remove('active'));
+  // Clear all active markers and aria-pressed
+  document.querySelectorAll('.stat').forEach(s => {
+    s.classList.remove('active');
+    s.setAttribute('aria-pressed', 'false');
+  });
   // Reset common filters
   document.getElementById('searchBox').value = '';
   document.getElementById('podcastFilter').value = '';
 
+  let activeCard;
   if (action === 'en') {
     document.getElementById('langFilter').value = 'English';
     document.getElementById('ratingFilter').value = '4';
-    document.getElementById('statCardEn').classList.add('active');
+    activeCard = document.getElementById('statCardEn');
   } else if (action === 'no') {
     document.getElementById('langFilter').value = 'Norwegian';
     document.getElementById('ratingFilter').value = '4';
-    document.getElementById('statCardNo').classList.add('active');
+    activeCard = document.getElementById('statCardNo');
   } else if (action === 'top') {
     document.getElementById('langFilter').value = '';
     document.getElementById('ratingFilter').value = '6';
-    document.getElementById('statCardTop').classList.add('active');
+    activeCard = document.getElementById('statCardTop');
   } else {
     // total — reset everything
     document.getElementById('langFilter').value = '';
     document.getElementById('ratingFilter').value = '4';
-    document.getElementById('statCardTotal').classList.add('active');
+    activeCard = document.getElementById('statCardTotal');
   }
+  activeCard.classList.add('active');
+  activeCard.setAttribute('aria-pressed', 'true');
   buildPodcastFilter();
   refresh();
 }
