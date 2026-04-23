@@ -11,6 +11,7 @@ This project collects and curates podcast episodes on artificial intelligence (A
 - `update_podcasts.py` — RSS fetcher; legger nye episoder i `pending_episodes.csv`, ikke hoved-CSV
 - `rate_episodes.py` — filtrerer åpenbar ikke-AI fra pending (score=0 → rejected); setter ingen rating
 - `approve_episodes.py` — flytter manuelt ratede episoder fra pending til hoved-CSV
+- `show_pending.py` — viser pending_episodes.csv i lesbar form i terminalen; kjøres lokalt
 - `rejected_episodes.csv` — denylist of already-reviewed non-AI episodes; prevents re-fetching noise
 
 ## Live URL
@@ -220,6 +221,13 @@ Alle kjente WCAG AA-problemer er fikset. Gjeldende status:
 - Skriver oppdatert `AI_KI_Podcasts_2026.csv` (eksisterende rader + nye godkjente)
 - Skriver oppdatert `pending_episodes.csv` (kun rating=0-rader igjen)
 - Output viser tydelig antall godkjent, avvist og gjenværende i pending
+
+## show_pending.py – tekniske noter
+- Kjøres lokalt for å lese `pending_episodes.csv` i lesbar form: `python show_pending.py`
+- Viser alle ventende episoder nummerert med: podcast, tittel, språk, dato, vertskap, gjest, emner, rating, lenke og beskrivelse
+- Beskrivelse brytes over flere linjer (maks 76 tegn per linje)
+- Viser neste-steg-instruksjoner nederst (sett rating → kjør approve_episodes.py)
+- Ingen endringer i filer — kun lesing og visning
 
 ## rejected_episodes.csv – format og bruk
 - Columns: `Podcast Name`, `Episode Title` (header row required)
