@@ -1,31 +1,29 @@
 """
-rate_episodes.py — Automatisk vurdering av urangerte episoder (Rating=0).
+rate_episodes.py — Filtrerer åpenbar ikke-AI fra pending_episodes.csv.
 
-Regelbasert nøkkelordscoring:
-  - Rene AI-podcaster: vurderes alltid videre for rating
-  - Blandede podcaster: sjekker tittel + beskrivelse for AI-signal
-      score 0     →  reject  (→ rejected_episodes.csv)
-      score 1–2   →  review  (beholdes som 0, manuell gjennomgang)
-      score >= 3  →  rate    (fortsetter til rating-logikk)
+Kjøres lokalt etter update_podcasts.py:
+  python rate_episodes.py
 
-Rating-logikk (gjelder alle AI-bekreftet episoder):
-  Kjente AI-eksperter nevnt  →  6
-  Teknisk dybde + mange AI-signal  →  5
-  Ellers  →  4
+Scriptet:
+  - Leser pending_episodes.csv
+  - Rene AI-podcaster: beholdes alltid (ingen sjekk nødvendig)
+  - Blandede podcaster: sjekker tittel + beskrivelse for AI-nøkkelord
+      score 0  → forkastes (→ rejected_episodes.csv, fjernes fra pending)
+      score >0 → beholdes i pending for manuell vurdering
+  - Setter IKKE rating — det gjøres manuelt av bruker
+  - Kjør approve_episodes.py når du har satt rating i pending_episodes.csv
 """
 
 import csv
-import json
 import os
 import sys
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-CSV_PATH          = os.path.join(os.path.dirname(__file__), "AI_KI_Podcasts_2026.csv")
-REJECTED_PATH     = os.path.join(os.path.dirname(__file__), "rejected_episodes.csv")
-DESCRIPTIONS_PATH = os.path.join(os.path.dirname(__file__), "pending_descriptions.json")
+PENDING_PATH  = os.path.join(os.path.dirname(__file__), "pending_episodes.csv")
+REJECTED_PATH = os.path.join(os.path.dirname(__file__), "rejected_episodes.csv")
 
-# Podcaster der alle/nesten alle episoder er AI-relevante
+# Podcaster der alle/nesten alle episoder er AI-relevante — beholdes alltid
 PURE_AI_PODCASTS = {
     "Latent Space",
     "No Priors",
@@ -43,7 +41,6 @@ PURE_AI_PODCASTS = {
     "KI til Kaffen",
 }
 
-# AI-signal for å bekrefte at episoden handler om AI
 STRONG_AI = [
     "openai", "anthropic", "deepmind", "google ai", "meta ai",
     "chatgpt", "claude", "gemini", "grok", "copilot", "mistral", "llama",
@@ -71,41 +68,6 @@ MEDIUM_AI = [
     "benchmark", "inference", "training data",
 ]
 
-# Kjente eksperter/grunnleggere — trigger rating 6
-KNOWN_EXPERTS = [
-    # Researchers
-    "ilya sutskever", "andrej karpathy", "yann lecun", "geoffrey hinton",
-    "yoshua bengio", "demis hassabis", "shane legg", "oriol vinyals",
-    "noam shazeer", "jeff dean", "fei-fei li", "andrew ng", "john schulman",
-    "jan leike", "paul christiano", "chris olah", "adam d'angelo",
-    # OpenAI
-    "sam altman", "greg brockman", "mira murati", "kevin weil",
-    # Anthropic
-    "dario amodei", "daniela amodei", "amanda askell", "jared kaplan",
-    # Google / DeepMind
-    "sundar pichai", "jeff dean", "koray kavukcuoglu",
-    # Meta
-    "mark zuckerberg",
-    # Microsoft
-    "satya nadella", "mustafa suleyman",
-    # Others
-    "elon musk", "george hotz", "emmet shear", "reid hoffman",
-    "jensen huang", "lisa su",
-    # Norwegian AI voices
-    "audun kvitland", "niclas kvanvig", "celine haaland",
-]
-
-# Signaler på teknisk dybde — bidrar til rating 5
-DEPTH_SIGNALS = [
-    "research", "paper", "technical", "deep dive", "architecture",
-    "pretraining", "pre-training", "training run", "interpretability",
-    "alignment", "safety", "benchmark", "evaluation", "reasoning",
-    "multimodal", "agentic", "chain-of-thought", "rlhf", "dpo",
-    "scaling law", "emergent", "inference time", "test-time compute",
-    # Norwegian
-    "forskning", "teknisk", "arkitektur", "sikkerhet",
-]
-
 
 def ai_score(title: str, description: str) -> int:
     title_l = " " + title.lower() + " "
@@ -124,52 +86,6 @@ def ai_score(title: str, description: str) -> int:
     return score
 
 
-def auto_rating(podcast: str, title: str, description: str) -> tuple[int, str]:
-    """Returns (rating, note). Rating 4/5/6 for confirmed AI episodes."""
-    text = " " + (title + " " + description).lower() + " "
-
-    # Rating 6: known expert guest in title or description
-    for expert in KNOWN_EXPERTS:
-        if expert in text:
-            return 6, f"Auto-vurdert: ekspertgjest ({expert.title()})"
-
-    # Rating 5: technical depth signals OR many strong AI keywords
-    depth_hits  = sum(1 for s in DEPTH_SIGNALS if s in text)
-    strong_hits = sum(1 for kw in STRONG_AI if kw in text)
-    if depth_hits >= 2 or strong_hits >= 4:
-        return 5, "Auto-vurdert: AI-fokusert med teknisk dybde"
-    if depth_hits >= 1 and strong_hits >= 2:
-        return 5, "Auto-vurdert: AI-fokusert med teknisk dybde"
-
-    return 4, "Auto-vurdert: AI-relevant"
-
-
-def classify(podcast: str, title: str, description: str) -> tuple[str, int, str]:
-    """Returns (decision, rating, note). Decision: 'keep', 'review', 'reject'."""
-    if podcast not in PURE_AI_PODCASTS:
-        score = ai_score(title, description)
-        if score == 0:
-            return "reject", 1, ""
-        if score <= 2:
-            return "review", 0, ""
-
-    rating, note = auto_rating(podcast, title, description)
-    return "keep", rating, note
-
-
-def read_csv():
-    with open(CSV_PATH, encoding="utf-8", newline="") as f:
-        rows = list(csv.reader(f))
-    return rows[0], rows[1:]
-
-
-def load_descriptions() -> dict:
-    if not os.path.exists(DESCRIPTIONS_PATH):
-        return {}
-    with open(DESCRIPTIONS_PATH, encoding="utf-8") as f:
-        return json.load(f)
-
-
 def append_rejected(name: str, title: str):
     needs_header = not os.path.exists(REJECTED_PATH)
     with open(REJECTED_PATH, "a", encoding="utf-8", newline="") as f:
@@ -180,63 +96,58 @@ def append_rejected(name: str, title: str):
 
 
 def main():
-    header, rows = read_csv()
-    descriptions = load_descriptions()
+    if not os.path.exists(PENDING_PATH):
+        print("Ingen pending_episodes.csv funnet. Kjør update_podcasts.py først.")
+        return
 
-    updated_rows = []
-    kept, rejected_list, review_list = [], [], []
+    with open(PENDING_PATH, encoding="utf-8", newline="") as f:
+        rows = list(csv.reader(f))
 
-    for row in rows:
-        if len(row) < 8 or row[7].strip() != "0":
-            updated_rows.append(row)
+    if len(rows) < 2:
+        print("pending_episodes.csv er tom — ingen episoder å filtrere.")
+        return
+
+    header = rows[0]
+    data_rows = rows[1:]
+
+    kept, rejected_list = [], []
+
+    for row in data_rows:
+        if len(row) < 2:
+            kept.append(row)
             continue
 
         podcast = row[0].strip()
         title   = row[1].strip()
-        desc    = descriptions.get(f"{podcast}||{title}", "")
+        desc    = row[11].strip() if len(row) > 11 else ""
 
-        decision, rating, note = classify(podcast, title, desc)
+        if podcast in PURE_AI_PODCASTS:
+            kept.append(row)
+            continue
 
-        if decision == "keep":
-            row = list(row)
-            row[7] = str(rating)
-            if not row[8].strip() or row[8].strip() == "Ny episode — ikke vurdert ennå":
-                row[8] = note
-            updated_rows.append(row)
-            kept.append(f"  [{rating}] {podcast[:30]:<30} – {title[:55]}")
-        elif decision == "reject":
+        score = ai_score(title, desc)
+        if score == 0:
             append_rejected(podcast, title)
             rejected_list.append(f"  [✗] {podcast[:30]:<30} – {title[:55]}")
         else:
-            updated_rows.append(row)
-            review_list.append(f"  [?] {podcast[:30]:<30} – {title[:55]}")
+            kept.append(row)
 
-    with open(CSV_PATH, "w", encoding="utf-8", newline="") as f:
-        csv.writer(f).writerows([header] + updated_rows)
+    with open(PENDING_PATH, "w", encoding="utf-8", newline="") as f:
+        csv.writer(f).writerows([header] + kept)
 
-    if os.path.exists(DESCRIPTIONS_PATH):
-        os.remove(DESCRIPTIONS_PATH)
+    print(f"\nFiltrering fullført:")
+    print(f"  {len(kept)} episoder beholdt i pending (krever manuell vurdering)")
+    print(f"  {len(rejected_list)} episoder auto-avvist (→ rejected_episodes.csv)\n")
 
-    ratings_summary = {}
-    for line in kept:
-        r = line.strip()[1]
-        ratings_summary[r] = ratings_summary.get(r, 0) + 1
-
-    print(f"\nAuto-vurdering fullført:")
-    for r in sorted(ratings_summary, reverse=True):
-        print(f"  {ratings_summary[r]} episoder → rating {r}")
-    print(f"  {len(rejected_list)} episoder avvist (→ rejected_episodes.csv)")
-    print(f"  {len(review_list)} episoder til manuell gjennomgang (rating=0)\n")
+    if rejected_list:
+        print("Avviste:")
+        print("\n".join(rejected_list))
 
     if kept:
-        print("Godkjente:")
-        print("\n".join(kept))
-    if rejected_list:
-        print("\nAvviste:")
-        print("\n".join(rejected_list))
-    if review_list:
-        print("\nTil gjennomgang:")
-        print("\n".join(review_list))
+        print(f"\nNeste steg:")
+        print(f"  1. Åpne pending_episodes.csv og sett rating (4–6) på episoder du vil beholde")
+        print(f"     Rating 1–3 = avvis, Rating 0 = utsett til neste gjennomgang")
+        print(f"  2. Kjør: python approve_episodes.py")
 
 
 if __name__ == "__main__":

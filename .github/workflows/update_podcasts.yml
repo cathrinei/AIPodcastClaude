@@ -24,17 +24,14 @@ jobs:
       - name: Kjør update_podcasts.py
         run: python update_podcasts.py
 
-      - name: Kjør rate_episodes.py
-        run: python rate_episodes.py
-
-      - name: Commit og push hvis CSV er endret
+      - name: Commit og push hvis pending er endret
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add AI_KI_Podcasts_2026.csv rejected_episodes.csv
+          git add pending_episodes.csv
           if git diff --cached --quiet; then
             echo "Ingen nye episoder – ingen endringer å committe."
           else
-            git commit -m "Auto-oppdatering: nye podkast-episoder $(date +'%Y-%m-%d')"
+            git commit -m "Auto-fetch: nye episoder til gjennomgang $(date +'%Y-%m-%d')"
             git push
           fi
