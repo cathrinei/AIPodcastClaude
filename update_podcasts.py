@@ -5,35 +5,30 @@ Bruk:
   python update_podcasts.py
 
 Skriptet:
-  1. Leser AI_KI_Podcasts_2026.csv og finner siste kjente dato per podcast.
+  1. Leser AI_KI_Podcasts_2026.csv og pending_episodes.csv, finner siste kjente dato per podcast.
   2. Henter RSS-feed for hver kjent podcast.
-  3. Legger til nye episoder (nyere enn siste kjente dato) med Rating=0 og tomme felt.
-  4. Skriver oppdatert CSV — klar til å lastes inn via HTML-knappen.
+  3. Legger nye episoder (nyere enn siste kjente dato) til pending_episodes.csv — IKKE hoved-CSV.
+  4. Kjør rate_episodes.py for å filtrere åpenbar ikke-AI, deretter approve_episodes.py for å godkjenne.
 """
 
 import csv
-import json
 import re
 import urllib.request
 import urllib.error
 import xml.etree.ElementTree as ET
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 import os
 import sys
 
-# Sikre UTF-8 output i alle terminaler (Windows/Mac/Linux)
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-CSV_PATH          = os.path.join(os.path.dirname(__file__), "AI_KI_Podcasts_2026.csv")
-REJECTED_PATH     = os.path.join(os.path.dirname(__file__), "rejected_episodes.csv")
-DESCRIPTIONS_PATH = os.path.join(os.path.dirname(__file__), "pending_descriptions.json")
+CSV_PATH     = os.path.join(os.path.dirname(__file__), "AI_KI_Podcasts_2026.csv")
+PENDING_PATH = os.path.join(os.path.dirname(__file__), "pending_episodes.csv")
+REJECTED_PATH = os.path.join(os.path.dirname(__file__), "rejected_episodes.csv")
 
-UNRATED = "0"  # Markør for episoder som mangler manuell vurdering
-REVIEW_AFTER_DAYS = 2  # Antall dager før urangerte episoder flagges for vurdering
+UNRATED = "0"
 
-# Språk-override: tvinger riktig språk uavhengig av hva RSS-feedens <language>-tag sier.
-# Bruk for podcaster der feeden mangler tag eller returnerer feil språkkode (f.eks. Heis).
 LANGUAGE_OVERRIDE = {
     "AI-Snakk":               "Norwegian",
     "AI Forklart":            "Norwegian",
@@ -45,7 +40,6 @@ LANGUAGE_OVERRIDE = {
     "Teknologi og mennesker": "Norwegian",
 }
 
-# RSS-feeds per podcast. Legg til nye her for å utvide dekningen.
 FEEDS = {
     # Engelske
     "Latent Space":                     "https://www.latent.space/feed",
@@ -79,19 +73,17 @@ FEEDS = {
 }
 
 
-def read_csv():
-    if not os.path.exists(CSV_PATH):
-        print(f"FEIL: Finner ikke {CSV_PATH}")
-        sys.exit(1)
-    with open(CSV_PATH, encoding="utf-8", newline="") as f:
+def read_csv(path):
+    if not os.path.exists(path):
+        return None, []
+    with open(path, encoding="utf-8", newline="") as f:
         rows = list(csv.reader(f))
     if not rows:
-        sys.exit("FEIL: CSV-filen er tom.")
+        return None, []
     return rows[0], rows[1:]
 
 
 def load_rejected():
-    """Returnerer set av (podcast_name.lower(), title.lower()) som allerede er forkastet."""
     if not os.path.exists(REJECTED_PATH):
         return set()
     with open(REJECTED_PATH, encoding="utf-8", newline="") as f:
@@ -100,7 +92,6 @@ def load_rejected():
 
 
 def latest_date_per_podcast(rows):
-    """Returnerer {podcast_name: datetime} med siste kjente dato per podcast."""
     latest = {}
     for row in rows:
         if len(row) < 4:
@@ -140,7 +131,6 @@ def parse_date(date_str):
 
 
 def fetch_new_episodes(podcast_name, feed_url, after_dt):
-    """Returnerer (episoder, feilmelding). Episoder er None ved feil, [] hvis ingen nye."""
     raw, error = fetch_feed(feed_url)
     if raw is None:
         return None, error
@@ -189,45 +179,32 @@ def fetch_new_episodes(podcast_name, feed_url, after_dt):
             "",        # Host(s)
             "",        # Guest(s)
             "",        # Main Topic(s)
-            UNRATED,   # Rating — krever manuell vurdering
-            "Ny episode — ikke vurdert ennå",
+            UNRATED,   # Rating
+            "",        # Rating Notes
             "",        # Tags
             link,
-            description,  # index 11 — temp, fjernes før CSV-skriving
+            description,  # col 11 — kun i pending, fjernes ved approve
         ])
 
     new_eps.sort(key=lambda r: r[3])
     return new_eps, None
 
 
-def pending_review(rows):
-    """Returnerer urangerte episoder publisert for mer enn REVIEW_AFTER_DAYS siden."""
-    cutoff = datetime.now(tz=timezone.utc) - timedelta(days=REVIEW_AFTER_DAYS)
-    pending = []
-    for row in rows:
-        if len(row) < 8:
-            continue
-        if row[7].strip() != UNRATED:
-            continue
-        try:
-            pub = datetime.strptime(row[3].strip(), "%Y-%m-%d").replace(tzinfo=timezone.utc)
-        except ValueError:
-            continue
-        if pub <= cutoff:
-            pending.append(row)
-    return pending
-
-
 def main():
-    header, existing_rows = read_csv()
-    latest = latest_date_per_podcast(existing_rows)
+    main_header, main_rows = read_csv(CSV_PATH)
+    if main_header is None:
+        sys.exit(f"FEIL: Finner ikke {CSV_PATH}")
+
+    pending_header, pending_rows = read_csv(PENDING_PATH)
+
+    # Kombiner hoved + pending for duplikatsjekk og siste dato
+    all_known_rows = main_rows + pending_rows
+    latest = latest_date_per_podcast(all_known_rows)
     rejected = load_rejected()
     default_from = datetime(2026, 1, 1, tzinfo=timezone.utc)
 
-    # Bygg sett av eksisterende episoder for å unngå duplikater
-    existing_keys = {(r[0].strip().lower(), r[1].strip().lower()) for r in existing_rows if len(r) >= 2}
-    # Bygg sett av (podcast, dato)-par for å oppdage mulige duplikater med ulik tittel
-    existing_podcast_dates = {(r[0].strip().lower(), r[3].strip()) for r in existing_rows if len(r) >= 4}
+    existing_keys = {(r[0].strip().lower(), r[1].strip().lower()) for r in all_known_rows if len(r) >= 2}
+    existing_podcast_dates = {(r[0].strip().lower(), r[3].strip()) for r in all_known_rows if len(r) >= 4}
 
     all_new = []
     print(f"\nSjekker {len(FEEDS)} podcast-feeder...\n")
@@ -261,24 +238,14 @@ def main():
     if not all_new:
         print("\nIngen nye episoder funnet.\n")
     else:
-        descriptions = {f"{ep[0]}||{ep[1]}": ep[11] for ep in all_new if len(ep) > 11 and ep[11]}
-        if descriptions:
-            with open(DESCRIPTIONS_PATH, "w", encoding="utf-8") as f:
-                json.dump(descriptions, f, ensure_ascii=False, indent=2)
-        all_new_csv = [ep[:11] for ep in all_new]
-        with open(CSV_PATH, "w", encoding="utf-8", newline="") as f:
-            csv.writer(f).writerows([header] + existing_rows + all_new_csv)
-        print(f"\n{len(all_new)} nye episode(r) lagt til i CSV.")
-        print("Åpne HTML-siden og klikk 'Last inn CSV' for å laste inn oppdaterte data.")
-        print(f"NB: Nye episoder har Rating={UNRATED} og må vurderes manuelt.\n")
-
-    _, current_rows = read_csv()
-    pending = pending_review(current_rows)
-    if pending:
-        print(f"⚠  {len(pending)} episode(r) ikke vurdert etter {REVIEW_AFTER_DAYS}+ dager:\n")
-        for row in pending:
-            print(f"  [{row[3]}] {row[0][:30]:<30} – {row[1][:55]}")
-        print()
+        new_pending_header = main_header + ["Description"]
+        combined_pending = pending_rows + all_new
+        with open(PENDING_PATH, "w", encoding="utf-8", newline="") as f:
+            csv.writer(f).writerows([new_pending_header] + combined_pending)
+        print(f"\n{len(all_new)} ny(e) episode(r) lagt til i pending_episodes.csv.")
+        print("Kjør: python rate_episodes.py   (filtrerer åpenbar ikke-AI)")
+        print("Sett rating manuelt i pending_episodes.csv, kjør deretter:")
+        print("      python approve_episodes.py  (flytter godkjente til hoved-CSV)\n")
 
 
 if __name__ == "__main__":
