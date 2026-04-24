@@ -135,6 +135,12 @@
 
 
   .row-count { font-size: 0.82rem; color: var(--text-faint); padding: 0 2rem 0.5rem; }
+  .empty-state { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 3.5rem 2rem; color: var(--text-muted); text-align: center; gap: 0.6rem; }
+  .empty-state .empty-icon { font-size: 2.4rem; line-height: 1; opacity: 0.45; }
+  .empty-state .empty-title { font-size: 1rem; font-weight: 600; color: var(--text); }
+  .empty-state .empty-sub { font-size: 0.85rem; }
+  .empty-state .empty-reset { margin-top: 0.5rem; padding: 0.4rem 1rem; border: 1px solid var(--input-border); border-radius: 6px; background: var(--surface); font-size: 0.82rem; cursor: pointer; color: var(--text-muted); }
+  .empty-state .empty-reset:hover { background: var(--stat-bg); border-color: var(--accent); color: var(--text); }
 
   button:focus-visible,
   input:focus-visible,
@@ -265,6 +271,13 @@
 </div>
 
 <div class="row-count" id="rowCount"></div>
+
+<div class="empty-state" id="emptyState" role="status" aria-live="polite">
+  <span class="empty-icon">🎙️</span>
+  <span class="empty-title">Ingen episoder matcher filteret</span>
+  <span class="empty-sub">Prøv et annet søkeord eller juster filtrene</span>
+  <button class="empty-reset" id="emptyResetBtn">Nullstill filtre</button>
+</div>
 
 <div class="table-wrap">
 <table id="mainTable" aria-label="Podkast-episoder om kunstig intelligens">
@@ -515,6 +528,10 @@ function renderTable(rows) {
   tbody.innerHTML = '';
   const cardList = document.getElementById('cardList');
   cardList.innerHTML = '';
+  const isEmpty = rows.length === 0;
+  document.getElementById('emptyState').style.display       = isEmpty ? 'flex' : 'none';
+  document.querySelector('.table-wrap').style.display       = isEmpty ? 'none' : '';
+  cardList.style.display = isEmpty ? 'none' : '';
 
   rows.forEach(row => {
     const [podcast, title, lang, date, hosts, guests, topics, rating, note, tags, link] = row;
@@ -698,6 +715,7 @@ document.getElementById('langFilter').addEventListener('change', () => {
   document.getElementById(id).addEventListener('change', refresh)
 );
 document.getElementById('resetBtn').addEventListener('click', resetFilters);
+document.getElementById('emptyResetBtn').addEventListener('click', resetFilters);
 document.getElementById('updateBtn').addEventListener('click', () =>
   document.getElementById('csvFile').click()
 );
