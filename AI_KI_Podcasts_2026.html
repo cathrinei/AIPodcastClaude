@@ -71,6 +71,7 @@
   .reset-btn:hover { background: var(--stat-bg); }
   .fav-filter-btn.active { background: rgba(245,158,11,0.12); border-color: #f59e0b; color: #92400e; }
   body.dark .fav-filter-btn.active { color: #fbbf24; border-color: #fbbf24; }
+  .share-btn.copied { background: rgba(22,163,74,0.1); border-color: #16a34a; color: #16a34a; }
   .update-btn { padding: 0.45rem 0.9rem; border: none; border-radius: 6px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); font-size: 0.82rem; cursor: pointer; color: #fff; box-shadow: 0 2px 8px rgba(99,102,241,0.45); transition: box-shadow 0.15s ease, background 0.15s ease; }
   .update-btn:hover { background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); box-shadow: 0 4px 14px rgba(99,102,241,0.6); }
   .fetch-btn { padding: 0.45rem 0.9rem; border: none; border-radius: 6px; background: linear-gradient(135deg, #059669 0%, #047857 100%); font-size: 0.82rem; cursor: pointer; color: #fff; box-shadow: 0 2px 8px rgba(5,150,105,0.45); transition: box-shadow 0.15s ease, background 0.15s ease; text-decoration: none; display: inline-flex; align-items: center; }
@@ -207,7 +208,7 @@
     .controls label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.8rem; }
     .controls input[type=text] { width: 100%; max-width: 100%; font-size: 0.9rem; }
     .controls select { width: 100%; font-size: 0.9rem; }
-    .reset-btn, .update-btn, .fetch-btn, .fav-filter-btn { width: 100%; justify-content: center; font-size: 0.85rem; padding: 0.6rem 0.9rem; }
+    .reset-btn, .update-btn, .fetch-btn, .fav-filter-btn, .share-btn { width: 100%; justify-content: center; font-size: 0.85rem; padding: 0.6rem 0.9rem; }
     #updateStatus { text-align: center; }
     .row-count { padding: 0.4rem 1rem; }
     .table-wrap { display: none; }
@@ -263,6 +264,7 @@
     </select>
   </label>
   <button class="reset-btn fav-filter-btn" id="favFilterBtn" aria-pressed="false">&#9734; Favoritter</button>
+  <button class="reset-btn share-btn" id="shareBtn" title="Kopier lenke med aktive filtre">&#128279; Del</button>
   <button class="reset-btn" id="resetBtn">Nullstill</button>
   <a class="fetch-btn" href="https://github.com/cathrinei/AIPodcastClaude/actions/workflows/update_podcasts.yml" target="_blank" rel="noopener" title="Kjør daglig RSS-henting manuelt på GitHub Actions" style="display:none">&#8635; Hent nye data</a>
   <button class="update-btn" id="updateBtn">&#8593; Last inn CSV</button>
@@ -716,6 +718,63 @@ document.getElementById('langFilter').addEventListener('change', () => {
 );
 document.getElementById('resetBtn').addEventListener('click', resetFilters);
 document.getElementById('emptyResetBtn').addEventListener('click', resetFilters);
+
+// Share URL — builds and copies a URL with current filter state as query params
+function buildShareUrl() {
+  const params = new URLSearchParams();
+  const search   = document.getElementById('searchBox').value.trim();
+  const lang     = document.getElementById('langFilter').value;
+  const podcast  = document.getElementById('podcastFilter').value;
+  const rating   = document.getElementById('ratingFilter').value;
+  if (search)                          params.set('search', search);
+  if (lang)                            params.set('lang', lang);
+  if (podcast)                         params.set('podcast', podcast);
+  if (rating && rating !== '4')        params.set('rating', rating);
+  if (tagFilter)                       params.set('tag', tagFilter);
+  if (showFavoritesOnly)               params.set('favs', '1');
+  const base = window.location.origin + window.location.pathname;
+  return params.toString() ? base + '?' + params.toString() : base;
+}
+
+function applyUrlParams() {
+  const params = new URLSearchParams(window.location.search);
+  let changed = false;
+  if (params.has('search'))  { document.getElementById('searchBox').value = params.get('search'); changed = true; }
+  if (params.has('lang'))    { document.getElementById('langFilter').value = params.get('lang'); changed = true; }
+  if (params.has('rating'))  { document.getElementById('ratingFilter').value = params.get('rating'); changed = true; }
+  if (params.has('tag'))     { tagFilter = params.get('tag'); changed = true; }
+  if (params.get('favs') === '1') {
+    showFavoritesOnly = true;
+    const btn = document.getElementById('favFilterBtn');
+    btn.classList.add('active');
+    btn.setAttribute('aria-pressed', 'true');
+    btn.innerHTML = '&#9733; Favoritter';
+    changed = true;
+  }
+  if (changed) {
+    buildPodcastFilter();
+    // Apply podcast after buildPodcastFilter so the option exists
+    if (params.has('podcast')) document.getElementById('podcastFilter').value = params.get('podcast');
+  }
+}
+
+const shareBtn = document.getElementById('shareBtn');
+let shareCopyTimer = null;
+shareBtn.addEventListener('click', () => {
+  const url = buildShareUrl();
+  navigator.clipboard.writeText(url).then(() => {
+    shareBtn.innerHTML = '&#10003; Kopiert!';
+    shareBtn.classList.add('copied');
+    clearTimeout(shareCopyTimer);
+    shareCopyTimer = setTimeout(() => {
+      shareBtn.innerHTML = '&#128279; Del';
+      shareBtn.classList.remove('copied');
+    }, 2000);
+  }).catch(() => {
+    // Fallback for browsers without clipboard API
+    prompt('Kopier lenken:', url);
+  });
+});
 document.getElementById('updateBtn').addEventListener('click', () =>
   document.getElementById('csvFile').click()
 );
@@ -954,6 +1013,7 @@ function applyStatFilter(action) {
 // Initial render
 buildPodcastFilter();
 updateStats();
+applyUrlParams();
 refresh();
 
 // Auto-fetch CSV from same origin (GitHub Pages).
