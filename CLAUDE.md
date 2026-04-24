@@ -139,6 +139,28 @@ Manual fallback — still works for local use or when you want to load a specifi
 - Dark mode: `rgba(245,158,11,0.10)` + `#fbbf24` stripe
 - CSS-klasser: `tbody tr.ep-new`, `body.dark tbody tr.ep-new`, `tbody tr.ep-new:hover`
 
+### Favoritter
+- ☆/★ stjerne-knapp i siste kolonne (desktop) og øverst i mobilkort — klikk for å toggle
+- `favoriteKeys` (global `Set`) lastet fra `localStorage.favEpisodeKeys` (JSON-array av `"podcast||title"`-nøkler) ved oppstart
+- `toggleFavorite(key)` legger til/fjerner nøkkel og kaller `saveFavorites()` + `refresh()`
+- `saveFavorites()` skriver `[...favoriteKeys]` til `localStorage.favEpisodeKeys`
+- `showFavoritesOnly` (global boolean) — slås på/av av «☆ Favoritter»-knappen i kontrollpanelet
+- `getFiltered()` sjekker `showFavoritesOnly` og filtrerer bort ikke-favoriterte rader
+- Rad-teller viser `· Favoritter (N)` når filteret er aktivt
+- Favoritterte rader/kort får svak amber bakgrunn (`rgba(245,158,11,0.05/0.06)`)
+- Event delegation på `tableBody`/`cardList` for `[data-fav]`-knapper — overlever re-render
+- `resetFilters()` slår av favorittfilter og tilbakestiller knapp-tekst/aria-pressed
+- CSS-klasser: `tbody tr.ep-fav`, `.ep-card.ep-fav`, `.fav-btn`, `.fav-filter-btn.active`
+
+### Swipe-til-favoritt (mobil)
+- På touch-enheter: sveip høyre (≥ 60 px, klart horisontalt) på et mobilkort for å toggle favoritt
+- Implementert i en IIFE med `touchstart` / `touchmove` / `touchend` / `touchcancel` på `#cardList`
+- Under sveip: kortet forskyves (`translateX`) og amber venstrekant vokser proporsjonalt med distansen
+- Ved `touchend`: kort snapper tilbake med ease-transisjon; favoritt toggles hvis terskel nådd
+- Avbrytes hvis `|dy| / |dx| > 0.5` — vertikal scrolling forstyrres ikke
+- `will-change: transform` på `.ep-card` for ytelse
+- Hint-tekst `sveip → ★` vises på første kort kun på touch-enheter (`@media (hover: none) and (pointer: coarse)`)
+
 ### Øvrige tekniske noter
 - Sort state: `sort` object (`col`, `asc`); `RATING_COL = 7`, `DATE_COL = 3`, `CSV_MAX_BYTES` constants
 - Default sort: date descending (nyeste øverst); rating og dato starter begge med synkende rekkefølge ved klikk
