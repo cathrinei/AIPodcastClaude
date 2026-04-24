@@ -69,6 +69,8 @@
   .controls label { font-size: 0.85rem; color: var(--text-muted); }
   .reset-btn { padding: 0.45rem 0.9rem; border: 1px solid var(--input-border); border-radius: 6px; background: var(--surface); font-size: 0.82rem; cursor: pointer; color: var(--text-muted); }
   .reset-btn:hover { background: var(--stat-bg); }
+  .fav-filter-btn.active { background: rgba(245,158,11,0.12); border-color: #f59e0b; color: #92400e; }
+  body.dark .fav-filter-btn.active { color: #fbbf24; border-color: #fbbf24; }
   .update-btn { padding: 0.45rem 0.9rem; border: none; border-radius: 6px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); font-size: 0.82rem; cursor: pointer; color: #fff; box-shadow: 0 2px 8px rgba(99,102,241,0.45); transition: box-shadow 0.15s ease, background 0.15s ease; }
   .update-btn:hover { background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); box-shadow: 0 4px 14px rgba(99,102,241,0.6); }
   .fetch-btn { padding: 0.45rem 0.9rem; border: none; border-radius: 6px; background: linear-gradient(135deg, #059669 0%, #047857 100%); font-size: 0.82rem; cursor: pointer; color: #fff; box-shadow: 0 2px 8px rgba(5,150,105,0.45); transition: box-shadow 0.15s ease, background 0.15s ease; text-decoration: none; display: inline-flex; align-items: center; }
@@ -95,6 +97,12 @@
   tbody tr.ep-new { background: rgba(245,158,11,0.07); box-shadow: inset 3px 0 0 #f59e0b; }
   body.dark tbody tr.ep-new { background: rgba(245,158,11,0.10); box-shadow: inset 3px 0 0 #fbbf24; }
   tbody tr.ep-new:hover { background: var(--row-hover); box-shadow: inset 4px 0 0 var(--accent); }
+  tbody tr.ep-fav { background: rgba(245,158,11,0.05); }
+  body.dark tbody tr.ep-fav { background: rgba(245,158,11,0.08); }
+
+  .fav-btn { background: none; border: none; cursor: pointer; font-size: 1.1rem; line-height: 1; padding: 2px 4px; color: #c8a84b; opacity: 0.35; transition: opacity 0.15s, transform 0.1s, color 0.15s; border-radius: 4px; }
+  .fav-btn:hover { opacity: 1; transform: scale(1.2); color: #f59e0b; }
+  .fav-btn[aria-pressed="true"] { opacity: 1; color: #f59e0b; }
   tbody td { padding: 0.55rem 0.8rem; vertical-align: top; }
 
   .rating-badge { display: inline-block; width: 32px; height: 32px; border-radius: 50%; text-align: center; line-height: 32px; font-weight: 800; font-size: 0.88rem; color: #fff; background: #6b7280; }
@@ -156,6 +164,9 @@
   .ep-card.ep-new { background: rgba(245,158,11,0.07); box-shadow: inset 3px 0 0 #f59e0b; }
   body.dark .ep-card.ep-new { background: rgba(245,158,11,0.10); box-shadow: inset 3px 0 0 #fbbf24; }
   .ep-card.ep-new:hover { box-shadow: inset 4px 0 0 var(--accent); }
+  .ep-card.ep-fav { background: rgba(245,158,11,0.06); border-left: 3px solid #f59e0b; }
+  body.dark .ep-card.ep-fav { background: rgba(245,158,11,0.09); border-left-color: #fbbf24; }
+  .ep-card.ep-fav:hover { box-shadow: inset 4px 0 0 var(--accent); }
   .card-meta { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.45rem; flex-wrap: wrap; }
   .card-date { font-size: 0.78rem; color: var(--text-muted); }
   .card-title-link { display: block; font-weight: 700; font-size: 0.95rem; color: var(--stat-fg); text-decoration: none; margin-bottom: 0.3rem; line-height: 1.35; }
@@ -183,7 +194,7 @@
     .controls label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.8rem; }
     .controls input[type=text] { width: 100%; max-width: 100%; font-size: 0.9rem; }
     .controls select { width: 100%; font-size: 0.9rem; }
-    .reset-btn, .update-btn, .fetch-btn { width: 100%; justify-content: center; font-size: 0.85rem; padding: 0.6rem 0.9rem; }
+    .reset-btn, .update-btn, .fetch-btn, .fav-filter-btn { width: 100%; justify-content: center; font-size: 0.85rem; padding: 0.6rem 0.9rem; }
     #updateStatus { text-align: center; }
     .row-count { padding: 0.4rem 1rem; }
     .table-wrap { display: none; }
@@ -238,6 +249,7 @@
       <option value="6">6</option>
     </select>
   </label>
+  <button class="reset-btn fav-filter-btn" id="favFilterBtn" aria-pressed="false">&#9734; Favoritter</button>
   <button class="reset-btn" id="resetBtn">Nullstill</button>
   <a class="fetch-btn" href="https://github.com/cathrinei/AIPodcastClaude/actions/workflows/update_podcasts.yml" target="_blank" rel="noopener" title="Kjør daglig RSS-henting manuelt på GitHub Actions" style="display:none">&#8635; Hent nye data</a>
   <button class="update-btn" id="updateBtn">&#8593; Last inn CSV</button>
@@ -261,6 +273,7 @@
       <th data-col="7" scope="col" aria-sort="none" aria-label="Karakter" tabindex="0">&#9733; <span class="sort-icon" aria-hidden="true">&#8597;</span></th>
       <th scope="col">Begrunnelse</th>
       <th scope="col">Tags</th>
+      <th scope="col" aria-label="Favoritter" style="width:36px;text-align:center">&#9734;</th>
     </tr>
   </thead>
   <tbody id="tableBody"></tbody>
@@ -270,6 +283,16 @@
 
 <script>
 let newEpisodeKeys = new Set();
+let showFavoritesOnly = false;
+const favoriteKeys = new Set(JSON.parse(localStorage.getItem('favEpisodeKeys') || '[]'));
+function saveFavorites() {
+  localStorage.setItem('favEpisodeKeys', JSON.stringify([...favoriteKeys]));
+}
+function toggleFavorite(key) {
+  favoriteKeys.has(key) ? favoriteKeys.delete(key) : favoriteKeys.add(key);
+  saveFavorites();
+  refresh();
+}
 const data = [
   ["E24-podden","AI og cybersikkerhet: Vinner eller taper vi kappløpet?","Norwegian","2026-01","E24 hosts","Wendi Whitmore (CISO Palo Alto Networks)","AI and cybersecurity, AI threat landscape, AI in security",4,"Notable expert guest; business-oriented AI security perspective with Norwegian relevance","","https://podcasts.apple.com/ie/podcast/e24-podden/id993667736"],
   ["Practical AI","AI in 2025 & What's Coming in 2026","English","2026-01","Daniel Whitenack, Chris Benson","—","AI agents, multimodal AI, reasoning models, 2026 outlook",4,"Reliable annual outlook episode; practical and accessible","agents","https://practicalai.fm/"],
@@ -488,13 +511,18 @@ function renderTable(rows) {
 
   rows.forEach(row => {
     const [podcast, title, lang, date, hosts, guests, topics, rating, note, tags, link] = row;
-    const isNew = newEpisodeKeys.has(podcast + '||' + title);
+    const epKey  = podcast + '||' + title;
+    const isNew  = newEpisodeKeys.has(epKey);
+    const isFav  = favoriteKeys.has(epKey);
     const ratingClass = [1,2,3,4,5,6].includes(rating) ? ' r'+rating : '';
     const ratingLabel = rating > 0 ? rating : 'N/A';
+    const favLabel = isFav ? 'Fjern fra favoritter' : 'Legg til favoritter';
+    const favIcon  = isFav ? '&#9733;' : '&#9734;';
 
     // Table row (desktop)
     const tr = document.createElement('tr');
     if (isNew) tr.classList.add('ep-new');
+    if (isFav) tr.classList.add('ep-fav');
     tr.innerHTML = `
       <td><span class="podcast-name">${esc(podcast)}</span></td>
       <td><a class="episode-title-link" href="${safeUrl(link)}" target="_blank" rel="noopener noreferrer">${esc(title)}</a></td>
@@ -506,17 +534,19 @@ function renderTable(rows) {
       <td style="text-align:center"><span class="rating-badge${ratingClass}">${ratingLabel}</span></td>
       <td><span class="rating-note">${esc(note)}</span></td>
       <td>${renderTags(tags)}</td>
+      <td style="text-align:center"><button class="fav-btn" data-fav="${esc(epKey)}" aria-pressed="${isFav}" aria-label="${favLabel}" title="${favLabel}">${favIcon}</button></td>
     `;
     tbody.appendChild(tr);
 
     // Card (mobile)
     const card = document.createElement('div');
-    card.className = 'ep-card' + (isNew ? ' ep-new' : '');
+    card.className = 'ep-card' + (isNew ? ' ep-new' : '') + (isFav ? ' ep-fav' : '');
     card.innerHTML = `
       <div class="card-meta">
         <span class="rating-badge${ratingClass}">${ratingLabel}</span>
         <span class="lang-badge ${lang === 'English' ? 'lang-en' : 'lang-no'}">${lang === 'English' ? 'EN' : 'NO'}</span>
         <span class="card-date">${esc(date)}</span>
+        <button class="fav-btn" data-fav="${esc(epKey)}" aria-pressed="${isFav}" aria-label="${favLabel}" title="${favLabel}" style="margin-left:auto">${favIcon}</button>
       </div>
       <a class="card-title-link" href="${safeUrl(link)}" target="_blank" rel="noopener noreferrer">${esc(title)}</a>
       <div class="card-podcast">${esc(podcast)}</div>
@@ -527,7 +557,8 @@ function renderTable(rows) {
   });
 
   const tagLabel = tagFilter && tagMeta[tagFilter] ? ` · Tag: ${tagMeta[tagFilter].label}` : '';
-  document.getElementById('rowCount').textContent = `Viser ${rows.length} av ${data.length} episoder${tagLabel}`;
+  const favLabel2 = showFavoritesOnly ? ` · Favoritter (${favoriteKeys.size})` : '';
+  document.getElementById('rowCount').textContent = `Viser ${rows.length} av ${data.length} episoder${tagLabel}${favLabel2}`;
 }
 
 function updateStats() {
@@ -558,6 +589,7 @@ function getFiltered() {
 
   return data.filter(row => {
     const [podcast, title, language, , hosts, guests, topics, rating, note, tags] = row;
+    if (showFavoritesOnly && !favoriteKeys.has(podcast + '||' + title)) return false;
     if (lang && language !== lang) return false;
     if (podcastFilter && podcast !== podcastFilter) return false;
     if (rating > 0 && rating < minRating) return false;
@@ -603,6 +635,11 @@ function refresh() {
 
 function resetFilters() {
   tagFilter = '';
+  showFavoritesOnly = false;
+  const favBtn = document.getElementById('favFilterBtn');
+  favBtn.classList.remove('active');
+  favBtn.setAttribute('aria-pressed', 'false');
+  favBtn.innerHTML = '&#9734; Favoritter';
   document.getElementById('searchBox').value = '';
   document.getElementById('langFilter').value = '';
   document.getElementById('podcastFilter').value = '';
@@ -720,9 +757,29 @@ function handleTagInteraction(e) {
   const tag = tagEl.dataset.tag;
   setTagFilter(tagFilter === tag ? '' : tag); // toggle off if already active
 }
+// Favorite click — event delegation so it works after every re-render
+function handleFavInteraction(e) {
+  const btn = e.target.closest('[data-fav]');
+  if (!btn) return;
+  if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+  if (e.type === 'keydown') e.preventDefault();
+  toggleFavorite(btn.dataset.fav);
+}
 ['tableBody', 'cardList'].forEach(id => {
   document.getElementById(id).addEventListener('click', handleTagInteraction);
   document.getElementById(id).addEventListener('keydown', handleTagInteraction);
+  document.getElementById(id).addEventListener('click', handleFavInteraction);
+  document.getElementById(id).addEventListener('keydown', handleFavInteraction);
+});
+
+// Favorites filter button
+const favFilterBtn = document.getElementById('favFilterBtn');
+favFilterBtn.addEventListener('click', () => {
+  showFavoritesOnly = !showFavoritesOnly;
+  favFilterBtn.classList.toggle('active', showFavoritesOnly);
+  favFilterBtn.setAttribute('aria-pressed', showFavoritesOnly ? 'true' : 'false');
+  favFilterBtn.innerHTML = showFavoritesOnly ? '&#9733; Favoritter' : '&#9734; Favoritter';
+  refresh();
 });
 
 // Dark mode toggle
@@ -805,7 +862,7 @@ function applyStatFilter(action) {
 // Also clear active stat card when user manually changes a filter
 ['langFilter', 'ratingFilter', 'podcastFilter', 'searchBox'].forEach(id => {
   document.getElementById(id).addEventListener('input', () => {
-    document.querySelectorAll('.stat').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.stat').forEach(s => { s.classList.remove('active'); s.setAttribute('aria-pressed', 'false'); });
   });
 });
 
