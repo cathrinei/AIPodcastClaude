@@ -227,6 +227,12 @@ Alle kjente WCAG AA-problemer er fikset. Gjeldende status:
 - Loads `rejected_episodes.csv` at startup via `load_rejected()` — returns `set` of `(podcast.lower(), title.lower())` pairs
 - Fetched episodes filtered against both `existing_keys` and `rejected` before being added — skipped count reported in output
 - GitHub Actions runs this script daily; commits only `pending_episodes.csv`
+- **GitHub Actions-logg**: bruker `::group::`, `::notice::`, `::warning::`, `::error::` workflow-kommandoer for strukturert logg
+  - Tre sammenleggbare seksjoner: «Sjekker N feeder», «Nye episoder», «Feil ved henting»
+  - `::notice::` viser sluttoppsummering øverst i jobben («N nye episoder — klar for gjennomgang»)
+  - `::error::` markerer feeder som ikke svarer (rødt i GitHub UI)
+  - `::warning::` ved mulige duplikater (gult i GitHub UI)
+  - `is_gha()` sjekker `GITHUB_ACTIONS`-miljøvariabelen — lokalt kjøring er uendret
 
 ### Regler mot duplikater og feil språk
 - **`LANGUAGE_OVERRIDE`-dict**: Tvinger riktig språk for kjente norske podcaster uavhengig av RSS-feedens `<language>`-tag. Heis og andre norske feeder kan mangle eller returnere feil kode — overriden sikrer at episodene alltid får "Norwegian". Legg til nye norske podcaster her ved behov.
