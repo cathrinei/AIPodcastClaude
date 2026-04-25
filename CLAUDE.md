@@ -127,7 +127,7 @@ Manuell fallback for lokal bruk (`file://`) eller testing med en spesifikk CSV-f
 - **Zebrastriping**: annenhver rad bruker `--row-alt` (`#f5f7fc` lys / `#1f2235` mørk)
 - **Rating-badge**: `32px`, `font-weight: 800`; r4/r5/r6 har glow (`box-shadow: 0 0 0 3px rgba(...)`)
 - **"Last inn CSV"-knapp**: gradient + glow (`box-shadow: 0 2px 8px rgba(99,102,241,0.45)`)
-- **Episodetittel**: klikkbar lenke (`a.episode-title-link`) — åpner episodelenken i ny fane; hover gir accent-farge + understreking; «Lytt»-kolonne fjernet
+- **Episodetittel**: klikkbar lenke (`a.episode-title-link` desktop / `a.card-title-link` mobil) — åpner i ny fane (`target="_blank" rel="noopener noreferrer"`); hover gir accent-farge + understreking; `::after` viser `↗` som visuell indikator; `aria-label="Tittel (åpner i ny fane)"` for skjermlesere; «Lytt»-kolonne fjernet
 - Ingen eksterne fonter eller ressurser — holder CSP intakt
 
 ### Ny-markering av episoder
