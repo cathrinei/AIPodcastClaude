@@ -295,7 +295,6 @@ Branch-navnekonvensjon:
 - `feature/beskrivelse` — ny funksjonalitet i HTML eller skript
 
 **PR-regler (Claude):**
-- Sjekk alltid `git branch` før commit — aldri commit uten å bekrefte at du er på riktig branch
 - Sjekk alltid `gh pr list` og `git status` før ny branch eller PR opprettes
 - **Ikke opprett ny branch for hver endring** — bruk dagens session-branch (`session/YYYY-MM-DD`) for alle endringer den dagen
 - Opprett ny PR fra eksisterende branch når en oppgave er ferdig — ikke ny branch
