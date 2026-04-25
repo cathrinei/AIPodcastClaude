@@ -1041,21 +1041,6 @@ refresh();
     buildPodcastFilter();
     updateStats();
     refresh();
-    // Vis statusmelding kun første gang siden CSV sist ble endret.
-    // Bruker hash av de første 3000 tegnene i CSV-teksten som fingeravtrykk
-    // (Last-Modified-headeren er ikke tilgjengelig fra GitHub Pages CDN).
-    let csvHash = 0;
-    const sample = text.slice(0, 3000);
-    for (let i = 0; i < sample.length; i++) csvHash = (Math.imul(31, csvHash) + sample.charCodeAt(i)) | 0;
-    const csvFingerprint = String(csvHash);
-    const seenFingerprint = localStorage.getItem('csvFingerprint');
-    if (csvFingerprint !== seenFingerprint) {
-      localStorage.setItem('csvFingerprint', csvFingerprint);
-      const status = document.getElementById('updateStatus');
-      const newCount = newEpisodeKeys.size;
-      status.textContent = '✓ ' + data.length + ' episoder lastet inn automatisk' + (newCount > 0 ? ' · ' + newCount + ' nye' : '');
-      status.style.color = '#16a34a';
-    }
   } catch (e) {
     // file:// or network error — built-in data stays
   }
