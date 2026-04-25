@@ -155,6 +155,12 @@ Manuell fallback for lokal bruk (`file://`) eller testing med en spesifikk CSV-f
 - `resetFilters()` slår av favorittfilter og tilbakestiller knapp-tekst/aria-pressed
 - CSS-klasser: `tbody tr.ep-fav`, `.ep-card.ep-fav`, `.fav-btn`, `.fav-filter-btn.active`
 
+### Tastatursnarvei — søkefelt
+- `/`-tast setter fokus på `#searchBox` (vanlig konvensjon fra GitHub/Linear/Notion)
+- Implementert som `keydown`-lytter på `document`
+- Aktiveres ikke hvis `activeElement` allerede er `INPUT`, `TEXTAREA` eller `SELECT`
+- `e.preventDefault()` hindrer at `/` skrives inn i søkefeltet
+
 ### Del-lenke
 - «🔗 Del»-knapp i kontrollpanelet bygger en URL med aktive filtre og kopierer til utklippstavlen
 - Støttede query-parametre: `search`, `lang`, `podcast`, `rating` (utelates hvis 4), `tag`, `favs=1`
