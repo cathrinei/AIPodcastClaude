@@ -299,7 +299,7 @@ Branch-navnekonvensjon:
 - **Ikke opprett ny branch for hver endring** — bruk dagens session-branch (`session/YYYY-MM-DD`) for alle endringer den dagen
 - Opprett ny PR fra eksisterende branch når en oppgave er ferdig — ikke ny branch
 - **CLAUDE.md skal alltid oppdateres** og inkluderes i samme PR som feature-endringen — ingen unntak
-- Ny session-branch opprettes kun ved starten av en ny arbeidsdag
+- Session-branch opprettes rett før første endring (`git checkout main && git pull && git checkout -b session/YYYY-MM-DD`) — ikke tidlig på dagen — slik at den alltid er i sync med main
 
 ## Workflow
 
