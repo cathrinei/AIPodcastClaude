@@ -296,9 +296,10 @@ Branch-navnekonvensjon:
 
 **PR-regler (Claude):**
 - Sjekk alltid `gh pr list` og `git status` før ny branch eller PR opprettes
-- Ikke opprett ny branch for hver småendring — samle relaterte endringer på én branch
+- **Ikke opprett ny branch for hver endring** — bruk dagens session-branch (`session/YYYY-MM-DD`) for alle endringer den dagen
+- Opprett ny PR fra eksisterende branch når en oppgave er ferdig — ikke ny branch
 - CLAUDE.md-oppdatering skal alltid inkluderes i samme PR som feature-endringen
-- Ny session-branch opprettes ved starten av hver arbeidsdag
+- Ny session-branch opprettes kun ved starten av en ny arbeidsdag
 
 ## Workflow
 
