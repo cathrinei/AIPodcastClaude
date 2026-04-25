@@ -143,7 +143,7 @@ Manuell fallback for lokal bruk (`file://`) eller testing med en spesifikk CSV-f
 - CSS-klasser: `tbody tr.ep-new`, `body.dark tbody tr.ep-new`, `tbody tr.ep-new:hover`
 
 ### Favoritter
-- ☆/★ stjerne-knapp i siste kolonne (desktop) og øverst i mobilkort — klikk for å toggle
+- ☆/★ stjerne-knapp mellom Podkast- og Episode-kolonnen (desktop) og øverst i mobilkort — klikk for å toggle
 - `favoriteKeys` (global `Set`) lastet fra `localStorage.favEpisodeKeys` (JSON-array av `"podcast||title"`-nøkler) ved oppstart
 - `toggleFavorite(key)` legger til/fjerner nøkkel og kaller `saveFavorites()` + `refresh()`
 - `saveFavorites()` skriver `[...favoriteKeys]` til `localStorage.favEpisodeKeys`

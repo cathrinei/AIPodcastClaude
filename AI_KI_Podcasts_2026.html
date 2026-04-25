@@ -288,6 +288,7 @@
   <thead>
     <tr>
       <th data-col="0" scope="col" aria-sort="none" tabindex="0">Podkast <span class="sort-icon" aria-hidden="true">&#8597;</span></th>
+      <th scope="col" aria-label="Favoritter" style="width:36px;text-align:center">&#9734;</th>
       <th data-col="1" scope="col" aria-sort="none" tabindex="0">Episode <span class="sort-icon" aria-hidden="true">&#8597;</span></th>
       <th data-col="2" scope="col" aria-sort="none" tabindex="0">Spr. <span class="sort-icon" aria-hidden="true">&#8597;</span></th>
       <th data-col="3" scope="col" aria-sort="descending" class="sorted" tabindex="0">Dato <span class="sort-icon" aria-hidden="true">&#8595;</span></th>
@@ -297,7 +298,6 @@
       <th data-col="7" scope="col" aria-sort="none" aria-label="Karakter" tabindex="0">&#9733; <span class="sort-icon" aria-hidden="true">&#8597;</span></th>
       <th scope="col">Begrunnelse</th>
       <th scope="col">Tags</th>
-      <th scope="col" aria-label="Favoritter" style="width:36px;text-align:center">&#9734;</th>
     </tr>
   </thead>
   <tbody id="tableBody"></tbody>
@@ -553,6 +553,7 @@ function renderTable(rows) {
     if (isFav) tr.classList.add('ep-fav');
     tr.innerHTML = `
       <td><span class="podcast-name">${esc(podcast)}</span></td>
+      <td style="text-align:center"><button class="fav-btn" data-fav="${esc(epKey)}" aria-pressed="${isFav}" aria-label="${favLabel}" title="${favLabel}">${favIcon}</button></td>
       <td><a class="episode-title-link" href="${safeUrl(link)}" target="_blank" rel="noopener noreferrer">${esc(title)}</a></td>
       <td><span class="lang-badge ${lang === 'English' ? 'lang-en' : 'lang-no'}">${lang === 'English' ? 'EN' : 'NO'}</span></td>
       <td style="white-space:nowrap">${esc(date)}</td>
@@ -562,7 +563,6 @@ function renderTable(rows) {
       <td style="text-align:center"><span class="rating-badge${ratingClass}">${ratingLabel}</span></td>
       <td><span class="rating-note">${esc(note)}</span></td>
       <td>${renderTags(tags)}</td>
-      <td style="text-align:center"><button class="fav-btn" data-fav="${esc(epKey)}" aria-pressed="${isFav}" aria-label="${favLabel}" title="${favLabel}">${favIcon}</button></td>
     `;
     tbody.appendChild(tr);
 
