@@ -2,7 +2,7 @@
 
 A curated list of podcast episodes on artificial intelligence (AI / KI) published in 2026 — both English and Norwegian.
 
-**[Open interactive episode browser →](https://cathrinei.github.io/AIPodcastClaude/AI_KI_Podcasts_2026.html)**
+**[Open interactive episode browser →](https://cathrinei.github.io/AIPodcastClaude/AI_KI_Podcasts.html)**
 
 ## What's in here
 
@@ -16,8 +16,8 @@ A curated list of podcast episodes on artificial intelligence (AI / KI) publishe
 
 | File | Description |
 |---|---|
-| `AI_KI_Podcasts_2026.html` | Interactive browser — filter, sort, search, load CSV |
-| `AI_KI_Podcasts_2026.csv` | Master data — one row per episode |
+| `AI_KI_Podcasts.html` | Interactive browser — filter, sort, search, load CSV |
+| `AI_KI_Podcasts.csv` | Master data — one row per episode |
 | `update_podcasts.py` | RSS fetcher — adds new episodes since last known date |
 | `rejected_episodes.csv` | Denylist — off-topic episodes that won't be re-fetched |
 
@@ -36,4 +36,4 @@ A curated list of podcast episodes on artificial intelligence (AI / KI) publishe
 python update_podcasts.py
 ```
 
-Then open `AI_KI_Podcasts_2026.html` in a browser and click **↑ Last inn CSV** to load the updated data.
+Then open `AI_KI_Podcasts.html` in a browser and click **↑ Last inn CSV** to load the updated data.

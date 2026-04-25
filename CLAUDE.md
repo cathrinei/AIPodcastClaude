@@ -4,9 +4,9 @@
 This project collects and curates podcast episodes on artificial intelligence (AI / KI / kunstig intelligens), including the sub-topic of vibe coding, published in 2026. Both Norwegian-language and English-language podcasts are in scope.
 
 ## Files
-- `AI_KI_Podcasts_2026.csv` — master data, one row per episode (kun godkjente episoder, rating 4–6)
-- `AI_KI_Podcasts_2026.html` — interactive table with filtering, sorting, stats, CSV import
-- `index.html` — redirect fra rot-URL til `AI_KI_Podcasts_2026.html` (GitHub Pages)
+- `AI_KI_Podcasts.csv` — master data, one row per episode (kun godkjente episoder, rating 4–6)
+- `AI_KI_Podcasts.html` — interactive table with filtering, sorting, stats, CSV import
+- `index.html` — redirect fra rot-URL til `AI_KI_Podcasts.html` (GitHub Pages)
 - `pending_episodes.csv` — staging-fil: nye episoder som venter på manuell vurdering (12 kolonner inkl. Description)
 - `update_podcasts.py` — RSS fetcher; legger nye episoder i `pending_episodes.csv`, ikke hoved-CSV
 - `rate_episodes.py` — filtrerer åpenbar ikke-AI fra pending (score=0 → rejected); setter ingen rating
@@ -92,7 +92,7 @@ The `data` array in the HTML is populated from the CSV. When changes are made to
 - Active state clears automatically when the user touches any manual filter control (`input` event)
 
 ### Auto-fetch CSV (GitHub Pages)
-- On page load, an async IIFE calls `fetch('./AI_KI_Podcasts_2026.csv')` (same-origin)
+- On page load, an async IIFE calls `fetch('./AI_KI_Podcasts.csv')` (same-origin)
 - If successful: parses CSV, replaces `data` array, calls `buildPodcastFilter()` + `updateStats()` + `refresh()`
 - Status bar shows `✓ X episoder lastet inn automatisk [· Y nye]` — men kun første gang etter at CSV er endret
 - Fingeravtrykk: `Last-Modified`-headeren fra fetch-svaret lagres i `localStorage.csvLastModified`; melding vises bare når den er endret siden sist besøk; fallback til antall rader hvis headeren mangler
@@ -248,10 +248,10 @@ Alle kjente WCAG AA-problemer er fikset. Gjeldende status:
 ## approve_episodes.py – tekniske noter
 - Kjøres lokalt etter at rating er satt manuelt i `pending_episodes.csv`
 - Leser alle rader fra `pending_episodes.csv` og behandler etter rating:
-  - **Rating 4–6** → `row[:11]` (Description-kolonnen strippes) legges til i `AI_KI_Podcasts_2026.csv`
+  - **Rating 4–6** → `row[:11]` (Description-kolonnen strippes) legges til i `AI_KI_Podcasts.csv`
   - **Rating 1–3** → legges til i `rejected_episodes.csv` (kun Podcast Name + Episode Title)
   - **Rating 0** → beholdes i `pending_episodes.csv` til neste gjennomgang
-- Skriver oppdatert `AI_KI_Podcasts_2026.csv` (eksisterende rader + nye godkjente)
+- Skriver oppdatert `AI_KI_Podcasts.csv` (eksisterende rader + nye godkjente)
 - Skriver oppdatert `pending_episodes.csv` (kun rating=0-rader igjen)
 - Output viser tydelig antall godkjent, avvist og gjenværende i pending
 
@@ -313,7 +313,7 @@ Branch-navnekonvensjon:
    - **1–3**: avvis (flyttes til rejected av approve-scriptet)
    - **0**: utsett til neste gjennomgang
 4. `python approve_episodes.py` — rating 4–6 → hoved-CSV, rating 1–3 → rejected, rating 0 → blir i pending
-5. `git add AI_KI_Podcasts_2026.csv pending_episodes.csv rejected_episodes.csv`
+5. `git add AI_KI_Podcasts.csv pending_episodes.csv rejected_episodes.csv`
 6. `git commit -m "..."` og `git push`
 7. Åpne `https://cathrinei.github.io/AIPodcastClaude/` — siden lastes automatisk med ny data
 
@@ -322,4 +322,4 @@ Branch-navnekonvensjon:
 - Legg til i `PURE_AI_PODCASTS` i `rate_episodes.py` hvis det er en ren AI-podcast
 
 **Sjekk duplikater i hoved-CSV:**
-`python3 -c "import csv; rows=list(csv.reader(open('AI_KI_Podcasts_2026.csv',encoding='utf-8')))[1:]; seen={}; [print(f'DUP: {r[0]} – {r[1][:60]}') or seen.update({(r[0].lower(),r[1].lower()):1}) for r in rows if (r[0].lower(),r[1].lower()) in seen]"`
+`python3 -c "import csv; rows=list(csv.reader(open('AI_KI_Podcasts.csv',encoding='utf-8')))[1:]; seen={}; [print(f'DUP: {r[0]} – {r[1][:60]}') or seen.update({(r[0].lower(),r[1].lower()):1}) for r in rows if (r[0].lower(),r[1].lower()) in seen]"`

@@ -5,7 +5,7 @@ Bruk:
   python update_podcasts.py
 
 Skriptet:
-  1. Leser AI_KI_Podcasts_2026.csv og pending_episodes.csv, finner siste kjente dato per podcast.
+  1. Leser AI_KI_Podcasts.csv og pending_episodes.csv, finner siste kjente dato per podcast.
   2. Henter RSS-feed for hver kjent podcast.
   3. Legger nye episoder (nyere enn siste kjente dato) til pending_episodes.csv — IKKE hoved-CSV.
   4. Kjør rate_episodes.py for å filtrere åpenbar ikke-AI, deretter approve_episodes.py for å godkjenne.
@@ -23,7 +23,7 @@ import sys
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-CSV_PATH     = os.path.join(os.path.dirname(__file__), "AI_KI_Podcasts_2026.csv")
+CSV_PATH     = os.path.join(os.path.dirname(__file__), "AI_KI_Podcasts.csv")
 PENDING_PATH = os.path.join(os.path.dirname(__file__), "pending_episodes.csv")
 REJECTED_PATH = os.path.join(os.path.dirname(__file__), "rejected_episodes.csv")
 
