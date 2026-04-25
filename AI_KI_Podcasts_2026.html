@@ -267,7 +267,9 @@
   <button class="reset-btn share-btn" id="shareBtn" title="Kopier lenke med aktive filtre">&#128279; Del</button>
   <button class="reset-btn" id="resetBtn">Nullstill</button>
   <a class="fetch-btn" href="https://github.com/cathrinei/AIPodcastClaude/actions/workflows/update_podcasts.yml" target="_blank" rel="noopener" title="Kjør daglig RSS-henting manuelt på GitHub Actions" style="display:none">&#8635; Hent nye data</a>
-  <button class="update-btn" id="updateBtn">&#8593; Last inn CSV</button>
+  <!-- Last inn CSV-knapp: skjult fordi CSV lastes automatisk via fetch() på GitHub Pages.
+       For å vise igjen: fjern style="display:none" fra begge elementene under. -->
+  <button class="update-btn" id="updateBtn" style="display:none">&#8593; Last inn CSV</button>
   <input type="file" id="csvFile" accept=".csv" style="display:none">
   <span id="updateStatus"></span>
 </div>
