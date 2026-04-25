@@ -94,12 +94,15 @@ The `data` array in the HTML is populated from the CSV. When changes are made to
 ### Auto-fetch CSV (GitHub Pages)
 - On page load, an async IIFE calls `fetch('./AI_KI_Podcasts_2026.csv')` (same-origin)
 - If successful: parses CSV, replaces `data` array, calls `buildPodcastFilter()` + `updateStats()` + `refresh()`
-- Status bar shows `✓ X episoder lastet inn automatisk [· Y nye]`
+- Status bar shows `✓ X episoder lastet inn automatisk [· Y nye]` — men kun første gang etter at CSV er endret
+- Fingeravtrykk: `Last-Modified`-headeren fra fetch-svaret lagres i `localStorage.csvLastModified`; melding vises bare når den er endret siden sist besøk; fallback til antall rader hvis headeren mangler
 - Silently falls back to the built-in `data` array when opened as `file://` (fetch fails due to CORS) or on network error
 - CSP `connect-src 'self'` already allows same-origin fetch — no changes needed
 
 ### "↑ Last inn CSV"-knappen
-Manual fallback — still works for local use or when you want to load a specific CSV file:
+Skjult (`style="display:none"` på `#updateBtn`) — CSV lastes automatisk via fetch() på GitHub Pages.
+For å vise igjen: fjern `style="display:none"` fra `#updateBtn` i HTML-en (kommentar i koden forklarer dette).
+Manuell fallback for lokal bruk (`file://`) eller testing med en spesifikk CSV-fil:
 1. Opens a file picker (`<input type="file" accept=".csv">`)
 2. Reads file with `FileReader` (UTF-8)
 3. `parseCSV()` parses content — handles commas in quoted fields and CRLF/LF
@@ -151,6 +154,14 @@ Manual fallback — still works for local use or when you want to load a specifi
 - Event delegation på `tableBody`/`cardList` for `[data-fav]`-knapper — overlever re-render
 - `resetFilters()` slår av favorittfilter og tilbakestiller knapp-tekst/aria-pressed
 - CSS-klasser: `tbody tr.ep-fav`, `.ep-card.ep-fav`, `.fav-btn`, `.fav-filter-btn.active`
+
+### Del-lenke
+- «🔗 Del»-knapp i kontrollpanelet bygger en URL med aktive filtre og kopierer til utklippstavlen
+- Støttede query-parametre: `search`, `lang`, `podcast`, `rating` (utelates hvis 4), `tag`, `favs=1`
+- `buildShareUrl()` leser alle filterverdier og bygger `URLSearchParams`
+- `applyUrlParams()` kjøres ved oppstart etter `buildPodcastFilter()` — setter alle filtre fra URL
+- Kopiering via `navigator.clipboard.writeText()`; fallback til `prompt()` for eldre nettlesere
+- Knapp viser «✓ Kopiert!» i 2 sek, tilbakestilles automatisk
 
 ### Swipe-til-favoritt (mobil)
 - På touch-enheter: sveip høyre (≥ 60 px, klart horisontalt) på et mobilkort for å toggle favoritt
