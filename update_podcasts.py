@@ -29,6 +29,18 @@ REJECTED_PATH = os.path.join(os.path.dirname(__file__), "rejected_episodes.csv")
 
 UNRATED = "0"
 
+# Podcaster der gjest typisk er oppgitt i tittelen på formen «Tittel – Gjest»
+# eller «Tittel – Gjest | Podcast». Regex forsøker å trekke ut gjest automatisk.
+# Kun aktivert for podcaster der dette mønsteret er konsistent nok til å være nyttig.
+GUEST_FROM_TITLE = {
+    "Lex Fridman Podcast",
+    "Gradient Dissent (W&B)",
+    "The Cognitive Revolution",
+    "No Priors",
+    "TWIML AI Podcast",
+    "Latent Space",
+}
+
 LANGUAGE_OVERRIDE = {
     "AI-Snakk":               "Norwegian",
     "AI Forklart":            "Norwegian",
@@ -110,6 +122,62 @@ def strip_html(text):
     return re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', ' ', text)).strip()
 
 
+def extract_guest_from_title(title, podcast_name):
+    """
+    Forsøker å trekke ut gjest fra episodetittel.
+    Mønstrene er podcast-spesifikke — returnerer tom streng ved usikkerhet.
+    Resultatet bør alltid verifiseres manuelt i pending_episodes.csv.
+    """
+    if podcast_name not in GUEST_FROM_TITLE:
+        return ""
+
+    if podcast_name == "Lex Fridman Podcast":
+        # Mønster A: «#NNN – Gjest: Emne» — gjest er 2-4 ord rett etter episodenummer
+        m = re.match(r'^#\d+\s*[–-]\s*(.+?):', title)
+        if m:
+            candidate = m.group(1).strip()
+            words = candidate.split()
+            if 2 <= len(words) <= 4 and all(w[0].isupper() for w in words):
+                return candidate
+        # Mønster B: «#NNN – Emne – Gjest» — gjest er siste segment
+        parts = re.split(r'\s[–-]\s', title)
+        if len(parts) >= 3:
+            candidate = parts[-1].strip()
+            if len(candidate) > 3 and not re.match(r'^#?\d+', candidate):
+                return candidate
+
+    elif podcast_name == "TWIML AI Podcast":
+        # Mønster: «Emne with Gjest - #NNN»
+        m = re.search(r'\bwith\s+(.+?)(?:\s+-\s+#\d+|$)', title)
+        if m:
+            candidate = m.group(1).strip()
+            if len(candidate) > 3 and not re.match(r'^#?\d+', candidate):
+                return candidate
+
+    elif podcast_name == "The Cognitive Revolution":
+        # Mønster A: «Emne, with Gjest» (komma + "with" som eget ord)
+        m = re.search(r',\s*with\s+(.+?)(?:,|$)', title, re.IGNORECASE)
+        if m:
+            candidate = m.group(1).strip()
+            if len(candidate) > 3:
+                return candidate
+        # Mønster B: «w/ Gjest»
+        m = re.search(r'\bw/\s*(.+?)(?:,|$)', title)
+        if m:
+            candidate = m.group(1).strip()
+            if len(candidate) > 3:
+                return candidate
+
+    elif podcast_name == "Gradient Dissent (W&B)":
+        # Mønster: «Emne | Gjest» — siste segment etter ' | '
+        if ' | ' in title:
+            candidate = title.rsplit(' | ', 1)[-1].strip()
+            if len(candidate) > 3:
+                return candidate
+
+    return ""
+
+
 def fetch_feed(url):
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
     try:
@@ -171,13 +239,15 @@ def fetch_new_episodes(podcast_name, feed_url, after_dt):
         desc_raw = desc_el.text if desc_el is not None and desc_el.text else ""
         description = strip_html(desc_raw)[:600]
 
+        guest = extract_guest_from_title(title, podcast_name)
+
         new_eps.append([
             podcast_name,
             title,
             language,
             pub_dt.strftime("%Y-%m-%d"),
-            "",        # Host(s)
-            "",        # Guest(s)
+            "",        # Host(s) — fylles manuelt (kan variere per episode)
+            guest,     # Guest(s) — forsøkt utledet fra tittel, verifiser manuelt
             "",        # Main Topic(s)
             UNRATED,   # Rating
             "",        # Rating Notes

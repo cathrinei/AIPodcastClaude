@@ -240,6 +240,17 @@ Alle kjente WCAG AA-problemer er fikset. Gjeldende status:
   - `::warning::` ved mulige duplikater (gult i GitHub UI)
   - `is_gha()` sjekker `GITHUB_ACTIONS`-miljøvariabelen — lokalt kjøring er uendret
 
+### Automatisk utfylling av metadata
+- **Dato**: hentes alltid fra RSS `<pubDate>` via `parsedate_to_datetime()` — alltid `YYYY-MM-DD`, ingen manuell jobb nødvendig
+- **Host(s)**: fylles **ikke** automatisk — RSS `itunes:author` på item-nivå er for upålitelig (No Priors returnerer feil data, mange feeder returnerer generisk selskapsnavnn eller tomt felt). Fylles manuelt ved gjennomgang.
+- **Guest(s)**: forsøkes utledet fra episodetittelen via `extract_guest_from_title()`. Podcast-spesifikke mønstre:
+  - **Lex Fridman**: `#NNN – Gjest: Emne` (2-4 ord etter episodenr.) eller `#NNN – Emne – Gjest` (siste segment)
+  - **TWIML**: `Emne with Gjest - #NNN`
+  - **The Cognitive Revolution**: `, with Gjest` eller `w/ Gjest`
+  - **Gradient Dissent (W&B)**: `Emne | Gjest` (siste segment etter ` | `)
+  - Verifiser alltid manuelt i pending_episodes.csv — kan gi feil eller «CEO Navn» i stedet for bare navn
+- `GUEST_FROM_TITLE`-settet: legg til nye podcaster som konsekvent oppgir gjest i tittelen
+
 ### Regler mot duplikater og feil språk
 - **`LANGUAGE_OVERRIDE`-dict**: Tvinger riktig språk for kjente norske podcaster uavhengig av RSS-feedens `<language>`-tag. Heis og andre norske feeder kan mangle eller returnere feil kode — overriden sikrer at episodene alltid får "Norwegian". Legg til nye norske podcaster her ved behov.
 - **Samme-dato-advarsel**: Når en ny episode har samme (podcast, dato) som en allerede eksisterende episode i CSV-en, skrives `⚠  Mulig duplikat (samme dato finnes)` i output. Krever manuell sjekk — noen podcaster publiserer legitimt flere episoder samme dag.
