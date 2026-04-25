@@ -190,6 +190,36 @@ def fetch_new_episodes(podcast_name, feed_url, after_dt):
     return new_eps, None
 
 
+def is_gha():
+    """Er vi i GitHub Actions?"""
+    return os.environ.get("GITHUB_ACTIONS") == "true"
+
+
+def gha_group(title):
+    if is_gha():
+        print(f"::group::{title}", flush=True)
+
+
+def gha_endgroup():
+    if is_gha():
+        print("::endgroup::", flush=True)
+
+
+def gha_notice(msg):
+    if is_gha():
+        print(f"::notice::{msg}", flush=True)
+
+
+def gha_warning(msg):
+    if is_gha():
+        print(f"::warning::{msg}", flush=True)
+
+
+def gha_error(msg):
+    if is_gha():
+        print(f"::error::{msg}", flush=True)
+
+
 def main():
     main_header, main_rows = read_csv(CSV_PATH)
     if main_header is None:
@@ -207,6 +237,10 @@ def main():
     existing_podcast_dates = {(r[0].strip().lower(), r[3].strip()) for r in all_known_rows if len(r) >= 4}
 
     all_new = []
+    feeds_with_errors = []
+    feeds_with_new = []
+
+    gha_group(f"Sjekker {len(FEEDS)} podcast-feeder")
     print(f"\nSjekker {len(FEEDS)} podcast-feeder...\n")
 
     for podcast_name, feed_url in FEEDS.items():
@@ -217,6 +251,7 @@ def main():
 
         if episodes is None:
             print(f"! Feil: {error}")
+            feeds_with_errors.append((podcast_name, error))
         elif not episodes:
             print("– ingen nye")
         else:
@@ -231,21 +266,49 @@ def main():
                 for ep in filtered:
                     if (ep[0].lower(), ep[3]) in existing_podcast_dates:
                         print(f"    ⚠  Mulig duplikat (samme dato finnes): [{ep[3]}] {ep[1][:55]}")
+                        gha_warning(f"Mulig duplikat ({podcast_name}): [{ep[3]}] {ep[1][:80]}")
+                feeds_with_new.append((podcast_name, filtered))
             else:
                 print(f"– ingen nye ({skipped} allerede vurdert)" if skipped else "– ingen nye")
             all_new.extend(filtered)
 
+    print()
+    gha_endgroup()
+
+    # Oppsummering av nye episoder
+    if feeds_with_new:
+        gha_group(f"Nye episoder ({len(all_new)} stk)")
+        for podcast_name, eps in feeds_with_new:
+            print(f"\n  📻 {podcast_name} — {len(eps)} ny(e):")
+            for ep in eps:
+                print(f"     [{ep[3]}] {ep[1][:80]}")
+        print()
+        gha_endgroup()
+
+    # Feil-oppsummering
+    if feeds_with_errors:
+        gha_group(f"Feil ved henting ({len(feeds_with_errors)} feeder)")
+        for podcast_name, error in feeds_with_errors:
+            print(f"  ✗ {podcast_name}: {error}")
+            gha_error(f"{podcast_name}: {error}")
+        print()
+        gha_endgroup()
+
+    # Sluttresultat
     if not all_new:
-        print("\nIngen nye episoder funnet.\n")
+        print("Ingen nye episoder funnet.\n")
+        gha_notice("Ingen nye episoder funnet.")
     else:
         new_pending_header = main_header + ["Description"]
         combined_pending = pending_rows + all_new
         with open(PENDING_PATH, "w", encoding="utf-8", newline="") as f:
             csv.writer(f).writerows([new_pending_header] + combined_pending)
-        print(f"\n{len(all_new)} ny(e) episode(r) lagt til i pending_episodes.csv.")
+        summary = f"{len(all_new)} ny(e) episode(r) lagt til i pending_episodes.csv"
+        print(f"{summary}.")
         print("Kjør: python rate_episodes.py   (filtrerer åpenbar ikke-AI)")
         print("Sett rating manuelt i pending_episodes.csv, kjør deretter:")
         print("      python approve_episodes.py  (flytter godkjente til hoved-CSV)\n")
+        gha_notice(summary + " — klar for gjennomgang.")
 
 
 if __name__ == "__main__":
