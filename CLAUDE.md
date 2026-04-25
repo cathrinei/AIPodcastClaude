@@ -127,6 +127,7 @@ Manuell fallback for lokal bruk (`file://`) eller testing med en spesifikk CSV-f
 - **Zebrastriping**: annenhver rad bruker `--row-alt` (`#f5f7fc` lys / `#1f2235` mørk)
 - **Rating-badge**: `32px`, `font-weight: 800`; r4/r5/r6 har glow (`box-shadow: 0 0 0 3px rgba(...)`)
 - **"Last inn CSV"-knapp**: gradient + glow (`box-shadow: 0 2px 8px rgba(99,102,241,0.45)`)
+- **«Tilbake til toppen»-knapp** (`#backToTop`): fast posisjonert nedre høyre hjørne; vises etter 300px scroll (`window.scrollY > 300`); skjules via `opacity: 0 / pointer-events: none`; klikk → `window.scrollTo({ top: 0, behavior: 'smooth' })`; `{ passive: true }` scroll-lytter
 - **Episodetittel**: klikkbar lenke (`a.episode-title-link` desktop / `a.card-title-link` mobil) — åpner i ny fane (`target="_blank" rel="noopener noreferrer"`); hover gir accent-farge + understreking; `::after` viser `↗` som visuell indikator; `aria-label="Tittel (åpner i ny fane)"` for skjermlesere; «Lytt»-kolonne fjernet
 - Ingen eksterne fonter eller ressurser — holder CSP intakt
 

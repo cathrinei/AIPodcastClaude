@@ -40,10 +40,7 @@ Knapp som laster ned gjeldende filtrert datasett som CSV.
 Nyttig for egne analyser eller deling.
 Implementeres med `Blob` + `URL.createObjectURL`.
 
-### 6. «Tilbake til toppen»-knapp
-Vises når bruker har scrollet ned (f.eks. > 300px).
-Implementeres med `scroll`-event + `window.scrollTo({top:0, behavior:'smooth'})`.
-Spesielt nyttig på mobil med mange episoder.
+~~### 6. «Tilbake til toppen»-knapp~~ ✅ implementert
 
 ### 7. rate_episodes.py: legg til llm-nøkkelord
 Når llm-tag er implementert: legg til LLM-relaterte nøkkelord
@@ -59,6 +56,9 @@ Merk: øker risiko for falske positiver — vurder nøye.
 ---
 
 ## ✅ Fullført
+
+- **«Tilbake til toppen»-knapp** — fast posisjonert, vises etter 300px scroll (PR #26)
+- **Tomt-tilstand ved 0 søkeresultater** — allerede implementert (ikke i backlog)
 
 - **Fyll inn Host(s) og Main Topic(s)** — 26 episoder oppdatert (PR #24)
 - **`/`-snarvei for søkefelt** — implementert i HTML (PR #24)

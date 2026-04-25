@@ -217,6 +217,12 @@
     .card-list { display: block; }
   }
 
+  /* Tilbake til toppen-knapp */
+  #backToTop { position: fixed; bottom: 1.5rem; right: 1.5rem; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); font-size: 1.1rem; line-height: 1; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.12); opacity: 0; pointer-events: none; transition: opacity 0.2s ease, background 0.15s ease, border-color 0.15s ease; z-index: 100; }
+  #backToTop.visible { opacity: 1; pointer-events: auto; }
+  #backToTop:hover { background: var(--row-hover); border-color: var(--accent); color: var(--accent); }
+  #backToTop:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
   /* Small mobile: ≤400px (iPhone SE) */
   @media (max-width: 400px) {
     header h1 { font-size: 1.1rem; }
@@ -306,6 +312,7 @@
 </table>
 </div>
 <div id="cardList" class="card-list"></div>
+<button id="backToTop" aria-label="Tilbake til toppen" title="Tilbake til toppen">↑</button>
 
 <script>
 let newEpisodeKeys = new Set();
@@ -1013,6 +1020,15 @@ function applyStatFilter(action) {
     document.querySelectorAll('.stat').forEach(s => { s.classList.remove('active'); s.setAttribute('aria-pressed', 'false'); });
   });
 });
+
+// «Tilbake til toppen»-knapp — vises etter 300px scroll
+(function() {
+  const btn = document.getElementById('backToTop');
+  window.addEventListener('scroll', () => {
+    btn.classList.toggle('visible', window.scrollY > 300);
+  }, { passive: true });
+  btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+})();
 
 // '/' snarvei: fokuser søkefelt (ikke aktiver når brukeren allerede skriver i et felt)
 document.addEventListener('keydown', e => {
