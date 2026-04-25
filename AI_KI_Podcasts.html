@@ -1022,7 +1022,7 @@ refresh();
 // Silently skipped when opened as a local file:// — built-in data array used instead.
 (async function autoLoadCSV() {
   try {
-    const resp = await fetch('./AI_KI_Podcasts_2026.csv');
+    const resp = await fetch('./AI_KI_Podcasts.csv');
     if (!resp.ok) return;
     const text = await resp.text();
     const rows = parseCSV(text);

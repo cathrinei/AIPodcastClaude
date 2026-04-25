@@ -5,7 +5,7 @@ Kjøres lokalt etter at du har satt rating manuelt i pending_episodes.csv:
   python approve_episodes.py
 
 Behandling per episode:
-  Rating 4–6 → flyttes til AI_KI_Podcasts_2026.csv (Description-kolonnen fjernes)
+  Rating 4–6 → flyttes til AI_KI_Podcasts.csv (Description-kolonnen fjernes)
   Rating 1–3 → flyttes til rejected_episodes.csv (aldri hentet igjen)
   Rating 0   → beholdes i pending til neste gjennomgang
 """
@@ -16,7 +16,7 @@ import sys
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-CSV_PATH      = os.path.join(os.path.dirname(__file__), "AI_KI_Podcasts_2026.csv")
+CSV_PATH      = os.path.join(os.path.dirname(__file__), "AI_KI_Podcasts.csv")
 PENDING_PATH  = os.path.join(os.path.dirname(__file__), "pending_episodes.csv")
 REJECTED_PATH = os.path.join(os.path.dirname(__file__), "rejected_episodes.csv")
 
@@ -79,7 +79,7 @@ def main():
         csv.writer(f).writerows([pending_header] + still_pending)
 
     print(f"\nApprove fullført:")
-    print(f"  {len(approved)} episoder lagt til i AI_KI_Podcasts_2026.csv")
+    print(f"  {len(approved)} episoder lagt til i AI_KI_Podcasts.csv")
     print(f"  {len(rejected_list)} episoder avvist (→ rejected_episodes.csv)")
     print(f"  {len(still_pending)} episoder beholdt i pending (rating=0)\n")
 
