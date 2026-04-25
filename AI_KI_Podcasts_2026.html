@@ -1041,10 +1041,16 @@ refresh();
     buildPodcastFilter();
     updateStats();
     refresh();
-    const status = document.getElementById('updateStatus');
-    const newCount = newEpisodeKeys.size;
-    status.textContent = '✓ ' + data.length + ' episoder lastet inn automatisk' + (newCount > 0 ? ' · ' + newCount + ' nye' : '');
-    status.style.color = '#16a34a';
+    // Vis statusmelding kun første gang siden CSV sist ble endret
+    const lastMod = resp.headers.get('Last-Modified') || String(data.length);
+    const seenMod = localStorage.getItem('csvLastModified');
+    if (lastMod !== seenMod) {
+      localStorage.setItem('csvLastModified', lastMod);
+      const status = document.getElementById('updateStatus');
+      const newCount = newEpisodeKeys.size;
+      status.textContent = '✓ ' + data.length + ' episoder lastet inn automatisk' + (newCount > 0 ? ' · ' + newCount + ' nye' : '');
+      status.style.color = '#16a34a';
+    }
   } catch (e) {
     // file:// or network error — built-in data stays
   }
