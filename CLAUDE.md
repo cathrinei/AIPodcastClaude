@@ -14,7 +14,6 @@ This project collects and curates podcast episodes on artificial intelligence (A
 - `show_pending.py` — viser pending_episodes.csv i lesbar form i terminalen; kjøres lokalt
 - `sync_html.py` — synkroniserer det innebygde `data[]`-arrayet i HTML-en med CSV-en; kjøres etter `approve_episodes.py`
 - `rejected_episodes.csv` — denylist of already-reviewed non-AI episodes; prevents re-fetching noise
-- `backlog.md` — foreslåtte forbedringer og fremtidige features, sortert etter prioritet
 
 ## Live URL
 `https://cathrinei.github.io/AIPodcastClaude/` — serves the latest committed HTML + CSV automatically. GitHub Actions updates the CSV daily at 11:00 CEST; Pages rebuilds on every push to `main`.
@@ -72,10 +71,10 @@ Bruk disse navnene konsekvent ved rating av nye episoder:
 - **Podcast directories**: Apple Podcasts, Spotify, listennotes.com, podchaser.com
 
 ## Key findings (Jan 2026 – 21.04.26)
-- **176 episodes** across **27 shows** (130 English, 46 Norwegian) — 176 rated (4–6)
+- **164 episodes** across **26 shows** (116 English, 48 Norwegian) — 164 rated (4–6)
 - **Vibe coding** was a dominant cross-show theme — tagged across multiple series
 - **OpenClaw** (formerly Clawdbot/Moltbot) emerged as a major cross-show topic — 10+ episodes tagged
-- **Top-rated (6/6):** 14 episoder totalt
+- **Top-rated English episodes (6/6):** Latent Space × 5, Lex Fridman #490 + #491, No Priors (Karpathy), TWIML × 2 — 10 total
 - **Best Norwegian source:** AI-Snakk — weekly episodes Jan–Apr, consistent quality, Norwegian AI news with local relevance
 - **Norwegian sources:** AI Forklart (Niclas Kvanvig & Celine Haaland-Johansen), Heis, KI til Kaffen, Shifter, Kode24-podkasten
 - **Anthropic vs. Pentagon**, **SaaSpocalypse** and **OpenClaw** were recurring cross-show news events
