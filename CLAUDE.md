@@ -248,13 +248,12 @@ Alle kjente WCAG AA-problemer er fikset. Gjeldende status:
 - **Guest(s)**: forsøkes utledet fra episodetittelen via `extract_guest_from_title()`. Podcast-spesifikke mønstre:
   - **Lex Fridman**: `#NNN – Gjest: Emne` (2-4 ord etter episodenr.) eller `#NNN – Emne – Gjest` (siste segment)
   - **TWIML**: `Emne with Gjest - #NNN`
-  - **The Cognitive Revolution**: `, with Gjest` eller `w/ Gjest`
+  - **The Cognitive Revolution**: `, with Gjest`, `w/ Gjest`, eller `Gjest on topic` etter `?`/`!`
   - **Gradient Dissent (W&B)**: `Emne | Gjest` (siste segment etter ` | `)
+  - **Latent Space**: `Emne — with Gjest, Tittel` (mønster A) eller `Emne — Gjest (Selskap)` / `Emne — Gjest & Gjest` (mønster B, em/en-strek). `[AINews]`-episoder mangler strek og treffer ikke.
+  - **Hard Fork (NYT)**: `Emne With Gjest + ...` — stor W indikerer gjesteepisode; stopper ved ` +`
   - Verifiser alltid manuelt i pending_episodes.csv — kan gi feil eller «CEO Navn» i stedet for bare navn
 - `GUEST_FROM_TITLE`-settet: legg til nye podcaster som konsekvent oppgir gjest i tittelen
-  - **Latent Space**: Mønster A `— with Gjest` (eksplisitt); Mønster B `— Gjest (Selskap)` / `— Gjest & Gjest` (em/en-strek + navn); `[AINews]`-episoder treffer ikke (mangler strek)
-  - **Hard Fork (NYT)**: `With Gjest` (stor W) i tittelen indikerer gjesteepisode
-  - **The Cognitive Revolution**: i tillegg til `,with` og `w/` — også `Gjest on topic` etter `?`/`!`
 
 ### Regler mot duplikater og feil språk
 - **`LANGUAGE_OVERRIDE`-dict**: Tvinger riktig språk for kjente norske podcaster uavhengig av RSS-feedens `<language>`-tag. Heis og andre norske feeder kan mangle eller returnere feil kode — overriden sikrer at episodene alltid får "Norwegian". Legg til nye norske podcaster her ved behov.
