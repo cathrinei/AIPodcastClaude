@@ -7,11 +7,32 @@ Foreslåtte forbedringer, sortert etter prioritet. Ikke tidsbestemt.
 ## 🔴 Høy prioritet
 
 ### 1. Implementer llm-tag
-Se `llm_tag_plan.md` for fullstendig plan (16 episoder + HTML-endringer).
-- CSS-badge: `#ede9fe / #5b21b6` (lilla)
+- CSS-badge: `.tag-llm { background: #ede9fe; color: #5b21b6; }` (lilla)
 - `tagMeta`: `llm: { label: 'LLM', cls: 'tag-llm' }`
-- Oppdater 16 episoder i CSV
-- Oppdater CLAUDE.md
+- Legg til LLM-knapp i tag-filterpanelet
+- Oppdater 16 episoder i CSV (se tabell under)
+- Oppdater CLAUDE.md (legg til `llm` i Tags-kolonnen)
+
+**Episoder som får llm-tag:**
+
+| Podcast | Tittel | Nåværende tag → Ny |
+|---------|--------|--------------------|
+| AI Forklart | Det rundt spørsmålet: Valgene som gir bedre svar | (ingen) → `llm` |
+| AI Forklart | Når språkmodellen får deg inn i en spiral av feil | (ingen) → `llm` |
+| AI Forklart | Prompting del 1: Samtalen med AI | (ingen) → `llm` |
+| AI Forklart | Prompting del 2: RASK-modellen | (ingen) → `llm` |
+| AI Forklart | Hvordan tilpasse AI-chatboten til meg? | (ingen) → `llm` |
+| AI-Snakk | Ep 35 – GPT-5.2 Løser 30 År Gammelt Matematikkproblem | (ingen) → `llm` |
+| Win-Win with Liv Boeree | #53 – John Schultz – Why Google Made ChatGPT, Gemini & Claude Play 900,000 Hands | (ingen) → `llm` |
+| Latent Space | Anthropic Distillation & How Models Cheat (SWE-Bench Dead) | (ingen) → `llm` |
+| TWIML AI Podcast | The Race to Production-Grade Diffusion LLMs with Stefano Ermon | (ingen) → `llm` |
+| Latent Space | Training Transformers to solve 95% failure rate of Cancer Trials | (ingen) → `llm` |
+| Latent Space | [AINews] Gemma 4 crosses 2 million downloads | (ingen) → `llm` |
+| Latent Space | [AINews] Top Local Models List - April 2026 | (ingen) → `llm` |
+| Latent Space | [AINews] Anthropic Claude Opus 4.7 | (ingen) → `llm` |
+| Latent Space | [AINews] Moonshot Kimi K2.6 | (ingen) → `llm` |
+| Lex Fridman Podcast | #490 – State of AI in 2026: LLMs / Coding / Scaling / China | `vibe` → `vibe,llm` |
+| TWIML AI Podcast | #762 – AI Trends 2026 | `openclaw` → `openclaw,llm` |
 
 ---
 
