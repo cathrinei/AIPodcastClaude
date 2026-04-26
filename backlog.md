@@ -42,6 +42,9 @@ Implementeres med `Blob` + `URL.createObjectURL`.
 
 ~~### 6. «Tilbake til toppen»-knapp~~ ✅ implementert
 
+~~### 9. Klikkbare podcastnavn~~ ✅ implementert
+Klikk på podcastnavn (tabell og mobilkort) filtrerer til alle episoder fra den aktuelle podkasten.
+
 ### 7. rate_episodes.py: legg til llm-nøkkelord
 Når llm-tag er implementert: legg til LLM-relaterte nøkkelord
 (`llm`, `language model`, `prompting`, `transformer`, `benchmark`) i `MEDIUM_AI`-lista
