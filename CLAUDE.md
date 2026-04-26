@@ -157,6 +157,15 @@ Manuell fallback for lokal bruk (`file://`) eller testing med en spesifikk CSV-f
 - `resetFilters()` slår av favorittfilter og tilbakestiller knapp-tekst/aria-pressed
 - CSS-klasser: `tbody tr.ep-fav`, `.ep-card.ep-fav`, `.fav-btn`, `.fav-filter-btn.active`
 
+### Klikkbare podcastnavn
+- Podcastnavnet i tabellen (`.podcast-name`) og på mobilkort (`.card-podcast`) er klikkbart
+- Klikk setter `#podcastFilter` til det aktuelle podcastnavnet og kaller `refresh()`
+- Nullstiller aktive stat-korter (samme som andre manuelle filterendringer)
+- Implementert via event delegation (`handlePodcastInteraction`) på `#tableBody` og `#cardList` — fungerer etter re-render
+- `data-podcast` attributt brukt til å hente podcastnavn; `role="button" tabindex="0"` for tilgjengelighet
+- Keyboard: Enter/Space aktiverer filteret
+- CSS: `.podcast-name` og `.card-podcast` — `cursor: pointer`; hover gir `var(--accent)` + underline
+
 ### Tastatursnarvei — søkefelt
 - `/`-tast setter fokus på `#searchBox` (vanlig konvensjon fra GitHub/Linear/Notion)
 - Implementert som `keydown`-lytter på `document`

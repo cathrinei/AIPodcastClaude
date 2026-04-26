@@ -130,7 +130,8 @@
   a.episode-title-link:hover { color: var(--accent); text-decoration: underline; }
   a.episode-title-link::after,
   a.card-title-link::after { content: "\a0↗"; font-size: 0.72em; opacity: 0.45; font-weight: 400; }
-  .podcast-name { color: var(--text-muted); font-size: 0.78rem; }
+  .podcast-name { color: var(--text-muted); font-size: 0.78rem; cursor: pointer; }
+  .podcast-name:hover { color: var(--accent); text-decoration: underline; }
   .topic-tags { color: var(--text-faint); font-size: 0.78rem; margin-top: 2px; }
   .rating-note { color: var(--text); font-size: 0.78rem; font-style: italic; }
   .hosts { color: var(--text-muted); font-size: 0.78rem; }
@@ -187,7 +188,8 @@
   .card-date { font-size: 0.78rem; color: var(--text-muted); }
   .card-title-link { display: block; font-weight: 700; font-size: 0.95rem; color: var(--stat-fg); text-decoration: none; margin-bottom: 0.3rem; line-height: 1.35; }
   .card-title-link:hover { color: var(--accent); text-decoration: underline; }
-  .card-podcast { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.25rem; }
+  .card-podcast { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.25rem; cursor: pointer; display: inline-block; }
+  .card-podcast:hover { color: var(--accent); text-decoration: underline; }
   .card-hosts { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.3rem; }
   .card-tags-row { margin-top: 0.3rem; }
 
@@ -573,7 +575,7 @@ function renderTable(rows) {
     if (isNew) tr.classList.add('ep-new');
     if (isFav) tr.classList.add('ep-fav');
     tr.innerHTML = `
-      <td><span class="podcast-name">${esc(podcast)}</span></td>
+      <td><span class="podcast-name" data-podcast="${esc(podcast)}" role="button" tabindex="0" title="Vis alle episoder fra ${esc(podcast)}">${esc(podcast)}</span></td>
       <td style="text-align:center"><button class="fav-btn" data-fav="${esc(epKey)}" aria-pressed="${isFav}" aria-label="${favLabel}" title="${favLabel}">${favIcon}</button></td>
       <td><a class="episode-title-link" href="${safeUrl(link)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(title)} (åpner i ny fane)">${esc(title)}</a></td>
       <td><span class="lang-badge ${lang === 'English' ? 'lang-en' : 'lang-no'}">${lang === 'English' ? 'EN' : 'NO'}</span></td>
@@ -598,7 +600,7 @@ function renderTable(rows) {
         <button class="fav-btn" data-fav="${esc(epKey)}" aria-pressed="${isFav}" aria-label="${favLabel}" title="${favLabel}" style="margin-left:auto">${favIcon}</button>
       </div>
       <a class="card-title-link" href="${safeUrl(link)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(title)} (åpner i ny fane)">${esc(title)}</a>
-      <div class="card-podcast">${esc(podcast)}</div>
+      <div class="card-podcast" data-podcast="${esc(podcast)}" role="button" tabindex="0" title="Vis alle episoder fra ${esc(podcast)}">${esc(podcast)}</div>
       ${hosts && hosts !== '—' ? `<div class="card-hosts">${esc(hosts)}</div>` : ''}
       <div class="card-tags-row">${renderTags(tags)}</div>
       <span class="swipe-hint">sveip &#8594; &#9733;</span>
@@ -873,11 +875,23 @@ function handleFavInteraction(e) {
   if (e.type === 'keydown') e.preventDefault();
   toggleFavorite(btn.dataset.fav);
 }
+// Podcast name click — filters to that podcast, clears active stat card
+function handlePodcastInteraction(e) {
+  const el = e.target.closest('[data-podcast]');
+  if (!el) return;
+  if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+  if (e.type === 'keydown') e.preventDefault();
+  document.getElementById('podcastFilter').value = el.dataset.podcast;
+  document.querySelectorAll('.stat').forEach(s => { s.classList.remove('active'); s.setAttribute('aria-pressed', 'false'); });
+  refresh();
+}
 ['tableBody', 'cardList'].forEach(id => {
   document.getElementById(id).addEventListener('click', handleTagInteraction);
   document.getElementById(id).addEventListener('keydown', handleTagInteraction);
   document.getElementById(id).addEventListener('click', handleFavInteraction);
   document.getElementById(id).addEventListener('keydown', handleFavInteraction);
+  document.getElementById(id).addEventListener('click', handlePodcastInteraction);
+  document.getElementById(id).addEventListener('keydown', handlePodcastInteraction);
 });
 
 // Favorites filter button
