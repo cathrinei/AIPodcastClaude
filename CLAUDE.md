@@ -12,6 +12,7 @@ This project collects and curates podcast episodes on artificial intelligence (A
 - `rate_episodes.py` — filtrerer åpenbar ikke-AI fra pending (score=0 → rejected); setter ingen rating
 - `approve_episodes.py` — flytter manuelt ratede episoder fra pending til hoved-CSV
 - `show_pending.py` — viser pending_episodes.csv i lesbar form i terminalen; kjøres lokalt
+- `sync_html.py` — synkroniserer det innebygde `data[]`-arrayet i HTML-en med CSV-en; kjøres etter `approve_episodes.py`
 - `rejected_episodes.csv` — denylist of already-reviewed non-AI episodes; prevents re-fetching noise
 
 ## Live URL
@@ -339,9 +340,10 @@ Branch-navnekonvensjon:
    - **1–3**: avvis (flyttes til rejected av approve-scriptet)
    - **0**: utsett til neste gjennomgang
 4. `python approve_episodes.py` — rating 4–6 → hoved-CSV, rating 1–3 → rejected, rating 0 → blir i pending
-5. `git add AI_KI_Podcasts.csv pending_episodes.csv rejected_episodes.csv`
-6. `git commit -m "..."` og `git push`
-7. Åpne `https://cathrinei.github.io/AIPodcastClaude/` — siden lastes automatisk med ny data
+5. `python sync_html.py` — synkroniserer HTML-ens innebygde `data[]`-array med CSV-en
+6. `git add AI_KI_Podcasts.csv AI_KI_Podcasts.html pending_episodes.csv rejected_episodes.csv`
+7. `git commit -m "..."` og `git push`
+8. Åpne `https://cathrinei.github.io/AIPodcastClaude/` — siden lastes automatisk med ny data
 
 **Legge til ny podcast:**
 - Legg til RSS-feed i `FEEDS`-dicten i `update_podcasts.py`
