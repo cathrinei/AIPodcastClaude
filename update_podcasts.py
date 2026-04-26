@@ -39,6 +39,7 @@ GUEST_FROM_TITLE = {
     "No Priors",
     "TWIML AI Podcast",
     "Latent Space",
+    "Hard Fork (NYT)",
 }
 
 LANGUAGE_OVERRIDE = {
@@ -167,11 +168,45 @@ def extract_guest_from_title(title, podcast_name):
             candidate = m.group(1).strip()
             if len(candidate) > 3:
                 return candidate
+        # Mønster C: «Emne? Gjest on topic» — stort navn etter spørsmålstegn
+        m = re.search(r'[?!]\s+([A-Z][a-z]+(?: [A-Z][a-z]+)+) on \b', title)
+        if m:
+            candidate = m.group(1).strip()
+            if len(candidate) > 3:
+                return candidate
 
     elif podcast_name == "Gradient Dissent (W&B)":
         # Mønster: «Emne | Gjest» — siste segment etter ' | '
         if ' | ' in title:
             candidate = title.rsplit(' | ', 1)[-1].strip()
+            if len(candidate) > 3:
+                return candidate
+
+    elif podcast_name == "Latent Space":
+        # Mønster A: «Emne — with Gjest, Tittel» (eksplisitt "with")
+        m = re.search(r'\s[—–]\s+with\s+(.+?)$', title)
+        if m:
+            candidate = m.group(1).strip()
+            if len(candidate) > 3:
+                return candidate
+        # Mønster B: «Emne — Gjest (Selskap)» eller «Emne — Gjest & Gjest, Selskap»
+        # Bruker em/en-strek som separator; [AINews]-titler bruker aldri denne.
+        m = re.search(r'\s[—–]\s+(?!with\s)(.+?)$', title)
+        if m:
+            candidate = m.group(1).strip()
+            words = candidate.split()
+            # Må se ut som navn: 1–6 ord, starter med stor bokstav, ikke bare akronymer
+            if (1 <= len(words) <= 6
+                    and len(candidate) < 60
+                    and candidate[0].isupper()
+                    and not re.match(r'^[A-Z]{2,}\b', candidate)):
+                return candidate
+
+    elif podcast_name == "Hard Fork (NYT)":
+        # Mønster: «Emne With Gjest + ...» — stor W indikerer gjest, ikke "with" i setning
+        m = re.search(r'\bWith\s+(.+?)(?:\s+\+|$)', title)
+        if m:
+            candidate = m.group(1).strip()
             if len(candidate) > 3:
                 return candidate
 
