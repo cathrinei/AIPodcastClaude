@@ -16,7 +16,7 @@ This project collects and curates podcast episodes on artificial intelligence (A
 - `rejected_episodes.csv` — denylist of already-reviewed non-AI episodes; prevents re-fetching noise
 
 ## Live URL
-`https://cathrinei.github.io/AIPodcastClaude/` — serves the latest committed HTML + CSV automatically. GitHub Actions updates the CSV daily at 11:00 CEST; Pages rebuilds on every push to `main`.
+`https://cathrinei.github.io/AIPodcastClaude/` — serves the latest committed HTML + CSV automatically. GitHub Actions updates the CSV daily at 23:00 CEST; Pages rebuilds on every push to `main`.
 
 ## CSV columns
 
@@ -340,7 +340,7 @@ Branch-navnekonvensjon:
 
 ## Workflow
 
-**GitHub Actions (automatisk, daglig kl. 11:00):**
+**GitHub Actions (automatisk, daglig kl. 23:00):**
 1. `update_podcasts.py` henter nye episoder → legger dem i `pending_episodes.csv` → committer
 
 **Lokalt (manuell gjennomgang):**
