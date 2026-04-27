@@ -7,11 +7,29 @@ Foreslåtte forbedringer, sortert etter prioritet. Ikke tidsbestemt.
 ## 🔴 Høy prioritet
 
 ### 1. Implementer llm-tag
-Se `llm_tag_plan.md` for fullstendig plan (16 episoder + HTML-endringer).
 - CSS-badge: `#ede9fe / #5b21b6` (lilla)
 - `tagMeta`: `llm: { label: 'LLM', cls: 'tag-llm' }`
-- Oppdater 16 episoder i CSV
 - Oppdater CLAUDE.md
+
+**16 episoder som skal tagges:**
+| Podcast | Episode (forkortet) |
+|---|---|
+| Latent Space | Anthropic Distillation & How Models Cheat (SWE-Bench Dead) |
+| TWIML AI Podcast | #760 – Intelligent Robots in 2026 |
+| TWIML AI Podcast | #762 – AI Trends 2026 |
+| TWIML AI Podcast | #764 – Diffusion LLMs |
+| TWIML AI Podcast | #765 – Capital One Multi-Agent |
+| No Priors | Andrej Karpathy on Code Agents |
+| The Cognitive Revolution | Zvi Mowshowitz: From the Beginning… |
+| The Cognitive Revolution | It's Crunch Time: Ajeya Cotra on RSI |
+| Win-Win with Liv Boeree | #52 – Will MacAskill |
+| Win-Win with Liv Boeree | #53 – John Schultz (DeepMind) |
+| Win-Win with Liv Boeree | #55 – Dean Ball x Daniel Kokotajlo |
+| AI Forklart | Det rundt spørsmålet (prompting) |
+| AI Forklart | Når språkmodellen får deg inn i en spiral av feil |
+| HR-podden | 228: Hva du bør vite om KI i 2026 |
+| Teknologi og mennesker | De viktigste teknologitrendene 2026 |
+| Hard Fork (NYT) | A.I. and Job/Stock Market Volatility |
 
 ---
 
