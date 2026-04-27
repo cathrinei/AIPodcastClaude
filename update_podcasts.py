@@ -175,6 +175,15 @@ def extract_guest_from_title(title, podcast_name):
             if len(candidate) > 3:
                 return candidate
 
+    elif podcast_name == "No Priors":
+        # Mønster: «Gjest on Emne» — tittelen starter med gjestens navn
+        # (mange No Priors-episoder har ikke gjest i tittelen — fanges ikke opp)
+        m = re.match(r'^([A-Z][a-z]+(?: [A-Z][a-z]+)+) on \b', title)
+        if m:
+            candidate = m.group(1).strip()
+            if len(candidate) > 3:
+                return candidate
+
     elif podcast_name == "Gradient Dissent (W&B)":
         # Mønster: «Emne | Gjest» — siste segment etter ' | '
         if ' | ' in title:

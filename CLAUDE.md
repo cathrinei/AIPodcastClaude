@@ -71,7 +71,7 @@ Bruk disse navnene konsekvent ved rating av nye episoder:
 - **Podcast directories**: Apple Podcasts, Spotify, listennotes.com, podchaser.com
 
 ## Key findings (Jan 2026 – 21.04.26)
-- **164 episodes** across **26 shows** (116 English, 48 Norwegian) — 164 rated (4–6)
+- **176 episodes** across **27 shows** (130 English, 46 Norwegian) — 176 rated (4–6)
 - **Vibe coding** was a dominant cross-show theme — tagged across multiple series
 - **OpenClaw** (formerly Clawdbot/Moltbot) emerged as a major cross-show topic — 10+ episodes tagged
 - **Top-rated English episodes (6/6):** Latent Space × 5, Lex Fridman #490 + #491, No Priors (Karpathy), TWIML × 2 — 10 total
@@ -260,6 +260,7 @@ Alle kjente WCAG AA-problemer er fikset. Gjeldende status:
   - **The Cognitive Revolution**: `, with Gjest`, `w/ Gjest`, eller `Gjest on topic` etter `?`/`!`
   - **Gradient Dissent (W&B)**: `Emne | Gjest` (siste segment etter ` | `)
   - **Latent Space**: `Emne — with Gjest, Tittel` (mønster A) eller `Emne — Gjest (Selskap)` / `Emne — Gjest & Gjest` (mønster B, em/en-strek). `[AINews]`-episoder mangler strek og treffer ikke.
+  - **No Priors**: `Gjest on Emne` — tittelen starter med gjestens navn (mange episoder har ikke gjest i tittelen)
   - **Hard Fork (NYT)**: `Emne With Gjest + ...` — stor W indikerer gjesteepisode; stopper ved ` +`
   - Verifiser alltid manuelt i pending_episodes.csv — kan gi feil eller «CEO Navn» i stedet for bare navn
 - `GUEST_FROM_TITLE`-settet: legg til nye podcaster som konsekvent oppgir gjest i tittelen
