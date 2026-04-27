@@ -350,7 +350,9 @@ Branch-navnekonvensjon:
 ## Workflow
 
 **GitHub Actions (automatisk, daglig kl. 23:00):**
-1. `update_podcasts.py` henter nye episoder → legger dem i `pending_episodes.csv` → committer
+1. `update_podcasts.py` henter nye episoder → legger dem i `pending_episodes.csv`
+2. `rate_episodes.py` kjøres automatisk — filtrerer åpenbar ikke-AI (score=0 → `rejected_episodes.csv`); resten beholdes i pending
+3. Committer `pending_episodes.csv` + `rejected_episodes.csv` hvis endret
 
 **Lokalt (manuell gjennomgang):**
 1. `git pull` — hent oppdatert `pending_episodes.csv`

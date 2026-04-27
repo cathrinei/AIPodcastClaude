@@ -64,11 +64,10 @@ Når llm-tag er implementert: legg til LLM-relaterte nøkkelord
 (`llm`, `language model`, `prompting`, `transformer`, `benchmark`) i `MEDIUM_AI`-lista
 for bedre automatisk scoring av pending-episoder.
 
-### 8. GitHub Actions: kjør rate_episodes.py automatisk
-Etter `update_podcasts.py` i workflow: kjør `python rate_episodes.py` automatisk.
-Filtrerer åpenbar ikke-AI fra pending før manuell gjennomgang.
-Krever at `rate_episodes.py` ikke har interaktive spørsmål (det har den ikke).
-Merk: øker risiko for falske positiver — vurder nøye.
+~~### 8. GitHub Actions: kjør rate_episodes.py automatisk~~ ✅ implementert
+`rate_episodes.py` kjøres automatisk etter `update_podcasts.py` i GHA-workflow.
+`rejected_episodes.csv` committes også (ikke bare `pending_episodes.csv`).
+Merk: øker risiko for falske positiver — overvåk GHA-logger etter deploy.
 
 ---
 

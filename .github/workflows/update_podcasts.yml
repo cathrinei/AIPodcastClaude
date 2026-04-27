@@ -28,11 +28,14 @@ jobs:
       - name: Kjør update_podcasts.py
         run: python update_podcasts.py
 
-      - name: Commit og push hvis pending er endret
+      - name: Kjør rate_episodes.py (filtrerer åpenbar ikke-AI)
+        run: python rate_episodes.py
+
+      - name: Commit og push hvis pending eller rejected er endret
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add pending_episodes.csv
+          git add pending_episodes.csv rejected_episodes.csv
           if git diff --cached --quiet; then
             echo "Ingen nye episoder – ingen endringer å committe."
           else
