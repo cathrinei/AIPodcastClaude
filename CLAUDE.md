@@ -172,6 +172,14 @@ Manuell fallback for lokal bruk (`file://`) eller testing med en spesifikk CSV-f
 - Aktiveres ikke hvis `activeElement` allerede er `INPUT`, `TEXTAREA` eller `SELECT`
 - `e.preventDefault()` hindrer at `/` skrives inn i søkefeltet
 
+### CSV-eksport
+- «↓ Eksporter CSV»-knapp i kontrollpanelet laster ned filtrert og sortert visning som CSV
+- Eksporterer kun de radene som vises (respekterer søk, filtre, sortering)
+- Implementert med `Blob` + `URL.createObjectURL` + midlertidig `<a>`-element
+- BOM-prefiks (`﻿`) sikrer korrekt UTF-8-visning i Excel
+- Filnavn: `AI_KI_Podcasts_YYYY-MM-DD.csv`
+- Knapp viser «✓ Lastet ned!» i 2 sek, tilbakestilles automatisk
+
 ### Del-lenke
 - «🔗 Del»-knapp i kontrollpanelet bygger en URL med aktive filtre og kopierer til utklippstavlen
 - Støttede query-parametre: `search`, `lang`, `podcast`, `rating` (utelates hvis 4), `tag`, `favs=1`

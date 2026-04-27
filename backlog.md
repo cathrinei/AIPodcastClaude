@@ -44,19 +44,15 @@ Eks: «Vibe coding (28)» i stedet for bare «Vibe coding».
 Beregnes dynamisk fra filtrert datasett i `renderTags()`/kontrollpanelet.
 Gir brukeren bedre oversikt over taggens omfang.
 
-### 4. Tomt-tilstand ved ingen søkeresultater
-Når filtrering gir 0 treff: vis en tydelig melding i tabellen/kortvisningen
-(f.eks. «Ingen episoder matcher filteret — prøv å justere søket»).
-Hindrer forvirring ved tomme resultater.
+~~### 4. Tomt-tilstand ved ingen søkeresultater~~ ✅ implementert
 
 ---
 
 ## 🟢 Lav prioritet / nice to have
 
-### 5. Eksporter filtrert visning som CSV
-Knapp som laster ned gjeldende filtrert datasett som CSV.
-Nyttig for egne analyser eller deling.
-Implementeres med `Blob` + `URL.createObjectURL`.
+~~### 5. Eksporter filtrert visning som CSV~~ ✅ implementert
+Knapp «↓ Eksporter CSV» laster ned filtrert og sortert visning.
+BOM-prefiks sikrer korrekt UTF-8 i Excel. Filnavn inkluderer dato.
 
 ~~### 6. «Tilbake til toppen»-knapp~~ ✅ implementert
 

@@ -72,6 +72,7 @@
   .fav-filter-btn.active { background: rgba(245,158,11,0.12); border-color: #f59e0b; color: #92400e; }
   body.dark .fav-filter-btn.active { color: #fbbf24; border-color: #fbbf24; }
   .share-btn.copied { background: rgba(22,163,74,0.1); border-color: #16a34a; color: #16a34a; }
+  .export-btn.exported { background: rgba(22,163,74,0.1); border-color: #16a34a; color: #16a34a; }
   .update-btn { padding: 0.45rem 0.9rem; border: none; border-radius: 6px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); font-size: 0.82rem; cursor: pointer; color: #fff; box-shadow: 0 2px 8px rgba(99,102,241,0.45); transition: box-shadow 0.15s ease, background 0.15s ease; }
   .update-btn:hover { background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); box-shadow: 0 4px 14px rgba(99,102,241,0.6); }
   .fetch-btn { padding: 0.45rem 0.9rem; border: none; border-radius: 6px; background: linear-gradient(135deg, #059669 0%, #047857 100%); font-size: 0.82rem; cursor: pointer; color: #fff; box-shadow: 0 2px 8px rgba(5,150,105,0.45); transition: box-shadow 0.15s ease, background 0.15s ease; text-decoration: none; display: inline-flex; align-items: center; }
@@ -212,7 +213,7 @@
     .controls label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.8rem; }
     .controls input[type=text] { width: 100%; max-width: 100%; font-size: 0.9rem; }
     .controls select { width: 100%; font-size: 0.9rem; }
-    .reset-btn, .update-btn, .fetch-btn, .fav-filter-btn, .share-btn { width: 100%; justify-content: center; font-size: 0.85rem; padding: 0.6rem 0.9rem; }
+    .reset-btn, .update-btn, .fetch-btn, .fav-filter-btn, .share-btn, .export-btn { width: 100%; justify-content: center; font-size: 0.85rem; padding: 0.6rem 0.9rem; }
     #updateStatus { text-align: center; }
     .row-count { padding: 0.4rem 1rem; }
     .table-wrap { display: none; }
@@ -275,6 +276,7 @@
   </label>
   <button class="reset-btn fav-filter-btn" id="favFilterBtn" aria-pressed="false">&#9734; Favoritter</button>
   <button class="reset-btn share-btn" id="shareBtn" title="Kopier lenke med aktive filtre">&#128279; Del</button>
+  <button class="reset-btn export-btn" id="exportBtn" title="Last ned filtrert visning som CSV">&#8595; Eksporter CSV</button>
   <button class="reset-btn" id="resetBtn">Nullstill</button>
   <a class="fetch-btn" href="https://github.com/cathrinei/AIPodcastClaude/actions/workflows/update_podcasts.yml" target="_blank" rel="noopener" title="Kjør daglig RSS-henting manuelt på GitHub Actions" style="display:none">&#8635; Hent nye data</a>
   <!-- Last inn CSV-knapp: skjult fordi CSV lastes automatisk via fetch() på GitHub Pages.
@@ -799,6 +801,34 @@ shareBtn.addEventListener('click', () => {
     // Fallback for browsers without clipboard API
     prompt('Kopier lenken:', url);
   });
+});
+// CSV-eksport — laster ned filtrert og sortert visning som CSV
+const exportBtn = document.getElementById('exportBtn');
+let exportTimer = null;
+const CSV_HEADER = ['Podcast Name','Episode Title','Language','Published Date','Host(s)','Guest(s)','Main Topic(s)','Rating (1-6)','Rating Notes','Tags','Platform / Link'];
+exportBtn.addEventListener('click', () => {
+  const rows = getSorted(getFiltered());
+  const escape = v => {
+    const s = String(v === null || v === undefined ? '' : v);
+    return s.includes(',') || s.includes('"') || s.includes('\n')
+      ? '"' + s.replace(/"/g, '""') + '"'
+      : s;
+  };
+  const csv = [CSV_HEADER, ...rows].map(r => r.map(escape).join(',')).join('\r\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `AI_KI_Podcasts_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  exportBtn.innerHTML = '&#10003; Lastet ned!';
+  exportBtn.classList.add('exported');
+  clearTimeout(exportTimer);
+  exportTimer = setTimeout(() => {
+    exportBtn.innerHTML = '&#8595; Eksporter CSV';
+    exportBtn.classList.remove('exported');
+  }, 2000);
 });
 document.getElementById('updateBtn').addEventListener('click', () =>
   document.getElementById('csvFile').click()
