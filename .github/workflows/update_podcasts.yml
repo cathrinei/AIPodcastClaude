@@ -2,7 +2,7 @@ name: Hent nye podkast-episoder
 
 on:
   schedule:
-    - cron: '0 9 * * *'   # 11:00 norsk sommertid (CEST = UTC+2)
+    - cron: '0 21 * * *'  # 23:00 norsk sommertid (CEST = UTC+2)
   workflow_dispatch:        # kan også kjøres manuelt fra GitHub
 
 permissions:
