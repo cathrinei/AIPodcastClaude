@@ -231,6 +231,8 @@ def fetch_feed(url):
         return None, f"HTTP {e.code}"
     except urllib.error.URLError as e:
         return None, str(e.reason)
+    except (TimeoutError, OSError) as e:
+        return None, f"Timeout/OS-feil: {e}"
 
 
 def parse_date(date_str):
