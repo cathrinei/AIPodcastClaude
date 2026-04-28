@@ -70,8 +70,8 @@ Bruk disse navnene konsekvent ved rating av nye episoder:
 - **Norwegian**: AI-Snakk (aisnakk.no), E24-podden, Shifter, Digi.no, lorn.tech, nora.ai, HR-podden, Teknologi og mennesker (Atea), Bouvet Bobler
 - **Podcast directories**: Apple Podcasts, Spotify, listennotes.com, podchaser.com
 
-## Key findings (Jan 2026 – 21.04.26)
-- **176 episodes** across **27 shows** (130 English, 46 Norwegian) — 176 rated (4–6)
+## Key findings (Jan 2026 – 28.04.26)
+- **180 episodes** across **27 shows** (133 English, 47 Norwegian) — 180 rated (4–6)
 - **Vibe coding** was a dominant cross-show theme — tagged across multiple series
 - **OpenClaw** (formerly Clawdbot/Moltbot) emerged as a major cross-show topic — 10+ episodes tagged
 - **Top-rated English episodes (6/6):** Latent Space × 5, Lex Fridman #490 + #491, No Priors (Karpathy), TWIML × 2 — 10 total
@@ -280,6 +280,8 @@ Alle kjente WCAG AA-problemer er fikset. Gjeldende status:
 ### Kjente fallgruver ved episodefetching
 - **Gamle «siste kjente dato»**: Dersom en podcast ikke har blitt kjørt på en stund (eller har få episoder i CSV), kan `latest_date_per_podcast()` returnere en gammel dato — og hele gapet siden da hentes inn som «nye» episoder. Eksempel: Lex Fridman siste i CSV: 2026-02-12 → episodene #492–#495 (mars/april) fanget opp først ved neste kjøring.
 - **RSS-titteldrift gir duplikater**: Noen feeder endrer tittelformatering over tid (em-strek vs bindestrek, apostrof-encoding, mellomrom vs bindestrek). `existing_keys` bruker eksakt match på `title.lower()`, så minimale titteldifferanser sniker seg gjennom som nye episoder. Løsning: kjør duplikatsjekk etter `update_podcasts.py` og fjern eventuelle dobbeltoppføringer manuelt.
+- **TimeoutError krasjer jobben**: Python 3.12 kan kaste `TimeoutError` direkte (ikke pakket i `urllib.error.URLError`) ved treg feed. `fetch_feed()` fanger nå `(TimeoutError, OSError)` i tillegg til `HTTPError`/`URLError` — uten denne fiksen vil én treg feed stoppe hele kjøringen og ingen episoder skrives til pending.
+- **No Priors-feeden henter inn StarTalk-episoder**: RSS-feeden for No Priors inneholder av og til episoder fra Neil deGrasse Tysons StarTalk-podcast (f.eks. «Cosmic Queries – Take Me To Your Leader»). Disse er ikke AI-relevante — avvis dem med rating 1 ved gjennomgang.
 
 ## rate_episodes.py – tekniske noter
 - Kjøres lokalt etter `git pull`; leser `pending_episodes.csv` og filtrerer åpenbar ikke-AI
