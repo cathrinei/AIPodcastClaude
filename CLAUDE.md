@@ -363,6 +363,7 @@ Branch-navnekonvensjon:
    - **4–6**: godkjent — behold med metadata
    - **1–3**: avvis (flyttes til rejected av approve-scriptet)
    - **0**: utsett til neste gjennomgang
+   - **Claude kjører `git pull` og setter rating autonomt** — uten å spørre brukeren først, så lenge ratingen er sikker. Spør kun ved genuint tvetydige episoder.
 4. `python approve_episodes.py` — rating 4–6 → hoved-CSV, rating 1–3 → rejected, rating 0 → blir i pending
 5. `python sync_html.py` — synkroniserer HTML-ens innebygde `data[]`-array med CSV-en
 6. `git add AI_KI_Podcasts.csv AI_KI_Podcasts.html pending_episodes.csv rejected_episodes.csv`
