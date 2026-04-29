@@ -359,8 +359,8 @@ Branch-navnekonvensjon:
 **Lokalt (manuell gjennomgang):**
 1. `git pull` — hent oppdatert `pending_episodes.csv`
 2. `python rate_episodes.py` — fjerner åpenbar ikke-AI (score=0 → rejected); resten beholdes i pending med Rating=0
-3. Åpne `pending_episodes.csv` og sett rating manuelt:
-   - **4–6**: behold (sett passende rating, fyll inn Host(s), Guest(s), Main Topic(s), Tags)
+3. **Claude setter rating** på alle gjenværende episoder i pending — fyll inn Host(s), Guest(s), Main Topic(s), Tags og rating (4–6 / 1–3) basert på tittel og beskrivelse. Bruk rubrikken nedenfor.
+   - **4–6**: godkjent — behold med metadata
    - **1–3**: avvis (flyttes til rejected av approve-scriptet)
    - **0**: utsett til neste gjennomgang
 4. `python approve_episodes.py` — rating 4–6 → hoved-CSV, rating 1–3 → rejected, rating 0 → blir i pending
