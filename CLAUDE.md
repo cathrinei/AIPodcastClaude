@@ -351,6 +351,17 @@ Branch-navnekonvensjon:
 - **CLAUDE.md skal alltid oppdateres** og inkluderes i samme PR som feature-endringen — ingen unntak
 - Session-branch opprettes rett før første endring (`git checkout main && git pull && git checkout -b session/YYYY-MM-DD`) — ikke tidlig på dagen — slik at den alltid er i sync med main
 
+**Opprydding av branches og PRs (annenhver uke):**
+Mergede branches hoper seg opp raskt. Claude skal minne om dette ved oppstart av en arbeidsøkt hvis det har gått mer enn 14 dager siden forrige opprydding.
+Sjekk og slett med:
+```bash
+# Slett alle mergede remote branches unntatt main og aktiv branch
+git branch -r | grep "origin/" | grep -v "HEAD\|main\|$(git branch --show-current)" | sed 's/origin\///' | xargs -I{} git push origin --delete {}
+
+# Slett tilsvarende lokale branches
+git branch --merged main | grep -v "main\|$(git branch --show-current)" | xargs git branch -d
+```
+
 ## Workflow
 
 **GitHub Actions (automatisk, daglig kl. 23:00):**
