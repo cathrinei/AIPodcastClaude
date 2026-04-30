@@ -114,7 +114,7 @@ Bruk disse navnene konsekvent ved rating av nye episoder:
 
 ### Metadata-utfylling
 - **Dato**: alltid fra RSS `<pubDate>` — alltid `YYYY-MM-DD`
-- **Host(s)**: fylles **ikke** automatisk — `itunes:author` er for upålitelig (returnerer ofte selskapsnavn). Settes av `auto_rate.py` basert på kjente vertnavn i system-prompten.
+- **Host(s)**: hentes fra `HOST_OVERRIDES`-dict (18 kjente podkaster) → deretter RSS `itunes:author`/`dc:creator` på item- og kanalnivå (kun hvis det ser ut som et personnavn). `auto_rate.py` kan korrigere ved behov. Legg nye faste verter til i `HOST_OVERRIDES` i `update_podcasts.py`.
 - **Guest(s)**: utledes fra tittelen via `extract_guest_from_title()` for utvalgte podcaster (`GUEST_FROM_TITLE`-settet). Verifiser alltid manuelt — kan gi feil.
 - **`LANGUAGE_OVERRIDE`-dict**: tvinger riktig språk for norske podcaster der RSS-feeden mangler eller returnerer feil `<language>`-tag. Legg til nye norske podcaster her ved behov.
 
