@@ -42,6 +42,32 @@ GUEST_FROM_TITLE = {
     "Hard Fork (NYT)",
 }
 
+ITUNES_NS = "http://www.itunes.com/dtds/podcast-1.0.dtd"
+DC_NS     = "http://purl.org/dc/elements/1.1/"
+
+# Kjente faste verter per podcast (nøkler i lowercase).
+# Disse brukes alltid fremfor RSS-feltene, som typisk returnerer selskapsnavn.
+HOST_OVERRIDES = {
+    "latent space":                     "Shawn Wang, Alessio Fanelli",
+    "hard fork (nyt)":                  "Kevin Roose, Casey Newton",
+    "lex fridman podcast":              "Lex Fridman",
+    "no priors":                        "Sarah Guo, Elad Gil",
+    "the ai daily brief":               "Nathaniel Whittemore (NLW)",
+    "twiml ai podcast":                 "Sam Charrington",
+    "the cognitive revolution":         "Nathan Labenz",
+    "practical ai":                     "Daniel Whitenack, Chris Benson",
+    "gradient dissent (w&b)":           "Lukas Biewald",
+    "the artificial intelligence show": "Paul Roetzer, Mike Kaput",
+    "the ai breakdown (andy dumbell)":  "Andy Dumbell",
+    "the implement ai podcast":         "Piers Linney, Dr. Aalok Y. Shukla",
+    "win-win with liv boeree":          "Liv Boeree",
+    "agile mentors podcast":            "Mike Cohn",
+    "ai-snakk":                         "Audun Kvitland Røstad",
+    "ai forklart":                      "Niclas Kvanvig, Celine Haaland-Johansen",
+    "heis":                             "Truls og Audun",
+    "hr-podden":                        "Lene Broen",
+}
+
 LANGUAGE_OVERRIDE = {
     "AI-Snakk":               "Norwegian",
     "AI Forklart":            "Norwegian",
@@ -121,6 +147,48 @@ def latest_date_per_podcast(rows):
 
 def strip_html(text):
     return re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', ' ', text)).strip()
+
+
+def _looks_like_person(val: str, podcast_name: str) -> bool:
+    """Sjekker at en RSS-verdi trolig er et personnavn og ikke et selskapsnavn."""
+    v = val.lower()
+    p = podcast_name.lower()
+    if v in p or p in v:
+        return False
+    if any(w in v for w in ("podcast", "show", "radio", "media", "production", "studio", "llc", "inc.", "ltd")):
+        return False
+    return val[0].isupper() and 2 <= len(val.split()) <= 5
+
+
+def _extract_host(podcast_name: str, item, channel) -> str:
+    """Henter vertsnavn via HOST_OVERRIDES, deretter RSS item- og kanal-nivå."""
+    key = podcast_name.strip().lower()
+
+    # 1. Kjent override — alltid mest pålitelig for disse podcastene
+    if key in HOST_OVERRIDES:
+        return HOST_OVERRIDES[key]
+
+    # 2. RSS item-nivå (ofte selskapsnavn — valider)
+    for el in [
+        item.find(f"{{{ITUNES_NS}}}author"),
+        item.find(f"{{{DC_NS}}}creator"),
+    ]:
+        if el is not None and el.text:
+            val = el.text.strip()
+            if val and _looks_like_person(val, podcast_name):
+                return val
+
+    # 3. RSS kanal-nivå fallback
+    for el in [
+        channel.find(f"{{{ITUNES_NS}}}author"),
+        channel.find("managingEditor"),
+    ]:
+        if el is not None and el.text:
+            val = el.text.strip()
+            if val and _looks_like_person(val, podcast_name):
+                return val
+
+    return ""
 
 
 def extract_guest_from_title(title, podcast_name):
@@ -285,6 +353,7 @@ def fetch_new_episodes(podcast_name, feed_url, after_dt):
         desc_raw = desc_el.text if desc_el is not None and desc_el.text else ""
         description = strip_html(desc_raw)[:600]
 
+        host  = _extract_host(podcast_name, item, channel)
         guest = extract_guest_from_title(title, podcast_name)
 
         new_eps.append([
@@ -292,7 +361,7 @@ def fetch_new_episodes(podcast_name, feed_url, after_dt):
             title,
             language,
             pub_dt.strftime("%Y-%m-%d"),
-            "",        # Host(s) — fylles manuelt (kan variere per episode)
+            host,      # Host(s) — fra HOST_OVERRIDES eller RSS
             guest,     # Guest(s) — forsøkt utledet fra tittel, verifiser manuelt
             "",        # Main Topic(s)
             UNRATED,   # Rating
