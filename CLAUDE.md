@@ -83,165 +83,16 @@ Bruk disse navnene konsekvent ved rating av nye episoder:
 
 ## HTML – tekniske noter
 
-### Data array
-The `data` array in the HTML is populated from the CSV. When changes are made to episode data, update the CSV first, then sync the HTML data array. Unrated episodes (Rating=0) display as **N/A** in the rating badge and always pass through the rating filter regardless of the minimum rating setting.
-
-### Stats
-`updateStats()` computes all stats automatically from the `data` array:
-- Total episodes, English count, Norwegian count, top-rated (6/6) count
-- "Podkastserier" and "episoder uten rating" cards removed
-- Each stat card is clickable: applies a corresponding filter and marks itself `.active`; clicking "total" resets all filters
-- `applyStatFilter(action)` handles card clicks — sets `langFilter`/`ratingFilter` and calls `buildPodcastFilter()` + `refresh()`
-- Active state clears automatically when the user touches any manual filter control (`input` event)
-
-### Auto-fetch CSV (GitHub Pages)
-- On page load, an async IIFE calls `fetch('./AI_KI_Podcasts.csv')` (same-origin)
-- If successful: parses CSV, replaces `data` array, calls `buildPodcastFilter()` + `updateStats()` + `refresh()`
-- Status bar shows `✓ X episoder lastet inn automatisk [· Y nye]` — men kun første gang etter at CSV er endret
-- Fingeravtrykk: `Last-Modified`-headeren fra fetch-svaret lagres i `localStorage.csvLastModified`; melding vises bare når den er endret siden sist besøk; fallback til antall rader hvis headeren mangler
-- Silently falls back to the built-in `data` array when opened as `file://` (fetch fails due to CORS) or on network error
-- CSP `connect-src 'self'` already allows same-origin fetch — no changes needed
-
-### "↑ Last inn CSV"-knappen
-Skjult (`style="display:none"` på `#updateBtn`) — CSV lastes automatisk via fetch() på GitHub Pages.
-For å vise igjen: fjern `style="display:none"` fra `#updateBtn` i HTML-en (kommentar i koden forklarer dette).
-Manuell fallback for lokal bruk (`file://`) eller testing med en spesifikk CSV-fil:
-1. Opens a file picker (`<input type="file" accept=".csv">`)
-2. Reads file with `FileReader` (UTF-8)
-3. `parseCSV()` parses content — handles commas in quoted fields and CRLF/LF
-4. `data` array is cleared and refilled; header row skipped
-5. Rating field (column 7) parsed with `parseInt` + `isNaN` fallback to 0
-6. `updateStats()` and `refresh()` run immediately
-
-### Dark mode
-- Toggle button (☾ Mørk / ☀ Lys) in the top-right of the header
-- Preference persisted in `localStorage` (`darkMode` key: `'1'` = dark, `'0'` = light)
-- Implemented via CSS custom properties on `:root`; `body.dark` overrides all color variables
-- Light mode is the default
-
-### Design / visuell stil
-- **Accent**: `--accent: #6366f1` (lys: indigo, mørk: `#818cf8`) — brukes på knapp, focus-outline, rad-hover-kant
-- **Header**: `var(--surface)` (hvit/mørk via variabel) + `border-top: 3px solid var(--accent)` + `border-bottom: 1px solid var(--border)`; ingen dark-mode-override nødvendig — CSS-variabler håndterer det automatisk
-- **Mørk-toggle**: bruker `var(--border)` / `var(--text-muted)` — ingen hardkodede dark-overrides
-- **Stats-bokser**: hvit bakgrunn, `border: 1px solid var(--border)`, `border-radius: 12px`; tall i `font-size: 2rem / font-weight: 800`; klikkbare — hover gir accent-kant, `.active` gir `box-shadow: 0 0 0 3px rgba(99,102,241,0.18)`
-- **Tabelloverskrift**: `background: #f0f1f5` (nøytral off-white); tekst `#6b7280`; kolonner skilt med `border-right: 1px solid var(--border)`; sortert kolonne får `color: var(--accent)`; dark mode: `#252840`
-- **Kontrollfelt**: `background: var(--bg)` (litt mørkere enn `--surface`) — visuelt skilt fra stat-raden over
-- **Radhovering**: leaderboard-stil — `inset 4px 0 0 var(--accent)` + lys lilla bakgrunn; smooth `0.12s ease` transisjon
-- **Zebrastriping**: annenhver rad bruker `--row-alt` (`#f5f7fc` lys / `#1f2235` mørk)
-- **Rating-badge**: `32px`, `font-weight: 800`; r4/r5/r6 har glow (`box-shadow: 0 0 0 3px rgba(...)`)
-- **"Last inn CSV"-knapp**: gradient + glow (`box-shadow: 0 2px 8px rgba(99,102,241,0.45)`)
-- **«Tilbake til toppen»-knapp** (`#backToTop`): fast posisjonert nedre høyre hjørne; vises etter 300px scroll (`window.scrollY > 300`); skjules via `opacity: 0 / pointer-events: none`; klikk → `window.scrollTo({ top: 0, behavior: 'smooth' })`; `{ passive: true }` scroll-lytter
-- **Episodetittel**: klikkbar lenke (`a.episode-title-link` desktop / `a.card-title-link` mobil) — åpner i ny fane (`target="_blank" rel="noopener noreferrer"`); hover gir accent-farge + understreking; `::after` viser `↗` som visuell indikator; `aria-label="Tittel (åpner i ny fane)"` for skjermlesere; «Lytt»-kolonne fjernet
-- Ingen eksterne fonter eller ressurser — holder CSP intakt
-
-### Ny-markering av episoder
-- Nye episoder markeres med amber venstrekant (`inset 3px 0 0 #f59e0b`) + svak amber bakgrunn ved CSV-innlasting
-- Implementert via `localStorage.seenEpisodeKeys` (JSON-array av `"podcast||title"`-nøkler fra forrige innlasting)
-- `newEpisodeKeys` (global `Set`) populeres ved CSV-innlasting: episoder ikke i `prevSeenKeys` legges til
-- Første innlasting (ingen `localStorage`): ingen markering (`hasPrevData = false`)
-- `localStorage` oppdateres med alle nøkler fra ny CSV etter hver innlasting — så neste runde starter ferskt
-- Statuslinjen viser f.eks. `✓ 160 episoder lastet inn … · 4 nye` når nye episoder finnes
-- `renderTable` sjekker `newEpisodeKeys` og setter `tr.classList.add('ep-new')` der det passer
-- Hover på `ep-new`-rad: lilla accent-stripe tar over (`.ep-new:hover` overstyrer amber)
-- Dark mode: `rgba(245,158,11,0.10)` + `#fbbf24` stripe
-- CSS-klasser: `tbody tr.ep-new`, `body.dark tbody tr.ep-new`, `tbody tr.ep-new:hover`
-
-### Favoritter
-- ☆/★ stjerne-knapp mellom Podkast- og Episode-kolonnen (desktop) og øverst i mobilkort — klikk for å toggle
-- `favoriteKeys` (global `Set`) lastet fra `localStorage.favEpisodeKeys` (JSON-array av `"podcast||title"`-nøkler) ved oppstart
-- `toggleFavorite(key)` legger til/fjerner nøkkel og kaller `saveFavorites()` + `refresh()`
-- `saveFavorites()` skriver `[...favoriteKeys]` til `localStorage.favEpisodeKeys`
-- `showFavoritesOnly` (global boolean) — slås på/av av «☆ Favoritter»-knappen i kontrollpanelet
-- `getFiltered()` sjekker `showFavoritesOnly` og filtrerer bort ikke-favoriterte rader
-- Rad-teller viser `· Favoritter (N)` når filteret er aktivt
-- Favoritterte rader/kort får svak amber bakgrunn (`rgba(245,158,11,0.05/0.06)`)
-- Event delegation på `tableBody`/`cardList` for `[data-fav]`-knapper — overlever re-render
-- `resetFilters()` slår av favorittfilter og tilbakestiller knapp-tekst/aria-pressed
-- CSS-klasser: `tbody tr.ep-fav`, `.ep-card.ep-fav`, `.fav-btn`, `.fav-filter-btn.active`
-
-### Klikkbare podcastnavn
-- Podcastnavnet i tabellen (`.podcast-name`) og på mobilkort (`.card-podcast`) er klikkbart
-- Klikk setter `#podcastFilter` til det aktuelle podcastnavnet og kaller `refresh()`
-- Nullstiller aktive stat-korter (samme som andre manuelle filterendringer)
-- Implementert via event delegation (`handlePodcastInteraction`) på `#tableBody` og `#cardList` — fungerer etter re-render
-- `data-podcast` attributt brukt til å hente podcastnavn; `role="button" tabindex="0"` for tilgjengelighet
-- Keyboard: Enter/Space aktiverer filteret
-- CSS: `.podcast-name` og `.card-podcast` — `cursor: pointer`; hover gir `var(--accent)` + underline
-
-### Tastatursnarvei — søkefelt
-- `/`-tast setter fokus på `#searchBox` (vanlig konvensjon fra GitHub/Linear/Notion)
-- Implementert som `keydown`-lytter på `document`
-- Aktiveres ikke hvis `activeElement` allerede er `INPUT`, `TEXTAREA` eller `SELECT`
-- `e.preventDefault()` hindrer at `/` skrives inn i søkefeltet
-
-### CSV-eksport
-- «↓ Eksporter CSV»-knapp i kontrollpanelet laster ned filtrert og sortert visning som CSV
-- Eksporterer kun de radene som vises (respekterer søk, filtre, sortering)
-- Implementert med `Blob` + `URL.createObjectURL` + midlertidig `<a>`-element
-- BOM-prefiks (`﻿`) sikrer korrekt UTF-8-visning i Excel
-- Filnavn: `AI_KI_Podcasts_YYYY-MM-DD.csv`
-- Knapp viser «✓ Lastet ned!» i 2 sek, tilbakestilles automatisk
-
-### Del-lenke
-- «🔗 Del»-knapp i kontrollpanelet bygger en URL med aktive filtre og kopierer til utklippstavlen
-- Støttede query-parametre: `search`, `lang`, `podcast`, `rating` (utelates hvis 4), `tag`, `favs=1`
-- `buildShareUrl()` leser alle filterverdier og bygger `URLSearchParams`
-- `applyUrlParams()` kjøres ved oppstart etter `buildPodcastFilter()` — setter alle filtre fra URL
-- Kopiering via `navigator.clipboard.writeText()`; fallback til `prompt()` for eldre nettlesere
-- Knapp viser «✓ Kopiert!» i 2 sek, tilbakestilles automatisk
-
-### Swipe-til-favoritt (mobil)
-- På touch-enheter: sveip høyre (≥ 60 px, klart horisontalt) på et mobilkort for å toggle favoritt
-- Implementert i en IIFE med `touchstart` / `touchmove` / `touchend` / `touchcancel` på `#cardList`
-- Under sveip: kortet forskyves (`translateX`) og amber venstrekant vokser proporsjonalt med distansen
-- Ved `touchend`: kort snapper tilbake med ease-transisjon; favoritt toggles hvis terskel nådd
-- Avbrytes hvis `|dy| / |dx| > 0.5` — vertikal scrolling forstyrres ikke
-- `will-change: transform` på `.ep-card` for ytelse
-- Hint-tekst `sveip → ★` vises på første kort kun på touch-enheter (`@media (hover: none) and (pointer: coarse)`)
-
-### Øvrige tekniske noter
-- Sort state: `sort` object (`col`, `asc`); `RATING_COL = 7`, `DATE_COL = 3`, `CSV_MAX_BYTES` constants
-- Default sort: date descending (nyeste øverst); rating og dato starter begge med synkende rekkefølge ved klikk
-- Column sort handlers use `data-col` attributes + click + keydown (Enter/Space) event listeners — no inline `onclick`
-- Tags whitelisted via `tagMeta` object — unknown tag values ignored; current tags: `vibe`, `openclaw`, `agents`
-- `safeUrl()` blocks non-HTTP(S) URLs to prevent `javascript:` injection
+- `data[]`-arrayet i HTML er en innebygd kopi av CSV — alltid oppdater CSV først, kjør deretter `sync_html.py`
+- På GitHub Pages lastes CSV automatisk via `fetch('./AI_KI_Podcasts.csv')` ved sidestart og erstatter `data[]`; faller stille tilbake til innebygd array ved `file://` eller nettverksfeil
+- `sync_html.py` bruker regex til å erstatte hele `const data = [...]`-blokken i HTML-filen
+- «Last inn CSV»-knappen er skjult (`style="display:none"`) — fjern attributtet for å aktivere manuell fallback
+- Tags whitelisted via `tagMeta`-objekt — ukjente tag-verdier ignoreres; aktive tags: `vibe`, `openclaw`, `agents`
+- `safeUrl()` blokkerer ikke-HTTP(S)-URLer for å hindre `javascript:`-injeksjon
 - CSP: `default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'`
-- `parseCSV` trims only unquoted fields — preserves whitespace in quoted titles
-- Default filter on load: rating 4+; N/A episodes always shown regardless of filter
-- Search is fuzzy: exact substring match first, then subsequence fallback (e.g. `"krpthy"` matches `"Karpathy"`)
-- Tag filter uses exact split match — `tags.split(',').map(t => t.trim()).includes(tagFilter)` — prevents substring false positives
-- Rating class injection hardened: `'r'+rating` only applied when rating is strictly in `[1,2,3,4,5,6]`
-- CSV upload capped at 5 MB — `CSV_MAX_BYTES` constant; `reader.onerror` handler added
-- `parseInt` called with explicit radix 10 throughout
-
-### WCAG AA – tilgjengelighet
-Alle kjente WCAG AA-problemer er fikset. Gjeldende status:
-
-**Kontrast (1.4.3):**
-- `thead th`: `#4b5563` på `#f0f1f5` (~5.9:1) ✅ — var `#6b7280` (4.3:1, feilet)
-- `--text-faint: #595959`, `--no-tags: #767676` på hvit — begge ≥ 4.5:1 ✅
-- `.r6` badge `#15803d` på hvit tekst — 4.8:1 ✅
-- Alle tag-badges (`tag-vibe`, `tag-openclaw`, `tag-agents`) og språk-badges (`lang-en`, `lang-no`) — alle ≥ 4.5:1 ✅
-
-**Semantikk / ARIA (1.3.1):**
-- Alle `<th>` har `scope="col"` ✅
-- Sortérbare `<th>` har `aria-sort="none/ascending/descending"` — oppdateres dynamisk i `sortTable()` ✅
-- `<table>` har `aria-label="Podkast-episoder om kunstig intelligens"` ✅
-- Karakter-kolonne (`★`) har `aria-label="Karakter"` ✅
-- `.sort-icon`-span har `aria-hidden="true"` — dekorative ikoner skjult for skjermlesere ✅
-
-**Tilstand (4.1.2):**
-- Stat-kort: `aria-pressed="true/false"` — oppdateres i `applyStatFilter()` ✅
-- `#darkToggle`: `aria-pressed="true/false"` — oppdateres i `applyDark()` ✅
-- Tags: `aria-pressed="${tagFilter === key}"` — settes ved `renderTags()` ✅
-
-**Fokus (2.4.7):**
-- `:focus-visible` dekker: `button`, `input`, `select`, `a`, `[role="button"]`, `thead th` ✅
-- Mørk modus: outline-farge `#818cf8` ✅
-
-**Tastatur (2.1.1):**
-- Alle `<th data-col>`: keydown-handler (Enter/Space) for sortering ✅
-- Stat-kort, tags: Enter/Space aktiverer filteret ✅
+- Søk er fuzzy: eksakt substring-match først, deretter subsequence-fallback (f.eks. `"krpthy"` → `"Karpathy"`)
+- Uraterte episoder (Rating=0) vises som **N/A** og passerer alltid gjennom ratingfilteret
+- WCAG AA: alle kjente problemer er fikset — kontrast, ARIA-roller, `aria-sort`, `aria-pressed`, `:focus-visible`
 
 ## update_podcasts.py – tekniske noter
 - `FEEDS` dict: add new podcasts with name (must match CSV) and RSS URL — 26 feeds currently
@@ -261,23 +112,11 @@ Alle kjente WCAG AA-problemer er fikset. Gjeldende status:
   - `::warning::` ved mulige duplikater (gult i GitHub UI)
   - `is_gha()` sjekker `GITHUB_ACTIONS`-miljøvariabelen — lokalt kjøring er uendret
 
-### Automatisk utfylling av metadata
-- **Dato**: hentes alltid fra RSS `<pubDate>` via `parsedate_to_datetime()` — alltid `YYYY-MM-DD`, ingen manuell jobb nødvendig
-- **Host(s)**: fylles **ikke** automatisk — RSS `itunes:author` på item-nivå er for upålitelig (No Priors returnerer feil data, mange feeder returnerer generisk selskapsnavnn eller tomt felt). Fylles manuelt ved gjennomgang.
-- **Guest(s)**: forsøkes utledet fra episodetittelen via `extract_guest_from_title()`. Podcast-spesifikke mønstre:
-  - **Lex Fridman**: `#NNN – Gjest: Emne` (2-4 ord etter episodenr.) eller `#NNN – Emne – Gjest` (siste segment)
-  - **TWIML**: `Emne with Gjest - #NNN`
-  - **The Cognitive Revolution**: `, with Gjest`, `w/ Gjest`, eller `Gjest on topic` etter `?`/`!`
-  - **Gradient Dissent (W&B)**: `Emne | Gjest` (siste segment etter ` | `)
-  - **Latent Space**: `Emne — with Gjest, Tittel` (mønster A) eller `Emne — Gjest (Selskap)` / `Emne — Gjest & Gjest` (mønster B, em/en-strek). `[AINews]`-episoder mangler strek og treffer ikke.
-  - **No Priors**: `Gjest on Emne` — tittelen starter med gjestens navn (mange episoder har ikke gjest i tittelen)
-  - **Hard Fork (NYT)**: `Emne With Gjest + ...` — stor W indikerer gjesteepisode; stopper ved ` +`
-  - Verifiser alltid manuelt i pending_episodes.csv — kan gi feil eller «CEO Navn» i stedet for bare navn
-- `GUEST_FROM_TITLE`-settet: legg til nye podcaster som konsekvent oppgir gjest i tittelen
-
-### Regler mot duplikater og feil språk
-- **`LANGUAGE_OVERRIDE`-dict**: Tvinger riktig språk for kjente norske podcaster uavhengig av RSS-feedens `<language>`-tag. Heis og andre norske feeder kan mangle eller returnere feil kode — overriden sikrer at episodene alltid får "Norwegian". Legg til nye norske podcaster her ved behov.
-- **Samme-dato-advarsel**: Når en ny episode har samme (podcast, dato) som en allerede eksisterende episode i CSV-en, skrives `⚠  Mulig duplikat (samme dato finnes)` i output. Krever manuell sjekk — noen podcaster publiserer legitimt flere episoder samme dag.
+### Metadata-utfylling
+- **Dato**: alltid fra RSS `<pubDate>` — alltid `YYYY-MM-DD`
+- **Host(s)**: fylles **ikke** automatisk — `itunes:author` er for upålitelig (returnerer ofte selskapsnavn). Settes av `auto_rate.py` basert på kjente vertnavn i system-prompten.
+- **Guest(s)**: utledes fra tittelen via `extract_guest_from_title()` for utvalgte podcaster (`GUEST_FROM_TITLE`-settet). Verifiser alltid manuelt — kan gi feil.
+- **`LANGUAGE_OVERRIDE`-dict**: tvinger riktig språk for norske podcaster der RSS-feeden mangler eller returnerer feil `<language>`-tag. Legg til nye norske podcaster her ved behov.
 
 ### Kjente fallgruver ved episodefetching
 - **Gamle «siste kjente dato»**: Dersom en podcast ikke har blitt kjørt på en stund (eller har få episoder i CSV), kan `latest_date_per_podcast()` returnere en gammel dato — og hele gapet siden da hentes inn som «nye» episoder. Eksempel: Lex Fridman siste i CSV: 2026-02-12 → episodene #492–#495 (mars/april) fanget opp først ved neste kjøring.
