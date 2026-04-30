@@ -274,6 +274,7 @@
       <option value="6">6</option>
     </select>
   </label>
+  <button class="reset-btn fav-filter-btn" id="recentBtn" aria-pressed="false">Siste 4 mnd</button>
   <button class="reset-btn fav-filter-btn" id="favFilterBtn" aria-pressed="false">&#9734; Favoritter</button>
   <button class="reset-btn share-btn" id="shareBtn" title="Kopier lenke med aktive filtre">&#128279; Del</button>
   <button class="reset-btn export-btn" id="exportBtn" title="Last ned filtrert visning som CSV">&#8595; Eksporter CSV</button>
@@ -321,6 +322,7 @@
 <script>
 let newEpisodeKeys = new Set();
 let showFavoritesOnly = false;
+let showRecentOnly = false;
 const favoriteKeys = new Set(JSON.parse(localStorage.getItem('favEpisodeKeys') || '[]'));
 function saveFavorites() {
   localStorage.setItem('favEpisodeKeys', JSON.stringify([...favoriteKeys]));
@@ -621,9 +623,10 @@ function renderTable(rows) {
     cardList.appendChild(card);
   });
 
-  const tagLabel = tagFilter && tagMeta[tagFilter] ? ` · Tag: ${tagMeta[tagFilter].label}` : '';
-  const favLabel2 = showFavoritesOnly ? ` · Favoritter (${favoriteKeys.size})` : '';
-  document.getElementById('rowCount').textContent = `Viser ${rows.length} av ${data.length} episoder${tagLabel}${favLabel2}`;
+  const tagLabel    = tagFilter && tagMeta[tagFilter] ? ` · Tag: ${tagMeta[tagFilter].label}` : '';
+  const favLabel2   = showFavoritesOnly ? ` · Favoritter (${favoriteKeys.size})` : '';
+  const recentLabel = showRecentOnly ? ' · Siste 4 mnd' : '';
+  document.getElementById('rowCount').textContent = `Viser ${rows.length} av ${data.length} episoder${recentLabel}${tagLabel}${favLabel2}`;
 }
 
 function updateStats() {
@@ -646,15 +649,23 @@ function fuzzyMatch(query, haystack) {
   return qi === query.length;
 }
 
+function getRecentCutoff() {
+  const d = new Date();
+  d.setMonth(d.getMonth() - 4);
+  return d.toISOString().slice(0, 10);
+}
+
 function getFiltered() {
   const search    = document.getElementById('searchBox').value.toLowerCase().trim();
   const lang      = document.getElementById('langFilter').value;
   const podcastFilter = document.getElementById('podcastFilter').value;
   const minRating = parseInt(document.getElementById('ratingFilter').value, 10);
+  const cutoff    = showRecentOnly ? getRecentCutoff() : null;
 
   return data.filter(row => {
-    const [podcast, title, language, , hosts, guests, topics, rating, note, tags] = row;
+    const [podcast, title, language, pubDate, hosts, guests, topics, rating, note, tags] = row;
     if (showFavoritesOnly && !favoriteKeys.has(podcast + '||' + title)) return false;
+    if (cutoff && pubDate < cutoff) return false;
     if (lang && language !== lang) return false;
     if (podcastFilter && podcast !== podcastFilter) return false;
     if (rating > 0 && rating < minRating) return false;
@@ -701,10 +712,14 @@ function refresh() {
 function resetFilters() {
   tagFilter = '';
   showFavoritesOnly = false;
+  showRecentOnly = false;
   const favBtn = document.getElementById('favFilterBtn');
   favBtn.classList.remove('active');
   favBtn.setAttribute('aria-pressed', 'false');
   favBtn.innerHTML = '&#9734; Favoritter';
+  const recentBtn = document.getElementById('recentBtn');
+  recentBtn.classList.remove('active');
+  recentBtn.setAttribute('aria-pressed', 'false');
   document.getElementById('searchBox').value = '';
   document.getElementById('langFilter').value = '';
   document.getElementById('podcastFilter').value = '';
@@ -757,6 +772,14 @@ document.getElementById('langFilter').addEventListener('change', () => {
 document.getElementById('resetBtn').addEventListener('click', resetFilters);
 document.getElementById('emptyResetBtn').addEventListener('click', resetFilters);
 
+document.getElementById('recentBtn').addEventListener('click', () => {
+  showRecentOnly = !showRecentOnly;
+  const btn = document.getElementById('recentBtn');
+  btn.classList.toggle('active', showRecentOnly);
+  btn.setAttribute('aria-pressed', showRecentOnly ? 'true' : 'false');
+  refresh();
+});
+
 // Share URL — builds and copies a URL with current filter state as query params
 function buildShareUrl() {
   const params = new URLSearchParams();
@@ -770,6 +793,7 @@ function buildShareUrl() {
   if (rating && rating !== '4')        params.set('rating', rating);
   if (tagFilter)                       params.set('tag', tagFilter);
   if (showFavoritesOnly)               params.set('favs', '1');
+  if (showRecentOnly)                  params.set('recent', '1');
   const base = window.location.origin + window.location.pathname;
   return params.toString() ? base + '?' + params.toString() : base;
 }
@@ -787,6 +811,13 @@ function applyUrlParams() {
     btn.classList.add('active');
     btn.setAttribute('aria-pressed', 'true');
     btn.innerHTML = '&#9733; Favoritter';
+    changed = true;
+  }
+  if (params.get('recent') === '1') {
+    showRecentOnly = true;
+    const btn = document.getElementById('recentBtn');
+    btn.classList.add('active');
+    btn.setAttribute('aria-pressed', 'true');
     changed = true;
   }
   if (changed) {
