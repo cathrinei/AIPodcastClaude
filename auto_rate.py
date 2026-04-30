@@ -52,6 +52,7 @@ Kjente verter (bruk disse navnene eksakt):
 - AI-Snakk: Audun Kvitland Røstad
 - AI Forklart: Niclas Kvanvig, Celine Haaland-Johansen
 - Andre podkaster: utled fra beskrivelse eller la feltet stå tomt
+- Bruk aldri podcastens navn, mediehus eller forkortelse (f.eks. WSJ, NYT, Bloomberg) som vertnavn — la heller stå tomt
 
 Tagger (kun disse, kommaseparert; la stå tomt hvis ingen passer):
 - vibe: vibe coding, AI-assistert programmering
