@@ -152,14 +152,12 @@ def rate_episode(
 ) -> dict | None:
     user_msg = (
         f"Podcast: {podcast}\n"
-        f"Episode title: {title}\n"
-        f"Language: {language}\n"
-        f"Published: {pub_date}\n"
-        f"Link: {link}\n"
+        f"Tittel: {title}\n"
+        f"Språk: {language}\n"
+        f"Publisert: {pub_date}\n"
+        f"Lenke: {link}\n\n"
+        "Vurder denne episoden og svar med JSON som beskrevet i systemprompten."
     )
-    if description.strip():
-        user_msg += f"\nDescription:\n{description[:600]}\n"
-    user_msg += "\nEvaluate this episode and respond with JSON as described in the system prompt."
 
     try:
         response = client.chat.completions.create(
