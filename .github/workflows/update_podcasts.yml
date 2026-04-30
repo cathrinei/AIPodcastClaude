@@ -25,20 +25,53 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Installer avhengigheter
+        run: pip install openai
+
       - name: Kjør update_podcasts.py
-        run: python update_podcasts.py
+        run: python update_podcasts.py 2>&1 | tee /tmp/fetch_output.txt
 
       - name: Kjør rate_episodes.py (filtrerer åpenbar ikke-AI)
-        run: python rate_episodes.py
+        run: python rate_episodes.py 2>&1 | tee /tmp/rate_filter_output.txt
 
-      - name: Commit og push hvis pending eller rejected er endret
+      - name: Kjør auto_rate.py (setter rating og metadata automatisk)
+        run: python auto_rate.py 2>&1 | tee /tmp/auto_rate_output.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Synkroniser HTML med CSV
+        run: python sync_html.py
+
+      - name: Commit og push hvis noe er endret
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add pending_episodes.csv rejected_episodes.csv
+          git add AI_KI_Podcasts.csv AI_KI_Podcasts.html pending_episodes.csv rejected_episodes.csv
+          git add failed_attempts.csv 2>/dev/null || true
           if git diff --cached --quiet; then
-            echo "Ingen nye episoder – ingen endringer å committe."
+            echo "Ingen endringer å committe."
           else
-            git commit -m "Auto-fetch: nye episoder til gjennomgang $(date +'%Y-%m-%d')"
+            git commit -m "Auto-fetch og rate: episoder oppdatert $(date +'%Y-%m-%d')"
             git push
           fi
+
+      - name: Skriv kjøreoppsummering
+        if: always()
+        run: |
+          echo "## Podkast-oppdatering $(date +'%Y-%m-%d')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Henting av nye episoder" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat /tmp/fetch_output.txt 2>/dev/null || echo "(ingen output)"
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Filtrering (rate_episodes.py)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat /tmp/rate_filter_output.txt 2>/dev/null || echo "(ingen output)"
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Automatisk rating (auto_rate.py)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat /tmp/auto_rate_output.txt 2>/dev/null || echo "(ingen output)"
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        shell: bash

@@ -7,13 +7,15 @@ This project collects and curates podcast episodes on artificial intelligence (A
 - `AI_KI_Podcasts.csv` — master data, one row per episode (kun godkjente episoder, rating 4–6)
 - `AI_KI_Podcasts.html` — interactive table with filtering, sorting, stats, CSV import
 - `index.html` — redirect fra rot-URL til `AI_KI_Podcasts.html` (GitHub Pages)
-- `pending_episodes.csv` — staging-fil: nye episoder som venter på manuell vurdering (12 kolonner inkl. Description)
+- `pending_episodes.csv` — staging-fil: nye episoder som venter på vurdering (12 kolonner inkl. Description)
 - `update_podcasts.py` — RSS fetcher; legger nye episoder i `pending_episodes.csv`, ikke hoved-CSV
 - `rate_episodes.py` — filtrerer åpenbar ikke-AI fra pending (score=0 → rejected); setter ingen rating
-- `approve_episodes.py` — flytter manuelt ratede episoder fra pending til hoved-CSV
+- `auto_rate.py` — setter rating og metadata automatisk via GitHub Models (gpt-4o-mini); kjøres av GitHub Actions etter rate_episodes.py; fyller inn Host(s), Guest(s), Main Topic(s), Tags, Rating, Rating Notes for alle rating=0-episoder i pending; godkjente (4–6) flyttes til hoved-CSV, avviste (1–3) til rejected
+- `approve_episodes.py` — manuell override: flytter manuelt ratede episoder fra pending til hoved-CSV
 - `show_pending.py` — viser pending_episodes.csv i lesbar form i terminalen; kjøres lokalt
-- `sync_html.py` — synkroniserer det innebygde `data[]`-arrayet i HTML-en med CSV-en; kjøres etter `approve_episodes.py`
+- `sync_html.py` — synkroniserer det innebygde `data[]`-arrayet i HTML-en med CSV-en
 - `rejected_episodes.csv` — denylist of already-reviewed non-AI episodes; prevents re-fetching noise
+- `failed_attempts.csv` — sporer API-feil per episode (Podcast Name, Episode Title, Attempts); episoder som feiler 3 ganger auto-forkastes til rejected_episodes.csv
 
 ## Live URL
 `https://cathrinei.github.io/AIPodcastClaude/` — serves the latest committed HTML + CSV automatically. GitHub Actions updates the CSV daily at 23:00 CEST; Pages rebuilds on every push to `main`.
@@ -354,21 +356,24 @@ Branch-navnekonvensjon:
 **GitHub Actions (automatisk, daglig kl. 23:00):**
 1. `update_podcasts.py` henter nye episoder → legger dem i `pending_episodes.csv`
 2. `rate_episodes.py` kjøres automatisk — filtrerer åpenbar ikke-AI (score=0 → `rejected_episodes.csv`); resten beholdes i pending
-3. Committer `pending_episodes.csv` + `rejected_episodes.csv` hvis endret
+3. `auto_rate.py` kjøres automatisk — setter rating og metadata (Host, Guest, Topics, Tags, Rating Notes) via gpt-4o-mini; godkjente (4–6) → `AI_KI_Podcasts.csv`; avviste (1–3) → `rejected_episodes.csv`
+4. `sync_html.py` synkroniserer HTML med oppdatert CSV
+5. Committer `AI_KI_Podcasts.csv`, `AI_KI_Podcasts.html`, `pending_episodes.csv`, `rejected_episodes.csv`, `failed_attempts.csv` hvis endret
 
-**Lokalt (manuell gjennomgang):**
+**Lokalt (manuell override ved behov):**
 1. `git pull` — hent oppdatert `pending_episodes.csv`
-2. `python rate_episodes.py` — fjerner åpenbar ikke-AI (score=0 → rejected); resten beholdes i pending med Rating=0
-3. **Claude setter rating** på alle gjenværende episoder i pending — fyll inn Host(s), Guest(s), Main Topic(s), Tags og rating (4–6 / 1–3) basert på tittel og beskrivelse. Bruk rubrikken nedenfor.
-   - **4–6**: godkjent — behold med metadata
-   - **1–3**: avvis (flyttes til rejected av approve-scriptet)
-   - **0**: utsett til neste gjennomgang
-   - **Claude kjører `git pull` og setter rating autonomt** — uten å spørre brukeren først, så lenge ratingen er sikker. Spør kun ved genuint tvetydige episoder.
+2. `python show_pending.py` — inspiser episoder som venter
+3. Rediger `pending_episodes.csv` manuelt (sett rating 4–6 eller 1–3)
 4. `python approve_episodes.py` — rating 4–6 → hoved-CSV, rating 1–3 → rejected, rating 0 → blir i pending
 5. `python sync_html.py` — synkroniserer HTML-ens innebygde `data[]`-array med CSV-en
 6. `git add AI_KI_Podcasts.csv AI_KI_Podcasts.html pending_episodes.csv rejected_episodes.csv`
 7. `git commit -m "..."` og `git push`
-8. Åpne `https://cathrinei.github.io/AIPodcastClaude/` — siden lastes automatisk med ny data
+
+**Kjøre auto_rate.py lokalt (med GITHUB_TOKEN):**
+```bash
+export GITHUB_TOKEN=<ditt_token>
+python auto_rate.py
+```
 
 **Legge til ny podcast:**
 - Legg til RSS-feed i `FEEDS`-dicten i `update_podcasts.py`
