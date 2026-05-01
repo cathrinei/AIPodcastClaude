@@ -40,6 +40,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Kjør archive_episodes.py (arkiver episoder eldre enn 4 måneder)
+        run: python archive_episodes.py 2>&1 | tee /tmp/archive_output.txt
+
       - name: Synkroniser HTML med CSV
         run: python sync_html.py
 
@@ -48,6 +51,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add AI_KI_Podcasts.csv AI_KI_Podcasts.html pending_episodes.csv rejected_episodes.csv
+          git add AI_KI_Podcasts_arkiv.csv 2>/dev/null || true
           git add failed_attempts.csv 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "Ingen endringer å committe."
@@ -74,5 +78,10 @@ jobs:
           echo "### Automatisk rating (auto_rate.py)" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           cat /tmp/auto_rate_output.txt 2>/dev/null || echo "(ingen output)"
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Arkivering (archive_episodes.py)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat /tmp/archive_output.txt 2>/dev/null || echo "(ingen output)"
           echo '```' >> $GITHUB_STEP_SUMMARY
         shell: bash
