@@ -57,6 +57,7 @@ jobs:
             echo "Ingen endringer å committe."
           else
             git commit -m "Auto-fetch og rate: episoder oppdatert $(date +'%Y-%m-%d')"
+            git pull --rebase
             git push
           fi
 
