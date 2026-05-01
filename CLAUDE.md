@@ -212,6 +212,11 @@ git branch --merged main | grep -v "main\|$(git branch --show-current)" | xargs 
 4. `archive_episodes.py` kjøres automatisk — episoder eldre enn 4 måneder flyttes fra `AI_KI_Podcasts.csv` til `AI_KI_Podcasts_arkiv.csv`
 5. `sync_html.py` synkroniserer HTML med oppdatert CSV
 6. Committer `AI_KI_Podcasts.csv`, `AI_KI_Podcasts.html`, `AI_KI_Podcasts_arkiv.csv`, `pending_episodes.csv`, `rejected_episodes.csv`, `failed_attempts.csv` hvis endret
+7. Skriver kjøreoppsummering til `$GITHUB_STEP_SUMMARY` — vises som «update summary» under hver workflow-kjøring i GitHub; inneholder output fra alle 4 skript (fetch, filter, auto-rate, arkivering)
+
+**GHA tekniske noter:**
+- Script-output fanges med `2>&1 | tee /tmp/<skript>_output.txt` og skrives til `$GITHUB_STEP_SUMMARY` i siste steg
+- Commit-steget bruker `git pull --rebase` før `git push` for å unngå push-avvisning ved samtidige commits til `main`
 
 **Lokalt (manuell override ved behov):**
 1. `git pull` — hent oppdatert `pending_episodes.csv`
