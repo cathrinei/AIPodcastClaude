@@ -1,11 +1,11 @@
 """
-archive_episodes.py — Arkiverer episoder eldre enn 4 måneder.
+archive_episodes.py — Arkiverer episoder eldre enn 3 måneder.
 
 Bruk:
   python archive_episodes.py
 
 Hva skriptet gjør:
-  1. Beregner cutoff = date.today() minus 4 måneder (rullerende daglig)
+  1. Beregner cutoff = date.today() minus 3 måneder (rullerende daglig)
   2. Leser AI_KI_Podcasts.csv og skiller ut episoder der Published Date < cutoff
   3. Arkiverte episoder flyttes til AI_KI_Podcasts_arkiv.csv (deduplicert)
   4. AI_KI_Podcasts.csv overskrives med gjenværende episoder
@@ -27,7 +27,7 @@ ARCHIVE_PATH  = os.path.join(BASE_DIR, "AI_KI_Podcasts_arkiv.csv")
 
 def archive_cutoff() -> str:
     today = date.today()
-    month = today.month - 4
+    month = today.month - 3
     year = today.year
     if month <= 0:
         month += 12

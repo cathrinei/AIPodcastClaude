@@ -14,8 +14,8 @@ This project collects and curates podcast episodes on artificial intelligence (A
 - `approve_episodes.py` — manuell override: flytter manuelt ratede episoder fra pending til hoved-CSV
 - `show_pending.py` — viser pending_episodes.csv i lesbar form i terminalen; kjøres lokalt
 - `sync_html.py` — synkroniserer det innebygde `data[]`-arrayet i HTML-en med CSV-en
-- `archive_episodes.py` — flytter episoder eldre enn 4 måneder fra hoved-CSV til `AI_KI_Podcasts_arkiv.csv`; kjøres daglig av GitHub Actions etter `auto_rate.py`; cutoff = rullerende daglig (`date.today()` minus 4 måneder)
-- `AI_KI_Podcasts_arkiv.csv` — arkiv-CSV: episoder eldre enn 4 måneder; identisk kolonneformat som hoved-CSV; lastes runtime av HTML ved klikk på «Vis arkiv»-knappen
+- `archive_episodes.py` — flytter episoder eldre enn 3 måneder fra hoved-CSV til `AI_KI_Podcasts_arkiv.csv`; kjøres daglig av GitHub Actions etter `auto_rate.py`; cutoff = rullerende daglig (`date.today()` minus 3 måneder)
+- `AI_KI_Podcasts_arkiv.csv` — arkiv-CSV: episoder eldre enn 3 måneder; identisk kolonneformat som hoved-CSV; lastes runtime av HTML ved klikk på «Vis arkiv»-knappen
 - `rejected_episodes.csv` — denylist of already-reviewed non-AI episodes; prevents re-fetching noise
 - `failed_attempts.csv` — sporer API-feil per episode (Podcast Name, Episode Title, Attempts); episoder som feiler 3 ganger auto-forkastes til rejected_episodes.csv
 
@@ -209,7 +209,7 @@ git branch --merged main | grep -v "main\|$(git branch --show-current)" | xargs 
 1. `update_podcasts.py` henter nye episoder → legger dem i `pending_episodes.csv`
 2. `rate_episodes.py` kjøres automatisk — filtrerer åpenbar ikke-AI (score=0 → `rejected_episodes.csv`); resten beholdes i pending
 3. `auto_rate.py` kjøres automatisk — setter rating og metadata (Host, Guest, Topics, Tags, Rating Notes) via gpt-4o-mini; godkjente (4–6) → `AI_KI_Podcasts.csv`; avviste (1–3) → `rejected_episodes.csv`
-4. `archive_episodes.py` kjøres automatisk — episoder eldre enn 4 måneder flyttes fra `AI_KI_Podcasts.csv` til `AI_KI_Podcasts_arkiv.csv`
+4. `archive_episodes.py` kjøres automatisk — episoder eldre enn 3 måneder flyttes fra `AI_KI_Podcasts.csv` til `AI_KI_Podcasts_arkiv.csv`
 5. `sync_html.py` synkroniserer HTML med oppdatert CSV
 6. Committer `AI_KI_Podcasts.csv`, `AI_KI_Podcasts.html`, `AI_KI_Podcasts_arkiv.csv`, `pending_episodes.csv`, `rejected_episodes.csv`, `failed_attempts.csv` hvis endret
 7. Skriver kjøreoppsummering til `$GITHUB_STEP_SUMMARY` — vises som «update summary» under hver workflow-kjøring i GitHub; inneholder output fra alle 4 skript (fetch, filter, auto-rate, arkivering)

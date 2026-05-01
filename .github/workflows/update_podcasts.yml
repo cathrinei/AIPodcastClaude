@@ -40,7 +40,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Kjør archive_episodes.py (arkiver episoder eldre enn 4 måneder)
+      - name: Kjør archive_episodes.py (arkiver episoder eldre enn 3 måneder)
         run: python archive_episodes.py 2>&1 | tee /tmp/archive_output.txt
 
       - name: Synkroniser HTML med CSV
