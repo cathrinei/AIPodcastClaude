@@ -89,6 +89,9 @@ Bruk disse navnene konsekvent ved rating av nye episoder:
 - På GitHub Pages lastes CSV automatisk via `fetch('./AI_KI_Podcasts.csv')` ved sidestart og erstatter `data[]`; faller stille tilbake til innebygd array ved `file://` eller nettverksfeil
 - `sync_html.py` bruker regex til å erstatte hele `const data = [...]`-blokken i HTML-filen
 - «Last inn CSV»-knappen er skjult (`style="display:none"`) — fjern attributtet for å aktivere manuell fallback
+- Filter-rad (én linje): Søk · Språk · Podkast · Min. karakter · Favoritter · Nullstill · Vis arkiv. «Del», «Eksporter CSV» og «Siste 3 mnd» er skjult (`display:none`) men beholdt i DOM for JS
+- `#podcastFilter` har `max-width: 190px` for å hindre at lange podkastnavn strekker filter-raden
+- Header-subtitle viser rullerende 3-månedersperiode beregnet i JS: `today - 3 måneder` → `today`, format `dd.mm.yy – dd.mm.yy`
 - Tags whitelisted via `tagMeta`-objekt — ukjente tag-verdier ignoreres; aktive tags: `vibe`, `openclaw`, `agents`
 - `safeUrl()` blokkerer ikke-HTTP(S)-URLer for å hindre `javascript:`-injeksjon
 - CSP: `default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'`
