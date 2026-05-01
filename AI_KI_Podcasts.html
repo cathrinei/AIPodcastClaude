@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'">
-<title>AI / KI Podcasts – 2026</title>
+<title>AI / KI Podcasts</title>
 <style>
   :root {
     --bg:        #f4f6f9;
@@ -245,8 +245,8 @@
 
 <header>
   <div>
-    <h1>AI / KI Podcasts &mdash; 2026</h1>
-    <p>Engelske og norske podkast-episoder om kunstig intelligens &bull; Januar 2026 &ndash; <span id="todayDate"></span></p>
+    <h1>AI / KI Podcasts</h1>
+    <p>Engelske og norske podkast-episoder om kunstig intelligens &bull; <span id="periodDate"></span></p>
   </div>
   <button id="darkToggle" aria-pressed="false" title="Bytt mellom lys og mørk visning">&#9790; Mørk</button>
 </header>
@@ -745,12 +745,17 @@ function parseCSV(text) {
   return rows.filter(r => r.some(f => f));
 }
 
-// Set today's date in header
-const _d = new Date();
-document.getElementById('todayDate').textContent =
-  String(_d.getDate()).padStart(2, '0') + '.' +
-  String(_d.getMonth() + 1).padStart(2, '0') + '.' +
-  String(_d.getFullYear()).slice(-2);
+// Set rolling 3-month period in header
+(function() {
+  const fmt = d =>
+    String(d.getDate()).padStart(2,'0') + '.' +
+    String(d.getMonth()+1).padStart(2,'0') + '.' +
+    String(d.getFullYear()).slice(-2);
+  const end = new Date();
+  const start = new Date(end);
+  start.setMonth(start.getMonth() - 3);
+  document.getElementById('periodDate').textContent = fmt(start) + ' – ' + fmt(end);
+})();
 
 // Wire up controls
 document.getElementById('searchBox').addEventListener('input', refresh);
