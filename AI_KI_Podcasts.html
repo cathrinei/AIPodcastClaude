@@ -278,12 +278,13 @@
       <option value="6">6</option>
     </select>
   </label>
-  <button class="reset-btn fav-filter-btn" id="recentBtn" aria-pressed="false">Siste 4 mnd</button>
-  <button class="reset-btn fav-filter-btn" id="archiveBtn" aria-pressed="false">Vis arkiv</button>
   <button class="reset-btn fav-filter-btn" id="favFilterBtn" aria-pressed="false">&#9734; Favoritter</button>
-  <button class="reset-btn share-btn" id="shareBtn" title="Kopier lenke med aktive filtre">&#128279; Del</button>
-  <button class="reset-btn export-btn" id="exportBtn" title="Last ned filtrert visning som CSV">&#8595; Eksporter CSV</button>
   <button class="reset-btn" id="resetBtn">Nullstill</button>
+  <div style="flex-basis:100%;height:0"></div>
+  <button class="reset-btn fav-filter-btn" id="recentBtn" aria-pressed="false">Siste 3 mnd</button>
+  <button class="reset-btn fav-filter-btn" id="archiveBtn" aria-pressed="false">Vis arkiv</button>
+  <button class="reset-btn share-btn" id="shareBtn" title="Kopier lenke med aktive filtre" style="display:none">&#128279; Del</button>
+  <button class="reset-btn export-btn" id="exportBtn" title="Last ned filtrert visning som CSV" style="display:none">&#8595; Eksporter CSV</button>
   <a class="fetch-btn" href="https://github.com/cathrinei/AIPodcastClaude/actions/workflows/update_podcasts.yml" target="_blank" rel="noopener" title="Kjør daglig RSS-henting manuelt på GitHub Actions" style="display:none">&#8635; Hent nye data</a>
   <!-- Last inn CSV-knapp: skjult fordi CSV lastes automatisk via fetch() på GitHub Pages.
        For å vise igjen: fjern style="display:none" fra begge elementene under. -->
@@ -636,7 +637,7 @@ function renderTable(rows) {
 
   const tagLabel     = tagFilter && tagMeta[tagFilter] ? ` · Tag: ${tagMeta[tagFilter].label}` : '';
   const favLabel2    = showFavoritesOnly ? ` · Favoritter (${favoriteKeys.size})` : '';
-  const recentLabel  = showRecentOnly ? ' · Siste 4 mnd' : '';
+  const recentLabel  = showRecentOnly ? ' · Siste 3 mnd' : '';
   const archiveLabel = showArchive ? ` · Inkl. arkiv (${archivedData.length} eldre episoder)` : '';
   document.getElementById('rowCount').textContent = `Viser ${rows.length} av ${data.length} episoder${recentLabel}${archiveLabel}${tagLabel}${favLabel2}`;
 }
