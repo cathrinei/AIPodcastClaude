@@ -66,6 +66,7 @@
   .controls { display: flex; flex-wrap: wrap; gap: 0.8rem; padding: 0.85rem 2rem; background: var(--bg); border-bottom: 1px solid var(--border); align-items: center; }
   .controls input[type=text] { padding: 0.45rem 0.8rem; border: 1px solid var(--input-border); border-radius: 6px; font-size: 0.85rem; width: 220px; max-width: 100%; background: var(--surface); color: var(--text); }
   .controls select { padding: 0.45rem 0.8rem; border: 1px solid var(--input-border); border-radius: 6px; font-size: 0.85rem; background: var(--surface); color: var(--text); }
+  #podcastFilter { max-width: 190px; }
   .controls label { font-size: 0.85rem; color: var(--text-muted); }
   .reset-btn { padding: 0.45rem 0.9rem; border: 1px solid var(--input-border); border-radius: 6px; background: var(--surface); font-size: 0.82rem; cursor: pointer; color: var(--text-muted); }
   .reset-btn:hover { background: var(--stat-bg); }
@@ -280,9 +281,8 @@
   </label>
   <button class="reset-btn fav-filter-btn" id="favFilterBtn" aria-pressed="false">&#9734; Favoritter</button>
   <button class="reset-btn" id="resetBtn">Nullstill</button>
-  <div style="flex-basis:100%;height:0"></div>
-  <button class="reset-btn fav-filter-btn" id="recentBtn" aria-pressed="false">Siste 3 mnd</button>
   <button class="reset-btn fav-filter-btn" id="archiveBtn" aria-pressed="false">Vis arkiv</button>
+  <button class="reset-btn fav-filter-btn" id="recentBtn" aria-pressed="false" style="display:none">Siste 3 mnd</button>
   <button class="reset-btn share-btn" id="shareBtn" title="Kopier lenke med aktive filtre" style="display:none">&#128279; Del</button>
   <button class="reset-btn export-btn" id="exportBtn" title="Last ned filtrert visning som CSV" style="display:none">&#8595; Eksporter CSV</button>
   <a class="fetch-btn" href="https://github.com/cathrinei/AIPodcastClaude/actions/workflows/update_podcasts.yml" target="_blank" rel="noopener" title="Kjør daglig RSS-henting manuelt på GitHub Actions" style="display:none">&#8635; Hent nye data</a>
