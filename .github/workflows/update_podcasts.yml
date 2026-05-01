@@ -57,6 +57,7 @@ jobs:
             echo "Ingen endringer å committe."
           else
             git commit -m "Auto-fetch og rate: episoder oppdatert $(date +'%Y-%m-%d')"
+            git pull --rebase
             git push
           fi
 
@@ -67,21 +68,21 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Henting av nye episoder" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          cat /tmp/fetch_output.txt 2>/dev/null || echo "(ingen output)"
+          cat /tmp/fetch_output.txt >> $GITHUB_STEP_SUMMARY 2>/dev/null || echo "(ingen output)" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Filtrering (rate_episodes.py)" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          cat /tmp/rate_filter_output.txt 2>/dev/null || echo "(ingen output)"
+          cat /tmp/rate_filter_output.txt >> $GITHUB_STEP_SUMMARY 2>/dev/null || echo "(ingen output)" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Automatisk rating (auto_rate.py)" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          cat /tmp/auto_rate_output.txt 2>/dev/null || echo "(ingen output)"
+          cat /tmp/auto_rate_output.txt >> $GITHUB_STEP_SUMMARY 2>/dev/null || echo "(ingen output)" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Arkivering (archive_episodes.py)" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          cat /tmp/archive_output.txt 2>/dev/null || echo "(ingen output)"
+          cat /tmp/archive_output.txt >> $GITHUB_STEP_SUMMARY 2>/dev/null || echo "(ingen output)" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
         shell: bash
