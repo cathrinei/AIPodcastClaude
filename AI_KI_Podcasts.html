@@ -747,14 +747,14 @@ function parseCSV(text) {
 
 // Set rolling 3-month period in header
 (function() {
-  const MND = ['jan','feb','mar','apr','mai','jun','jul','aug','sep','okt','nov','des'];
+  const fmt = d =>
+    String(d.getDate()).padStart(2,'0') + '.' +
+    String(d.getMonth()+1).padStart(2,'0') + '.' +
+    String(d.getFullYear()).slice(-2);
   const end = new Date();
   const start = new Date(end);
   start.setMonth(start.getMonth() - 3);
-  document.getElementById('periodDate').textContent =
-    MND[start.getMonth()] + ' ' + start.getFullYear() +
-    ' – ' +
-    MND[end.getMonth()] + ' ' + end.getFullYear();
+  document.getElementById('periodDate').textContent = fmt(start) + ' – ' + fmt(end);
 })();
 
 // Wire up controls
