@@ -204,8 +204,8 @@ Branch-navnekonvensjon:
 - Én ny PR per avsluttet oppgave — push til samme branch, `gh pr create` når oppgaven er ferdig
 - Session-branch opprettes rett før første endring (`git checkout main && git pull && git checkout -b session/YYYY-MM-DD`) — ikke tidlig på dagen — slik at den alltid er i sync med main
 
-**Opprydding av branches og PRs (annenhver uke):**
-Mergede branches hoper seg opp raskt. Claude skal minne om dette ved oppstart av en arbeidsøkt hvis det har gått mer enn 14 dager siden forrige opprydding.
+**Opprydding av branches og PRs (ukentlig):**
+Mergede branches hoper seg opp raskt. Claude skal minne om dette ved oppstart av en arbeidsøkt hvis det har gått mer enn 7 dager siden forrige opprydding.
 Sjekk og slett med:
 ```bash
 # Slett alle mergede remote branches unntatt main og aktiv branch
