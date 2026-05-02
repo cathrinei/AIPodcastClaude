@@ -147,39 +147,63 @@ def _handle_failure(
     return False
 
 
+def _build_user_msg(podcast: str, title: str, language: str,
+                    pub_date: str, link: str, description: str) -> str:
+    parts = [
+        f"Podcast: {podcast}",
+        f"Tittel: {title}",
+        f"Språk: {language}",
+        f"Publisert: {pub_date}",
+        f"Lenke: {link}",
+    ]
+    if description:
+        parts.append(f"Beskrivelse: {description}")
+    return "\n".join(parts)
+
+
+def _call_api(client: OpenAI, user_msg: str) -> dict | None:
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": user_msg},
+        ],
+        max_tokens=512,
+    )
+    text = (response.choices[0].message.content or "").strip()
+    if text.startswith("```"):
+        text = text.split("```")[1]
+        if text.startswith("json"):
+            text = text[4:]
+        text = text.strip()
+    return json.loads(text)
+
+
 def rate_episode(
     client: OpenAI, podcast: str, title: str,
     language: str, pub_date: str, link: str, description: str,
 ) -> dict | None:
-    user_msg = (
-        f"Podcast: {podcast}\n"
-        f"Tittel: {title}\n"
-        f"Språk: {language}\n"
-        f"Publisert: {pub_date}\n"
-        f"Lenke: {link}\n\n"
-        "Vurder denne episoden og svar med JSON som beskrevet i systemprompten."
-    )
-
+    """Kaller API med beskrivelse; ved content_filter-feil prøves uten beskrivelse."""
+    user_msg = _build_user_msg(podcast, title, language, pub_date, link, description)
     try:
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": user_msg},
-            ],
-            max_tokens=512,
-        )
-        text = (response.choices[0].message.content or "").strip()
-        if text.startswith("```"):
-            text = text.split("```")[1]
-            if text.startswith("json"):
-                text = text[4:]
-            text = text.strip()
-        return json.loads(text)
+        return _call_api(client, user_msg)
     except json.JSONDecodeError as e:
         print(f"WARN JSON-feil for '{title[:60]}': {e}")
         return None
     except Exception as e:
+        err_str = str(e)
+        if "content_filter" in err_str and description:
+            # Prøv på nytt uten beskrivelse — Azure-filteret reagerte på RSS-teksten
+            print(f"WARN Content-filter på beskrivelse, prøver uten for '{title[:60]}'")
+            try:
+                return _call_api(client, _build_user_msg(
+                    podcast, title, language, pub_date, link, ""))
+            except json.JSONDecodeError as e2:
+                print(f"WARN JSON-feil (retry) for '{title[:60]}': {e2}")
+                return None
+            except Exception as e2:
+                print(f"WARN API-feil (retry) for '{title[:60]}': {e2}")
+                return None
         print(f"WARN API-feil for '{title[:60]}': {e}")
         return None
 
