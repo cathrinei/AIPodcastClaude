@@ -101,6 +101,7 @@ Bruk disse navnene konsekvent ved rating av nye episoder:
 - **Kortlayout (≤600px):** tabellen erstattes av `#cardList .ep-card`-elementer; `.card-list` vises, `.table-wrap` skjules
 - **`label::after`-chevron på mobil:** labels får `flex-direction: column` (tekst over select), så chevron-pilen bruker `bottom: 0.6rem` i stedet for `top: 50%` for å sentrere i select-feltet
 - **Header på mobil:** beholder `flex-direction: row; justify-content: space-between` — ikke `column` med negativ margin
+- **Arkivvisning:** arkiv-rader vises med varm amber-bakgrunn (`#fffbeb`/`#1c150a`); brun skillerrad (`tr.archive-divider` / `.card-archive-divider`) skilles inn automatisk i `renderTable()` ved første arkivrad; `#archiveBtn[aria-pressed="true"]` har mørkere amber-aktiv-stil; row count viser «X av Y episoder + Z arkiverte»
 
 ## update_podcasts.py – tekniske noter
 - `FEEDS` dict: add new podcasts with name (must match CSV) and RSS URL — 26 feeds currently
