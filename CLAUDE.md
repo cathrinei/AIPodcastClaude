@@ -233,7 +233,7 @@ git branch --merged main | grep -v "main\|$(git branch --show-current)" | xargs 
 **GHA tekniske noter:**
 - Script-output fanges med `2>&1 | tee /tmp/<skript>_output.txt` og skrives til `$GITHUB_STEP_SUMMARY` i siste steg
 - Commit-steget bruker `git pull --rebase` før `git push` for å unngå push-avvisning ved samtidige commits til `main`
-- Actions-versjoner: `actions/checkout@v5`, `actions/setup-python@v5` (Node.js 24-native — ingen `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24` workaround)
+- Actions-versjoner: `actions/checkout@v5`, `actions/setup-python@v6` (Node.js 24-native — ingen `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24` workaround)
 
 **Lokalt (manuell override ved behov):**
 1. `git pull` — hent oppdatert `pending_episodes.csv`
