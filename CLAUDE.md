@@ -97,6 +97,10 @@ Bruk disse navnene konsekvent ved rating av nye episoder:
 - Søk er fuzzy: eksakt substring-match først, deretter subsequence-fallback (f.eks. `"krpthy"` → `"Karpathy"`)
 - Uraterte episoder (Rating=0) vises som **N/A** og passerer alltid gjennom ratingfilteret
 - WCAG AA: alle kjente problemer er fikset — kontrast, ARIA-roller, `aria-sort`, `aria-pressed`, `:focus-visible`
+- **Mobilbrekkpunkter:** `(hover:none)` touch-hint, `≤900px` redusert padding, `≤600px` kortlayout (tabell skjult), `≤400px` kompakt fontstørrelse
+- **Kortlayout (≤600px):** tabellen erstattes av `#cardList .ep-card`-elementer; `.card-list` vises, `.table-wrap` skjules
+- **`label::after`-chevron på mobil:** labels får `flex-direction: column` (tekst over select), så chevron-pilen bruker `bottom: 0.6rem` i stedet for `top: 50%` for å sentrere i select-feltet
+- **Header på mobil:** beholder `flex-direction: row; justify-content: space-between` — ikke `column` med negativ margin
 
 ## update_podcasts.py – tekniske noter
 - `FEEDS` dict: add new podcasts with name (must match CSV) and RSS URL — 26 feeds currently
