@@ -196,11 +196,12 @@ Branch-navnekonvensjon:
 - `feature/beskrivelse` — ny funksjonalitet i HTML eller skript
 
 **PR-regler (Claude):**
+- **Aldri commit direkte til `main`** — alltid branch + PR, uansett hvor liten endringen er
+- **CLAUDE.md skal alltid oppdateres** og inkluderes i samme PR som feature-endringen — ingen unntak
 - Sjekk alltid `git branch` før commit — aldri commit uten å bekrefte at du er på riktig branch
 - Sjekk alltid `gh pr list` og `git status` før ny branch eller PR opprettes
-- **Ikke opprett ny branch for hver endring** — bruk dagens session-branch (`session/YYYY-MM-DD`) for alle endringer den dagen
-- Opprett ny PR fra eksisterende branch når en oppgave er ferdig — ikke ny branch
-- **CLAUDE.md skal alltid oppdateres** og inkluderes i samme PR som feature-endringen — ingen unntak
+- Én session-branch per dag (`session/YYYY-MM-DD`) — opprettes rett før første endring, brukes for alle endringer den dagen
+- Én ny PR per avsluttet oppgave — push til samme branch, `gh pr create` når oppgaven er ferdig
 - Session-branch opprettes rett før første endring (`git checkout main && git pull && git checkout -b session/YYYY-MM-DD`) — ikke tidlig på dagen — slik at den alltid er i sync med main
 
 **Opprydding av branches og PRs (annenhver uke):**
