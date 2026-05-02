@@ -138,6 +138,15 @@ Bruk disse navnene konsekvent ved rating av nye episoder:
   - score > 0 → beholdes i pending med Rating=0 for manuell vurdering
 - Output viser antall beholdt og antall avvist med titler
 
+## auto_rate.py – tekniske noter
+- Kjøres automatisk av GitHub Actions etter `rate_episodes.py`; kan også kjøres lokalt med `GITHUB_TOKEN`
+- Kaller `gpt-4o-mini` via GitHub Models (`https://models.inference.ai.azure.com`)
+- `SYSTEM_PROMPT` inneholder karakterskala, vertsnavn og tag-definisjoner; svar alltid JSON
+- **`user_msg` skal kun inneholde data** (podcast, tittel, språk, dato, lenke, beskrivelse) — ingen instruksjoner om format eller respons; instruksjonstekst i user-meldingen trigger Azures jailbreak-filter
+- Beskrivelse fra RSS (kolonne 12) inkluderes alltid i prompten for bedre ratingkvalitet
+- **Azure content_filter-feil**: ved `content_filter`-feil (kode 400) prøves automatisk retry uten beskrivelse — RSS-teksten kan inneholde ord som trigger Azures filter
+- `failed_attempts.csv` sporer feil per episode; etter `MAX_ATTEMPTS` (3) auto-forkastes episoden til `rejected_episodes.csv`
+
 ## approve_episodes.py – tekniske noter
 - Kjøres lokalt etter at rating er satt manuelt i `pending_episodes.csv`
 - Leser alle rader fra `pending_episodes.csv` og behandler etter rating:
