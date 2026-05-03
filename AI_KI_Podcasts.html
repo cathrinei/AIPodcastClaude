@@ -849,20 +849,36 @@ document.getElementById('archiveBtn').addEventListener('click', async () => {
   refresh();
 });
 
-// Share URL — builds and copies a URL with current filter state as query params
+// Enkelt filter-skjema: én post per filter → buildShareUrl og applyUrlParams
+// bruker begge denne listen. Nytt filter = én ny rad her, ingenting annet.
+const FILTER_DEFS = [
+  { param: 'search',  default: '',
+    get: () => document.getElementById('searchBox').value.trim(),
+    set: v => { document.getElementById('searchBox').value = v; } },
+  { param: 'lang',    default: '',
+    get: () => document.getElementById('langFilter').value,
+    set: v => { document.getElementById('langFilter').value = v; } },
+  { param: 'rating',  default: '4',
+    get: () => document.getElementById('ratingFilter').value,
+    set: v => { document.getElementById('ratingFilter').value = v; } },
+  { param: 'tag',     default: '',
+    get: () => tagFilter,
+    set: v => { tagFilter = v; } },
+  { param: 'favs',    default: '',
+    get: () => showFavoritesOnly ? '1' : '',
+    set: v => { if (v === '1') { showFavoritesOnly = true; setToggleBtn(document.getElementById('favFilterBtn'), true, '&#9733; Favoritter', '&#9734; Favoritter'); } } },
+  { param: 'recent',  default: '',
+    get: () => showRecentOnly ? '1' : '',
+    set: v => { if (v === '1') { showRecentOnly = true; setToggleBtn(document.getElementById('recentBtn'), true); } } },
+  // afterBuild: settes etter buildPodcastFilter() slik at option-elementet finnes
+  { param: 'podcast', default: '', afterBuild: true,
+    get: () => document.getElementById('podcastFilter').value,
+    set: v => { document.getElementById('podcastFilter').value = v; } },
+];
+
 function buildShareUrl() {
   const params = new URLSearchParams();
-  const search   = document.getElementById('searchBox').value.trim();
-  const lang     = document.getElementById('langFilter').value;
-  const podcast  = document.getElementById('podcastFilter').value;
-  const rating   = document.getElementById('ratingFilter').value;
-  if (search)                          params.set('search', search);
-  if (lang)                            params.set('lang', lang);
-  if (podcast)                         params.set('podcast', podcast);
-  if (rating && rating !== '4')        params.set('rating', rating);
-  if (tagFilter)                       params.set('tag', tagFilter);
-  if (showFavoritesOnly)               params.set('favs', '1');
-  if (showRecentOnly)                  params.set('recent', '1');
+  FILTER_DEFS.forEach(f => { const v = f.get(); if (v && v !== f.default) params.set(f.param, v); });
   const base = window.location.origin + window.location.pathname;
   return params.toString() ? base + '?' + params.toString() : base;
 }
@@ -870,25 +886,16 @@ function buildShareUrl() {
 function applyUrlParams() {
   const params = new URLSearchParams(window.location.search);
   let changed = false;
-  if (params.has('search'))  { document.getElementById('searchBox').value = params.get('search'); changed = true; }
-  if (params.has('lang'))    { document.getElementById('langFilter').value = params.get('lang'); changed = true; }
-  if (params.has('rating'))  { document.getElementById('ratingFilter').value = params.get('rating'); changed = true; }
-  if (params.has('tag'))     { tagFilter = params.get('tag'); changed = true; }
-  if (params.get('favs') === '1') {
-    showFavoritesOnly = true;
-    setToggleBtn(document.getElementById('favFilterBtn'), true, '&#9733; Favoritter', '&#9734; Favoritter');
-    changed = true;
-  }
-  if (params.get('recent') === '1') {
-    showRecentOnly = true;
-    setToggleBtn(document.getElementById('recentBtn'), true);
-    changed = true;
-  }
-  if (changed) {
-    buildPodcastFilter();
-    // Apply podcast after buildPodcastFilter so the option exists
-    if (params.has('podcast')) document.getElementById('podcastFilter').value = params.get('podcast');
-  }
+  FILTER_DEFS.filter(f => !f.afterBuild).forEach(f => {
+    const v = params.get(f.param);
+    if (v !== null) { f.set(v); changed = true; }
+  });
+  if (changed) buildPodcastFilter();
+  // Podcast-filter settes alltid til slutt — dropdown er nå populert
+  FILTER_DEFS.filter(f => f.afterBuild).forEach(f => {
+    const v = params.get(f.param);
+    if (v !== null) f.set(v);
+  });
 }
 
 const shareBtn = document.getElementById('shareBtn');
