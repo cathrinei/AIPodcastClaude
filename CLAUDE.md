@@ -100,6 +100,7 @@ Bruk disse navnene konsekvent ved rating av nye episoder:
 - **Mobilbrekkpunkter:** `(hover:none)` touch-hint, `≤900px` redusert padding, `≤600px` kortlayout (tabell skjult), `≤400px` kompakt fontstørrelse
 - **Kortlayout (≤600px):** tabellen erstattes av `#cardList .ep-card`-elementer; `.card-list` vises, `.table-wrap` skjules; kortene viser emner (`card-topics`) i kursiv under vertsnavn
 - **Sortering på mobil:** `#mobileSortSelect` (skjult på desktop via `.mobile-sort-label { display: none }`); synkroniseres med `sort`-objektet; `sortTable()` kaller `syncMobileSortSelect()` for å holde desktop- og mobilsortering i sync
+- **`setToggleBtn(btn, active, labelOn?, labelOff?)`** — felles hjelpefunksjon for toggle-knapper; setter `.active`-klasse, `aria-pressed` og valgfritt `innerHTML`; brukes av `favFilterBtn`, `archiveBtn`, `recentBtn` i click-handlers, `resetFilters()` og `applyUrlParams()`
 - **`label::after`-chevron på mobil:** labels får `flex-direction: column` (tekst over select), så chevron-pilen bruker `bottom: 0.6rem` i stedet for `top: 50%` for å sentrere i select-feltet
 - **Header på mobil:** beholder `flex-direction: row; justify-content: space-between` — ikke `column` med negativ margin
 - **Arkivvisning:** arkiv-rader vises med varm amber-bakgrunn (`#fffbeb`/`#1c150a`); brun skillerrad (`tr.archive-divider` / `.card-archive-divider`) skilles inn automatisk i `renderTable()` ved første arkivrad; `#archiveBtn[aria-pressed="true"]` har mørkere amber-aktiv-stil; row count viser «X av Y episoder + Z arkiverte»
