@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'">
 <title>AI / KI Podcasts</title>
+<meta name="description" content="Engelske og norske podkast-episoder om kunstig intelligens (AI/KI) publisert i 2026 — med filtrering, sortering og favoritter.">
 <style>
   :root {
     --bg:        #f4f6f9;
@@ -21,7 +22,7 @@
     --row-alt:   #f5f7fc;
     --input-border:#cccccc;
     --link:      #2563eb;
-    --no-tags:   #767676;
+    --no-tags:   #5f5f5f;
     --accent:    #6366f1;
   }
   body.dark {
@@ -267,6 +268,7 @@
   <button id="darkToggle" aria-pressed="false" title="Bytt mellom lys og mørk visning">&#9790; Mørk</button>
 </header>
 
+<main>
 <div class="summary">
   <div class="stat" id="statCardTotal" role="button" tabindex="0" aria-label="Vis alle episoder" aria-pressed="false"><strong id="statTotal">–</strong><span class="stat-label">Episoder</span></div>
   <div class="stat" id="statCardEn" role="button" tabindex="0" aria-label="Filtrer engelske episoder" aria-pressed="false"><strong id="statEn">–</strong><span class="stat-label">Engelske</span></div>
@@ -348,6 +350,7 @@
 </table>
 </div>
 <div id="cardList" class="card-list"></div>
+</main>
 <button id="backToTop" aria-label="Tilbake til toppen" title="Tilbake til toppen">↑</button>
 
 <script>

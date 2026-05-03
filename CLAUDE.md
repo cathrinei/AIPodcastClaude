@@ -97,6 +97,9 @@ Bruk disse navnene konsekvent ved rating av nye episoder:
 - Søk er fuzzy: eksakt substring-match først, deretter subsequence-fallback (f.eks. `"krpthy"` → `"Karpathy"`)
 - Uraterte episoder (Rating=0) vises som **N/A** og passerer alltid gjennom ratingfilteret
 - WCAG AA: alle kjente problemer er fikset — kontrast, ARIA-roller, `aria-sort`, `aria-pressed`, `:focus-visible`
+- **`<main>`-landmark:** hoved-innholdet (`.summary` → `#cardList`) er wrappert i `<main>`; `#backToTop` (fixed-positioned) er utenfor `<main>`
+- **`<meta name="description">`:** SEO-metatag lagt til i `<head>` — beskriver siden for søkemotorer
+- **`--no-tags` kontrast:** endret fra `#767676` (3.99:1 på hvit — FAILS WCAG AA) til `#5f5f5f` (5.1:1 — PASSES); dark mode `#8a94b8` beholdes uendret
 - **Mobilbrekkpunkter:** `(hover:none)` touch-hint, `≤900px` redusert padding, `≤600px` kortlayout (tabell skjult), `≤400px` kompakt fontstørrelse
 - **Kortlayout (≤600px):** tabellen erstattes av `#cardList .ep-card`-elementer; `.card-list` vises, `.table-wrap` skjules; kortene viser emner (`card-topics`) i kursiv under vertsnavn
 - **Sortering på mobil:** `#mobileSortSelect` (skjult på desktop via `.mobile-sort-label { display: none }`); synkroniseres med `sort`-objektet; `sortTable()` kaller `syncMobileSortSelect()` for å holde desktop- og mobilsortering i sync
