@@ -191,7 +191,7 @@
   .ep-card .swipe-hint { display: none; position: absolute; right: 0.75rem; bottom: 0.6rem; font-size: 0.68rem; color: var(--text-faint); opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
   @media (hover: none) and (pointer: coarse) {
     .ep-card .swipe-hint { display: block; }
-    .ep-card:first-child .swipe-hint { opacity: 0.6; }
+    .ep-card:first-child .swipe-hint { opacity: 1; }
   }
   .ep-card.ep-new { background: rgba(245,158,11,0.07); box-shadow: inset 3px 0 0 #f59e0b; }
   body.dark .ep-card.ep-new { background: rgba(245,158,11,0.10); box-shadow: inset 3px 0 0 #fbbf24; }
@@ -270,10 +270,10 @@
 
 <main>
 <div class="summary">
-  <div class="stat" id="statCardTotal" role="button" tabindex="0" aria-label="Vis alle episoder" aria-pressed="false"><strong id="statTotal">–</strong><span class="stat-label">Episoder</span></div>
-  <div class="stat" id="statCardEn" role="button" tabindex="0" aria-label="Filtrer engelske episoder" aria-pressed="false"><strong id="statEn">–</strong><span class="stat-label">Engelske</span></div>
-  <div class="stat" id="statCardNo" role="button" tabindex="0" aria-label="Filtrer norske episoder" aria-pressed="false"><strong id="statNo">–</strong><span class="stat-label">Norske</span></div>
-  <div class="stat" id="statCardTop" role="button" tabindex="0" aria-label="Filtrer toppkarakter 6/6" aria-pressed="false"><strong id="statTop">–</strong><span class="stat-label">Topp&shy;karakter</span></div>
+  <div class="stat" id="statCardTotal" role="button" tabindex="0" title="Vis alle episoder" aria-pressed="false"><strong id="statTotal">–</strong> <span class="stat-label">Episoder</span></div>
+  <div class="stat" id="statCardEn" role="button" tabindex="0" title="Filtrer engelske episoder" aria-pressed="false"><strong id="statEn">–</strong> <span class="stat-label">Engelske</span></div>
+  <div class="stat" id="statCardNo" role="button" tabindex="0" title="Filtrer norske episoder" aria-pressed="false"><strong id="statNo">–</strong> <span class="stat-label">Norske</span></div>
+  <div class="stat" id="statCardTop" role="button" tabindex="0" title="Filtrer toppkarakter 6/6" aria-pressed="false"><strong id="statTop">–</strong> <span class="stat-label">Topp&shy;karakter</span></div>
   <div class="search-summary"><input type="text" id="searchBox" placeholder="Tittel, podcast, emne…" aria-label="Søk"></div>
 </div>
 
@@ -656,7 +656,7 @@ function renderTable(rows) {
       ${hosts && hosts !== '—' ? `<div class="card-hosts">${esc(hosts)}</div>` : ''}
       ${topics && topics !== '—' ? `<div class="card-topics">${esc(topics)}</div>` : ''}
       <div class="card-tags-row">${renderTags(tags)}</div>
-      <span class="swipe-hint">sveip &#8594; &#9733;</span>
+      <span class="swipe-hint" aria-hidden="true">sveip &#8594; &#9733;</span>
     `;
     cardList.appendChild(card);
   });
