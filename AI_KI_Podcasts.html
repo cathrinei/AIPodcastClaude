@@ -537,6 +537,13 @@ const CSV_MAX_BYTES = 5 * 1024 * 1024;
 const sort = { col: DATE_COL, asc: false };
 let tagFilter = '';
 
+// Sett tilstand på en toggle-knapp (active-klasse, aria-pressed, og valgfritt innerHTML)
+function setToggleBtn(btn, active, labelOn, labelOff) {
+  btn.classList.toggle('active', active);
+  btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+  if (labelOn !== undefined) btn.innerHTML = active ? labelOn : labelOff;
+}
+
 const tagMeta = {
   vibe:     { label: 'Vibe coding', cls: 'tag-vibe' },
   openclaw: { label: 'OpenClaw',    cls: 'tag-openclaw' },
@@ -751,16 +758,9 @@ function resetFilters() {
   showRecentOnly = false;
   showArchive = false;
   archivedData = [];
-  const favBtn = document.getElementById('favFilterBtn');
-  favBtn.classList.remove('active');
-  favBtn.setAttribute('aria-pressed', 'false');
-  favBtn.innerHTML = '&#9734; Favoritter';
-  const recentBtn = document.getElementById('recentBtn');
-  recentBtn.classList.remove('active');
-  recentBtn.setAttribute('aria-pressed', 'false');
-  const archiveBtn = document.getElementById('archiveBtn');
-  archiveBtn.classList.remove('active');
-  archiveBtn.setAttribute('aria-pressed', 'false');
+  setToggleBtn(document.getElementById('favFilterBtn'), false, '&#9733; Favoritter', '&#9734; Favoritter');
+  setToggleBtn(document.getElementById('recentBtn'), false);
+  setToggleBtn(document.getElementById('archiveBtn'), false);
   document.getElementById('searchBox').value = '';
   document.getElementById('langFilter').value = '';
   document.getElementById('podcastFilter').value = '';
@@ -828,9 +828,7 @@ document.getElementById('emptyResetBtn').addEventListener('click', resetFilters)
 
 document.getElementById('recentBtn').addEventListener('click', () => {
   showRecentOnly = !showRecentOnly;
-  const btn = document.getElementById('recentBtn');
-  btn.classList.toggle('active', showRecentOnly);
-  btn.setAttribute('aria-pressed', showRecentOnly ? 'true' : 'false');
+  setToggleBtn(document.getElementById('recentBtn'), showRecentOnly);
   refresh();
 });
 
@@ -846,9 +844,7 @@ document.getElementById('archiveBtn').addEventListener('click', async () => {
     } catch { /* arkiv ikke tilgjengelig */ }
   }
   showArchive = !showArchive;
-  const btn = document.getElementById('archiveBtn');
-  btn.classList.toggle('active', showArchive);
-  btn.setAttribute('aria-pressed', showArchive ? 'true' : 'false');
+  setToggleBtn(document.getElementById('archiveBtn'), showArchive);
   buildPodcastFilter();
   refresh();
 });
@@ -880,17 +876,12 @@ function applyUrlParams() {
   if (params.has('tag'))     { tagFilter = params.get('tag'); changed = true; }
   if (params.get('favs') === '1') {
     showFavoritesOnly = true;
-    const btn = document.getElementById('favFilterBtn');
-    btn.classList.add('active');
-    btn.setAttribute('aria-pressed', 'true');
-    btn.innerHTML = '&#9733; Favoritter';
+    setToggleBtn(document.getElementById('favFilterBtn'), true, '&#9733; Favoritter', '&#9734; Favoritter');
     changed = true;
   }
   if (params.get('recent') === '1') {
     showRecentOnly = true;
-    const btn = document.getElementById('recentBtn');
-    btn.classList.add('active');
-    btn.setAttribute('aria-pressed', 'true');
+    setToggleBtn(document.getElementById('recentBtn'), true);
     changed = true;
   }
   if (changed) {
@@ -1043,9 +1034,7 @@ function handlePodcastInteraction(e) {
 const favFilterBtn = document.getElementById('favFilterBtn');
 favFilterBtn.addEventListener('click', () => {
   showFavoritesOnly = !showFavoritesOnly;
-  favFilterBtn.classList.toggle('active', showFavoritesOnly);
-  favFilterBtn.setAttribute('aria-pressed', showFavoritesOnly ? 'true' : 'false');
-  favFilterBtn.innerHTML = showFavoritesOnly ? '&#9733; Favoritter' : '&#9734; Favoritter';
+  setToggleBtn(favFilterBtn, showFavoritesOnly, '&#9733; Favoritter', '&#9734; Favoritter');
   refresh();
 });
 
