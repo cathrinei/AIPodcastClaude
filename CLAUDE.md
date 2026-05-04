@@ -109,7 +109,8 @@ Bruk disse navnene konsekvent ved rating av nye episoder:
 - **`.ep-share-btn`** — 🔗-ikon per episode; i tabellen gruppert med `fav-btn` i ★-kolonnen (`white-space:nowrap`), i mobilkort gruppert med `fav-btn` i en `flex`-span med `margin-left:auto`; klikk kopierer `buildEpisodeUrl()`-URL til utklippstavlen og viser ✓ i 1,5 sek; event delegation på `document`
 - **`label::after`-chevron på mobil:** labels får `flex-direction: column` (tekst over select), så chevron-pilen bruker `bottom: 0.6rem` i stedet for `top: 50%` for å sentrere i select-feltet
 - **Header på mobil:** beholder `flex-direction: row; justify-content: space-between` — ikke `column` med negativ margin
-- **Arkivvisning:** arkiv-rader vises med varm amber-bakgrunn (`#fffbeb`/`#1c150a`); brun skillerrad (`tr.archive-divider` / `.card-archive-divider`) skilles inn automatisk i `renderTable()` ved første arkivrad; `#archiveBtn[aria-pressed="true"]` har mørkere amber-aktiv-stil; row count viser «X av Y episoder + Z arkiverte»
+- **Arkivvisning:** arkiv-rader vises med varm amber-bakgrunn (`#fffbeb`/`#1c150a`); brun skillerrad (`tr.archive-divider` / `.card-archive-divider`) skilles inn automatisk i `renderTable()` ved første arkivrad; `#archiveBtn[aria-pressed="true"]` har mørkere amber-aktiv-stil; row count viser «X av Y episoder + Z arkiverte»; ved aktivering scroller siden automatisk til skillelinjen (`getBoundingClientRect + scrollY`, kompensert for sticky header-høyde + 8px)
+- **Sticky kolonneheader:** `thead th` har `position: sticky; top: 0; z-index: 2; background` — holder seg synlig ved vertikal skrolling; `border-bottom` på `thead tr` erstattet med `box-shadow: 0 2px 0 var(--border)` på `th` for å unngå `border-collapse`-bug med sticky
 
 ## update_podcasts.py – tekniske noter
 - `FEEDS` dict: add new podcasts with name (must match CSV) and RSS URL — 26 feeds currently
@@ -153,7 +154,7 @@ Bruk disse navnene konsekvent ved rating av nye episoder:
 ## auto_rate.py – tekniske noter
 - Kjøres automatisk av GitHub Actions etter `rate_episodes.py`; kan også kjøres lokalt med `GITHUB_TOKEN`
 - Kaller `gpt-4o-mini` via GitHub Models (`https://models.inference.ai.azure.com`)
-- `SYSTEM_PROMPT` inneholder karakterskala, vertsnavn og tag-definisjoner; svar alltid JSON
+- `SYSTEM_PROMPT` inneholder karakterskala, vertsnavn og tag-definisjoner; svar alltid JSON; språkregler: norske episoder → norsk (bokmål), engelske → engelsk; bruk alltid æ/ø/å — aldri ASCII-translitterasjon
 - **`user_msg` skal kun inneholde data** (podcast, tittel, språk, dato, lenke, beskrivelse) — ingen instruksjoner om format eller respons; instruksjonstekst i user-meldingen trigger Azures jailbreak-filter
 - Beskrivelse fra RSS (kolonne 12) inkluderes alltid i prompten for bedre ratingkvalitet
 - **Azure content_filter-feil**: ved `content_filter`-feil (kode 400) prøves automatisk retry uten beskrivelse — RSS-teksten kan inneholde ord som trigger Azures filter
