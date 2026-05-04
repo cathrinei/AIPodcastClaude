@@ -17,6 +17,7 @@ import os
 import subprocess
 import sys
 from datetime import date
+from dateutil.relativedelta import relativedelta
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
@@ -26,13 +27,7 @@ ARCHIVE_PATH  = os.path.join(BASE_DIR, "AI_KI_Podcasts_arkiv.csv")
 
 
 def archive_cutoff() -> str:
-    today = date.today()
-    month = today.month - 3
-    year = today.year
-    if month <= 0:
-        month += 12
-        year -= 1
-    return date(year, month, today.day).isoformat()
+    return (date.today() - relativedelta(months=3)).isoformat()
 
 
 def load_archive_keys() -> set[tuple[str, str]]:
