@@ -62,6 +62,7 @@ Tagger (kun disse, kommaseparert; la stå tomt hvis ingen passer):
 Språk — følg dette strengt:
 - Norske episoder (Language=Norwegian): skriv main_topics og rating_notes på norsk (bokmål)
 - Engelske episoder (Language=English): skriv main_topics og rating_notes på engelsk
+- Bruk alltid korrekte tegn: æ, ø, å — aldri erstatt dem med ae, oe, aa eller utelat dem
 
 Viktig: "AI" betyr kunstig intelligens, ikke Amnesty International. "KI" betyr kunstig intelligens, ikke firmanavnforkortelse. Episoder som handler om noe annet enn AI, for eksempel nyheter, politikk, økonomi, sport, får karakter 1–2.
 
