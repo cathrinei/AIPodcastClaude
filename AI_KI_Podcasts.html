@@ -866,9 +866,19 @@ document.getElementById('archiveBtn').addEventListener('click', async () => {
   if (showArchive) {
     const divider = document.querySelector('tr.archive-divider, .card-archive-divider');
     if (divider) {
-      const headerH = document.querySelector('thead')?.offsetHeight || 0;
-      const y = divider.getBoundingClientRect().top + window.scrollY - headerH - 8;
-      window.scrollTo({ top: y, behavior: 'smooth' });
+      const tw = document.querySelector('.table-wrap');
+      const twHidden = !tw || getComputedStyle(tw).display === 'none';
+      if (twHidden) {
+        // Mobil: kortliste scroller med window
+        const y = divider.getBoundingClientRect().top + window.scrollY - 8;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      } else {
+        // Desktop: table-wrap er scroll-containeren
+        const headerH = document.querySelector('thead')?.offsetHeight || 0;
+        const twRect = tw.getBoundingClientRect();
+        const divRect = divider.getBoundingClientRect();
+        tw.scrollTo({ top: tw.scrollTop + divRect.top - twRect.top - headerH - 8, behavior: 'smooth' });
+      }
     }
   }
 });
