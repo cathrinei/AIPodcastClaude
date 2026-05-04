@@ -14,7 +14,7 @@ This project collects and curates podcast episodes on artificial intelligence (A
 - `approve_episodes.py` — manuell override: flytter manuelt ratede episoder fra pending til hoved-CSV
 - `show_pending.py` — viser pending_episodes.csv i lesbar form i terminalen; kjøres lokalt
 - `sync_html.py` — synkroniserer det innebygde `data[]`-arrayet i HTML-en med CSV-en
-- `archive_episodes.py` — flytter episoder eldre enn 3 måneder fra hoved-CSV til `AI_KI_Podcasts_arkiv.csv`; kjøres daglig av GitHub Actions etter `auto_rate.py`; cutoff = rullerende daglig (`date.today()` minus 3 måneder)
+- `archive_episodes.py` — flytter episoder eldre enn 3 måneder fra hoved-CSV til `AI_KI_Podcasts_arkiv.csv`; kjøres daglig av GitHub Actions etter `auto_rate.py`; cutoff = rullerende daglig (`date.today() - relativedelta(months=3)` fra `python-dateutil`)
 - `AI_KI_Podcasts_arkiv.csv` — arkiv-CSV: episoder eldre enn 3 måneder; identisk kolonneformat som hoved-CSV; lastes runtime av HTML ved klikk på «Vis arkiv»-knappen
 - `rejected_episodes.csv` — denylist of already-reviewed non-AI episodes; prevents re-fetching noise
 - `failed_attempts.csv` — sporer API-feil per episode (Podcast Name, Episode Title, Attempts); episoder som feiler 3 ganger auto-forkastes til rejected_episodes.csv
