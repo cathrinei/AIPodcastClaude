@@ -220,8 +220,8 @@ Branch-navnekonvensjon:
 
 **Regler (Claude):**
 - **Episodeoppdateringer** (kun `AI_KI_Podcasts.csv`, `AI_KI_Podcasts.html`, `pending_episodes.csv`, `rejected_episodes.csv`, `failed_attempts.csv`) → direkte push til `main`
-- **Alt annet** (HTML-kode, skript, GitHub Actions, CLAUDE.md alene) → branch + PR
-- **CLAUDE.md** oppdateres i samme commit/PR som feature-endringen — ingen unntak
+- **Alt annet** (HTML-kode, skript, GitHub Actions, CLAUDE.md) → alltid branch + PR, uansett størrelse
+- **CLAUDE.md** følger alltid med i PR-en for den tilhørende feature-endringen — aldri som egen commit til `main`
 - Sjekk alltid `git branch` før commit — aldri commit uten å bekrefte at du er på riktig branch
 
 **Opprydding av branches og PRs (ukentlig):**
