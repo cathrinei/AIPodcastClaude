@@ -90,15 +90,15 @@
 
   .table-wrap { overflow-x: auto; padding: 1rem 2rem 2rem; }
   table { width: 100%; border-collapse: collapse; font-size: 0.82rem; background: var(--surface); border-radius: 10px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.10); }
-  thead tr { background: #f0f1f5; border-bottom: 2px solid var(--border); }
-  thead th { padding: 0.65rem 0.8rem; text-align: left; white-space: nowrap; cursor: pointer; user-select: none; font-size: 0.70rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #4b5563; border-right: 1px solid var(--border); }
+  thead tr { background: #f0f1f5; }
+  thead th { padding: 0.65rem 0.8rem; text-align: left; white-space: nowrap; cursor: pointer; user-select: none; font-size: 0.70rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #4b5563; border-right: 1px solid var(--border); position: sticky; top: 0; z-index: 2; background: #f0f1f5; box-shadow: 0 2px 0 var(--border); }
   thead th:last-child { border-right: none; }
   thead th:hover { background: #e8eaf0; color: var(--text); }
   thead th.sorted { color: var(--accent); }
   thead th .sort-icon { opacity: 0.4; margin-left: 4px; font-size: 0.75rem; }
   thead th.sorted .sort-icon { opacity: 1; color: var(--accent); }
-  body.dark thead tr { background: #252840; border-bottom-color: var(--border); }
-  body.dark thead th { color: var(--text-muted); border-right-color: var(--border); }
+  body.dark thead tr { background: #252840; }
+  body.dark thead th { color: var(--text-muted); border-right-color: var(--border); background: #252840; box-shadow: 0 2px 0 var(--border); }
   body.dark thead th:hover { background: #2e3255; color: var(--text); }
   body.dark thead th.sorted { color: var(--accent); }
 
