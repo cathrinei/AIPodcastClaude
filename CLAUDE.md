@@ -190,32 +190,38 @@ These shows are in the episode list but have no RSS feed in `update_podcasts.py`
 - **Engelske:** The Journal (WSJ) *(has RSS but produces many off-topic episodes — manual curation needed)*
 
 ## Git workflow
-Bruk feature-brancher for alle endringer — aldri commit direkte til `main`.
 
+**Episodeoppdateringer (CSV + HTML)** — commit og push direkte til `main`:
 ```bash
-# Start ny arbeidsøkt
 git checkout main && git pull
-git checkout -b session/YYYY-MM-DD   # eller feature/kort-beskrivelse
+# ... rate og godkjenn episoder ...
+git add AI_KI_Podcasts.csv AI_KI_Podcasts.html pending_episodes.csv rejected_episodes.csv
+git commit -m "session: kort beskrivelse"
+git push
+```
+
+**Kode- og feature-endringer** — alltid branch + PR:
+```bash
+git checkout main && git pull
+git checkout -b feature/kort-beskrivelse
 
 # Etter endringer
 git add <filer>
-git commit -m "kort beskrivelse av hva og hvorfor"
-git push -u origin session/YYYY-MM-DD
+git commit -m "feat/fix/chore: beskrivelse"
+git push -u origin feature/kort-beskrivelse
 gh pr create --base main --title "..." --body "..."
 ```
 
 Branch-navnekonvensjon:
-- `session/YYYY-MM-DD` — vanlig oppdateringsøkt (episoder, rydding)
 - `feature/beskrivelse` — ny funksjonalitet i HTML eller skript
+- `fix/beskrivelse` — bugfiks
+- `chore/beskrivelse` — rydding, avhengigheter, konfig
 
-**PR-regler (Claude):**
-- **Aldri commit direkte til `main`** — alltid branch + PR, uansett hvor liten endringen er
-- **CLAUDE.md skal alltid oppdateres** og inkluderes i samme PR som feature-endringen — ingen unntak
+**Regler (Claude):**
+- **Episodeoppdateringer** (kun `AI_KI_Podcasts.csv`, `AI_KI_Podcasts.html`, `pending_episodes.csv`, `rejected_episodes.csv`, `failed_attempts.csv`) → direkte push til `main`
+- **Alt annet** (HTML-kode, skript, GitHub Actions, CLAUDE.md alene) → branch + PR
+- **CLAUDE.md** oppdateres i samme commit/PR som feature-endringen — ingen unntak
 - Sjekk alltid `git branch` før commit — aldri commit uten å bekrefte at du er på riktig branch
-- Sjekk alltid `gh pr list` og `git status` før ny branch eller PR opprettes
-- Én session-branch per dag (`session/YYYY-MM-DD`) — opprettes rett før første endring, brukes for alle endringer den dagen
-- Én ny PR per avsluttet oppgave — push til samme branch, `gh pr create` når oppgaven er ferdig
-- Session-branch opprettes rett før første endring (`git checkout main && git pull && git checkout -b session/YYYY-MM-DD`) — ikke tidlig på dagen — slik at den alltid er i sync med main
 
 **Opprydding av branches og PRs (ukentlig):**
 Mergede branches hoper seg opp raskt. Claude skal minne om dette ved oppstart av en arbeidsøkt hvis det har gått mer enn 7 dager siden forrige opprydding.
