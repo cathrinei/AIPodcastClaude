@@ -338,7 +338,7 @@
   <thead>
     <tr>
       <th data-col="0" scope="col" aria-sort="none" tabindex="0">Podkast <span class="sort-icon" aria-hidden="true">&#8597;</span></th>
-      <th scope="col" aria-label="Favoritter" style="width:36px;text-align:center">&#9734;</th>
+      <th scope="col" aria-label="Favoritter og del" style="width:60px;text-align:center">&#9734;</th>
       <th data-col="1" scope="col" aria-sort="none" tabindex="0">Episode <span class="sort-icon" aria-hidden="true">&#8597;</span></th>
       <th data-col="2" scope="col" aria-sort="none" tabindex="0">Spr. <span class="sort-icon" aria-hidden="true">&#8597;</span></th>
       <th data-col="3" scope="col" aria-sort="descending" class="sorted" tabindex="0">Dato <span class="sort-icon" aria-hidden="true">&#8595;</span></th>
@@ -628,8 +628,8 @@ function renderTable(rows) {
     if (isArchived) tr.classList.add('ep-archived');
     tr.innerHTML = `
       <td><span class="podcast-name" data-podcast="${esc(podcast)}" role="button" tabindex="0" title="Vis alle episoder fra ${esc(podcast)}">${esc(podcast)}</span></td>
-      <td style="text-align:center"><button class="fav-btn" data-fav="${esc(epKey)}" aria-pressed="${isFav}" aria-label="${favLabel}" title="${favLabel}">${favIcon}</button></td>
-      <td><a class="episode-title-link" href="${safeUrl(link)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(title)} (åpner i ny fane)">${esc(title)}</a><button class="ep-share-btn" data-podcast="${esc(podcast)}" data-title="${esc(title)}" aria-label="Kopier lenke til episode" title="Kopier lenke">&#128279;</button></td>
+      <td style="text-align:center;white-space:nowrap"><button class="fav-btn" data-fav="${esc(epKey)}" aria-pressed="${isFav}" aria-label="${favLabel}" title="${favLabel}">${favIcon}</button><button class="ep-share-btn" data-podcast="${esc(podcast)}" data-title="${esc(title)}" aria-label="Kopier lenke til episode" title="Kopier lenke">&#128279;</button></td>
+      <td><a class="episode-title-link" href="${safeUrl(link)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(title)} (åpner i ny fane)">${esc(title)}</a></td>
       <td><span class="lang-badge ${lang === 'English' ? 'lang-en' : 'lang-no'}">${lang === 'English' ? 'EN' : 'NO'}</span></td>
       <td style="white-space:nowrap">${esc(date)}</td>
       <td><span class="hosts">${esc(hosts)}</span></td>
