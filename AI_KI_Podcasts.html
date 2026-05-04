@@ -853,6 +853,14 @@ document.getElementById('archiveBtn').addEventListener('click', async () => {
   setToggleBtn(document.getElementById('archiveBtn'), showArchive);
   buildPodcastFilter();
   refresh();
+  if (showArchive) {
+    const divider = document.querySelector('tr.archive-divider, .card-archive-divider');
+    if (divider) {
+      const headerH = document.querySelector('thead')?.offsetHeight || 0;
+      const y = divider.getBoundingClientRect().top + window.scrollY - headerH - 8;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  }
 });
 
 // Enkelt filter-skjema: én post per filter → buildShareUrl og applyUrlParams
