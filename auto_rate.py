@@ -59,9 +59,9 @@ Tagger (kun disse, kommaseparert; la stå tomt hvis ingen passer):
 - openclaw: OpenClaw (tidl. Clawdbot/Moltbot)
 - agents: AI-agenter, agentisk AI, autonome AI-systemer
 
-Språk i rating_notes:
-- Norske episoder: skriv på norsk (bokmål)
-- Engelske episoder: skriv på engelsk
+Språk — følg dette strengt:
+- Norske episoder (Language=Norwegian): skriv main_topics og rating_notes på norsk (bokmål)
+- Engelske episoder (Language=English): skriv main_topics og rating_notes på engelsk
 
 Viktig: "AI" betyr kunstig intelligens, ikke Amnesty International. "KI" betyr kunstig intelligens, ikke firmanavnforkortelse. Episoder som handler om noe annet enn AI, for eksempel nyheter, politikk, økonomi, sport, får karakter 1–2.
 
