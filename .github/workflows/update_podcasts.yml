@@ -23,7 +23,7 @@ jobs:
           python-version: '3.12'
 
       - name: Installer avhengigheter
-        run: pip install openai
+        run: pip install openai python-dateutil
 
       - name: Kjør update_podcasts.py
         run: python update_podcasts.py 2>&1 | tee /tmp/fetch_output.txt
