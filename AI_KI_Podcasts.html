@@ -260,6 +260,26 @@
     .ep-card { padding: 0.7rem 0.85rem; }
     .card-title-link { font-size: 0.88rem; }
   }
+
+  /* Search result highlighting */
+  mark {
+    background: #fef08a; color: inherit;
+    border-radius: 2px; padding: 0 1px;
+    font-style: inherit; font-weight: inherit;
+  }
+  body.dark mark { background: #854d0e; color: #fef9c3; }
+
+  /* Search clear button */
+  #searchClear {
+    position: absolute; right: 0.45rem; top: 50%;
+    transform: translateY(-50%);
+    background: none; border: none; cursor: pointer;
+    color: var(--text-muted); font-size: 1rem;
+    line-height: 1; padding: 0 2px; display: none;
+    border-radius: 3px;
+  }
+  #searchClear:hover { color: var(--text); }
+  #searchBox.has-clear { padding-right: 1.8rem; }
 </style>
 </head>
 <body>
@@ -278,7 +298,7 @@
   <div class="stat" id="statCardEn" role="button" tabindex="0" title="Filtrer engelske episoder" aria-pressed="false"><strong id="statEn">–</strong> <span class="stat-label">Engelske</span></div>
   <div class="stat" id="statCardNo" role="button" tabindex="0" title="Filtrer norske episoder" aria-pressed="false"><strong id="statNo">–</strong> <span class="stat-label">Norske</span></div>
   <div class="stat" id="statCardTop" role="button" tabindex="0" title="Filtrer toppkarakter 6/6" aria-pressed="false"><strong id="statTop">–</strong> <span class="stat-label">Topp&shy;karakter</span></div>
-  <div class="search-summary"><input type="text" id="searchBox" placeholder="Tittel, podcast, emne…" aria-label="Søk"></div>
+  <div class="search-summary"><input type="text" id="searchBox" placeholder="Tittel, podcast, emne…" aria-label="Søk"><button id="searchClear" aria-label="Tøm søk" title="Tøm søk" tabindex="-1">&#x2715;</button></div>
 </div>
 
 <div class="controls">
@@ -590,6 +610,13 @@ function setTagFilter(tag) {
 }
 
 function renderTable(rows) {
+  const searchVal = document.getElementById('searchBox').value.trim().toLowerCase();
+  const hlWords   = searchVal ? searchVal.split(/\s+/).filter(Boolean) : [];
+  const emptyTitle = document.querySelector('#emptyState .empty-title');
+  if (emptyTitle) emptyTitle.textContent = searchVal
+    ? `Ingen episoder funnet for «${searchVal}»`
+    : 'Ingen episoder matcher filteret';
+
   const tbody = document.getElementById('tableBody');
   tbody.innerHTML = '';
   const cardList = document.getElementById('cardList');
@@ -632,14 +659,14 @@ function renderTable(rows) {
     if (isFav)      tr.classList.add('ep-fav');
     if (isArchived) tr.classList.add('ep-archived');
     tr.innerHTML = `
-      <td><span class="podcast-name" data-podcast="${esc(podcast)}" role="button" tabindex="0" title="Vis alle episoder fra ${esc(podcast)}">${esc(podcast)}</span></td>
+      <td><span class="podcast-name" data-podcast="${esc(podcast)}" role="button" tabindex="0" title="Vis alle episoder fra ${esc(podcast)}">${highlightMatch(podcast, hlWords)}</span></td>
       <td style="text-align:center;white-space:nowrap"><button class="fav-btn" data-fav="${esc(epKey)}" aria-pressed="${isFav}" aria-label="${favLabel}" title="${favLabel}">${favIcon}</button><button class="ep-share-btn" data-podcast="${esc(podcast)}" data-title="${esc(title)}" aria-label="Kopier lenke til episode" title="Kopier lenke">&#128279;</button></td>
-      <td><a class="episode-title-link" href="${safeUrl(link)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(title)} (åpner i ny fane)">${esc(title)}</a></td>
+      <td><a class="episode-title-link" href="${safeUrl(link)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(title)} (åpner i ny fane)">${highlightMatch(title, hlWords)}</a></td>
       <td><span class="lang-badge ${lang === 'English' ? 'lang-en' : 'lang-no'}">${lang === 'English' ? 'EN' : 'NO'}</span></td>
       <td style="white-space:nowrap">${esc(date)}</td>
       <td><span class="hosts">${esc(hosts)}</span></td>
       <td><span class="guests">${esc(guests)}</span></td>
-      <td><span class="topic-tags">${esc(topics)}</span></td>
+      <td><span class="topic-tags">${highlightMatch(topics, hlWords)}</span></td>
       <td style="text-align:center"><span class="rating-badge${ratingClass}">${ratingLabel}</span></td>
       <td><span class="rating-note">${esc(note)}</span></td>
       <td>${renderTags(tags)}</td>
@@ -659,10 +686,10 @@ function renderTable(rows) {
           <button class="fav-btn" data-fav="${esc(epKey)}" aria-pressed="${isFav}" aria-label="${favLabel}" title="${favLabel}">${favIcon}</button>
         </span>
       </div>
-      <a class="card-title-link" href="${safeUrl(link)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(title)} (åpner i ny fane)">${esc(title)}</a>
-      <div class="card-podcast" data-podcast="${esc(podcast)}" role="button" tabindex="0" title="Vis alle episoder fra ${esc(podcast)}">${esc(podcast)}</div>
+      <a class="card-title-link" href="${safeUrl(link)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(title)} (åpner i ny fane)">${highlightMatch(title, hlWords)}</a>
+      <div class="card-podcast" data-podcast="${esc(podcast)}" role="button" tabindex="0" title="Vis alle episoder fra ${esc(podcast)}">${highlightMatch(podcast, hlWords)}</div>
       ${hosts && hosts !== '—' ? `<div class="card-hosts">${esc(hosts)}</div>` : ''}
-      ${topics && topics !== '—' ? `<div class="card-topics">${esc(topics)}</div>` : ''}
+      ${topics && topics !== '—' ? `<div class="card-topics">${highlightMatch(topics, hlWords)}</div>` : ''}
       <div class="card-tags-row">${renderTags(tags)}</div>
       <span class="swipe-hint" aria-hidden="true">sveip &#8594; &#9733;</span>
     `;
@@ -696,6 +723,36 @@ function fuzzyMatch(query, haystack) {
   return qi === query.length;
 }
 
+function highlightMatch(text, words) {
+  if (!words || words.length === 0) return esc(text);
+  const lower = text.toLowerCase();
+  const ranges = [];
+  words.forEach(w => {
+    if (!w) return;
+    let pos = 0;
+    while (pos <= lower.length - w.length) {
+      const idx = lower.indexOf(w, pos);
+      if (idx === -1) break;
+      ranges.push([idx, idx + w.length]);
+      pos = idx + 1;
+    }
+  });
+  if (ranges.length === 0) return esc(text);
+  ranges.sort((a, b) => a[0] - b[0]);
+  const merged = [ranges[0]];
+  for (let i = 1; i < ranges.length; i++) {
+    const last = merged[merged.length - 1];
+    if (ranges[i][0] <= last[1]) last[1] = Math.max(last[1], ranges[i][1]);
+    else merged.push(ranges[i]);
+  }
+  let result = '', cursor = 0;
+  merged.forEach(([start, end]) => {
+    result += esc(text.slice(cursor, start)) + '<mark>' + esc(text.slice(start, end)) + '</mark>';
+    cursor = end;
+  });
+  return result + esc(text.slice(cursor));
+}
+
 function getRecentCutoff() {
   const d = new Date();
   d.setMonth(d.getMonth() - 4);
@@ -723,7 +780,8 @@ function getFiltered() {
     }
     if (search) {
       const haystack = [podcast, title, hosts, guests, topics, note].join(' ').toLowerCase();
-      if (!fuzzyMatch(search, haystack)) return false;
+      const words = search.split(/\s+/).filter(Boolean);
+      if (!words.every(w => fuzzyMatch(w, haystack))) return false;
     }
     return true;
   });
@@ -766,7 +824,17 @@ function setTableHeight() {
   tw.style.maxHeight = (window.innerHeight - top - 16) + 'px';
 }
 
+function syncClear() {
+  const sb  = document.getElementById('searchBox');
+  const btn = document.getElementById('searchClear');
+  if (!btn) return;
+  const has = sb.value.length > 0;
+  btn.style.display = has ? '' : 'none';
+  sb.classList.toggle('has-clear', has);
+}
+
 function refresh() {
+  syncClear();
   renderTable(getSorted(getFiltered()));
   setTableHeight();
 }
@@ -831,6 +899,11 @@ function parseCSV(text) {
 
 // Wire up controls
 document.getElementById('searchBox').addEventListener('input', refresh);
+document.getElementById('searchClear').addEventListener('click', () => {
+  document.getElementById('searchBox').value = '';
+  refresh();
+  document.getElementById('searchBox').focus();
+});
 document.getElementById('langFilter').addEventListener('change', () => {
   buildPodcastFilter();
   refresh();
