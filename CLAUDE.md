@@ -94,7 +94,9 @@ Bruk disse navnene konsekvent ved rating av nye episoder:
 - Tags whitelisted via `tagMeta`-objekt — ukjente tag-verdier ignoreres; aktive tags: `vibe`, `openclaw`, `agents`
 - `safeUrl()` blokkerer ikke-HTTP(S)-URLer for å hindre `javascript:`-injeksjon
 - CSP: `default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'`
-- Søk er fuzzy: eksakt substring-match først, deretter subsequence-fallback (f.eks. `"krpthy"` → `"Karpathy"`)
+- **Søk — multi-ord AND + fremheving:** flerords-søk splittes på mellomrom; hvert ord testes separat via `fuzzyMatch()` (alle må matche — AND-logikk); eksakt substring-match fremheves med `<mark>` (gul/#fef08a i lys, brun/#854d0e i dark); subsequence-treff vises uten fremheving; fremheving brukes på podcast-navn, episodetittel og emner i tabell og mobilkort via `highlightMatch(text, words)`
+- **`#searchClear`-knapp:** vises inne i søkeboksen når det er tekst; klikk tømmer og fokuserer; synkroniseres av `syncClear()` kalt fra `refresh()`; `#searchBox.has-clear` legger til `padding-right` så tekst ikke forsvinner under knappen
+- **Tom-tilstand-melding:** `#emptyState .empty-title` oppdateres dynamisk i `renderTable()` — «Ingen episoder funnet for «xyz»» ved aktivt søk, generisk melding ellers
 - Uraterte episoder (Rating=0) vises som **N/A** og passerer alltid gjennom ratingfilteret
 - WCAG AA: alle kjente problemer er fikset — kontrast, ARIA-roller, `aria-sort`, `aria-pressed`, `:focus-visible`
 - **`<main>`-landmark:** hoved-innholdet (`.summary` → `#cardList`) er wrappert i `<main>`; `#backToTop` (fixed-positioned) er utenfor `<main>`
