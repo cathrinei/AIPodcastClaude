@@ -73,7 +73,7 @@ Svar alltid med gyldig JSON, ingen annen tekst:
   "guest": "fullt navn på gjest(er), kommaseparert — søk aktivt i BÅDE tittel og beskrivelse etter mønstre som 'with [Navn]', 'w/ [Navn]', 'featuring [Navn]', 'interview with [Navn]', '[Navn] joins', '[Navn] on [emne]' — la stå tomt KUN hvis ingen konkret person er nevnt som gjest",
   "main_topics": "korte emneord, kommaseparert",
   "rating": <heltall 1-6>,
-  "rating_notes": "1–2 setninger som begrunner karakteren",
+  "rating_notes": "1–2 setninger som begrunner karakteren — fokuser på innholdet (hva tas opp, hvilken verdi har det), ikke på gjestens status eller personlighet; unngå fraser som 'fremragende gjest', 'gjestevennlig', 'eksepsjonell gjest' o.l.",
   "tags": "kommaseparerte tagger eller tom streng"
 }"""
 
