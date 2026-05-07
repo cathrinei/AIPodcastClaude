@@ -40,6 +40,7 @@ GUEST_FROM_TITLE = {
     "TWIML AI Podcast",
     "Latent Space",
     "Hard Fork (NYT)",
+    "Win-Win with Liv Boeree",
 }
 
 ITUNES_NS = "http://www.itunes.com/dtds/podcast-1.0.dtd"
@@ -282,6 +283,23 @@ def extract_guest_from_title(title, podcast_name):
     elif podcast_name == "Hard Fork (NYT)":
         # Mønster: «Emne With Gjest + ...» — stor W indikerer gjest, ikke "with" i setning
         m = re.search(r'\bWith\s+(.+?)(?:\s+\+|$)', title)
+        if m:
+            candidate = m.group(1).strip()
+            if len(candidate) > 3:
+                return candidate
+
+    elif podcast_name == "Win-Win with Liv Boeree":
+        # Mønster: «Emne | Gjest» — siste segment etter ' | '
+        if ' | ' in title:
+            candidate = title.rsplit(' | ', 1)[-1].strip()
+            if len(candidate) > 3:
+                return candidate
+
+    # Generelt fallback for alle podcaster i GUEST_FROM_TITLE:
+    # fanger «w/ Fornavn Etternavn» og «with Fornavn Etternavn» (2–4 ord med stor forbokstav)
+    NAME_RE = r'([A-Z][a-zÀ-ÿ]+(?:\s+[A-Z][a-zÀ-ÿ]+){1,3})'
+    for pattern in (r'\bw/\s*' + NAME_RE, r'\bwith\s+' + NAME_RE):
+        m = re.search(pattern, title)
         if m:
             candidate = m.group(1).strip()
             if len(candidate) > 3:

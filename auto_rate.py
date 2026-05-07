@@ -70,7 +70,7 @@ Svar alltid med gyldig JSON, ingen annen tekst:
 
 {
   "host": "vertnavn eller tom streng",
-  "guest": "gjestenavn eller tom streng",
+  "guest": "fullt navn på gjest(er), kommaseparert — søk aktivt i BÅDE tittel og beskrivelse etter mønstre som 'with [Navn]', 'w/ [Navn]', 'featuring [Navn]', 'interview with [Navn]', '[Navn] joins', '[Navn] on [emne]' — la stå tomt KUN hvis ingen konkret person er nevnt som gjest",
   "main_topics": "korte emneord, kommaseparert",
   "rating": <heltall 1-6>,
   "rating_notes": "1–2 setninger som begrunner karakteren",
