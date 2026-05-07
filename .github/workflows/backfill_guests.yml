@@ -1,0 +1,51 @@
+name: Backfill gjester i hoved-CSV
+
+on:
+  workflow_dispatch:  # kjøres manuelt fra GitHub UI
+
+permissions:
+  contents: write
+  models: read
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Hent kode
+        uses: actions/checkout@v5
+
+      - name: Sett opp Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Installer avhengigheter
+        run: pip install openai
+
+      - name: Kjør backfill_guests.py
+        run: python backfill_guests.py 2>&1 | tee /tmp/backfill_output.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit og push hvis noe er endret
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add AI_KI_Podcasts.csv AI_KI_Podcasts.html
+          if git diff --cached --quiet; then
+            echo "Ingen endringer å committe."
+          else
+            git commit -m "data: backfill gjester i hoved-CSV $(date +'%Y-%m-%d')"
+            git pull --rebase
+            git push
+          fi
+
+      - name: Skriv kjøreoppsummering
+        if: always()
+        run: |
+          echo "## Backfill gjester $(date +'%Y-%m-%d')" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat /tmp/backfill_output.txt >> $GITHUB_STEP_SUMMARY 2>/dev/null || echo "(ingen output)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        shell: bash
