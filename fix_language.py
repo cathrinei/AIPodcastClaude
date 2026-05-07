@@ -37,7 +37,7 @@ NORWEGIAN_ONLY_RE = re.compile(
     re.IGNORECASE,
 )
 
-THE_EPISODE_RE = re.compile(r'^(The|This)\s+episode\b', re.IGNORECASE)
+THE_EPISODE_RE = re.compile(r'^(The|This|Episode)\s+episode\b|^Episode\b', re.IGNORECASE)
 
 # Engelske ord typiske i metadata som ikke opptrer i norsk tekst
 ENGLISH_ONLY_RE = re.compile(
