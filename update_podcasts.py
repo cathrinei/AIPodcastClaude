@@ -69,6 +69,10 @@ HOST_OVERRIDES = {
     "hr-podden":                        "Lene Broen",
 }
 
+HOST_FALLBACK = {
+    "the journal (wsj)": "WSJ Reporters",
+}
+
 LANGUAGE_OVERRIDE = {
     "AI-Snakk":               "Norwegian",
     "AI Forklart":            "Norwegian",
@@ -188,6 +192,10 @@ def _extract_host(podcast_name: str, item, channel) -> str:
             val = el.text.strip()
             if val and _looks_like_person(val, podcast_name):
                 return val
+
+    # 4. Generisk fallback for podkaster uten fast personnavn-vert
+    if key in HOST_FALLBACK:
+        return HOST_FALLBACK[key]
 
     return ""
 
