@@ -18,6 +18,8 @@ This project collects and curates podcast episodes on artificial intelligence (A
 - `AI_KI_Podcasts_arkiv.csv` — arkiv-CSV: episoder eldre enn 2 måneder; identisk kolonneformat som hoved-CSV; lastes runtime av HTML ved klikk på «Vis arkiv»-knappen
 - `rejected_episodes.csv` — denylist of already-reviewed non-AI episodes; prevents re-fetching noise
 - `failed_attempts.csv` — sporer API-feil per episode (Podcast Name, Episode Title, Attempts); episoder som feiler 3 ganger auto-forkastes til rejected_episodes.csv
+- `backfill_guests.py` — éngangs-/manuelt skript: fyller inn manglende gjester for godkjente episoder via gpt-4o-mini (kun tittel og podcast-navn, ingen beskrivelse); støtter `--dry-run`; kjøres via GitHub Actions workflow `backfill_guests.yml`
+- `fix_language.py` — retter feil språk i `main_topics` og `rating_notes`; tre deteksjonstyper: (1) engelske episoder med norsk tekst, (2) norske episoder med engelsk tekst, (3) engelske begrunnelser som starter med «The/This/Episode»; kjøres via GitHub Actions workflow `fix_language.yml`
 
 ## Live URL
 `https://cathrinei.github.io/AIPodcastClaude/` — serves the latest committed HTML + CSV automatically. GitHub Actions updates the CSV daily at 23:00 CEST; Pages rebuilds on every push to `main`.
@@ -179,6 +181,22 @@ Bruk disse navnene konsekvent ved rating av nye episoder:
 - Beskrivelse brytes over flere linjer (maks 76 tegn per linje)
 - Viser neste-steg-instruksjoner nederst (sett rating → kjør approve_episodes.py)
 - Ingen endringer i filer — kun lesing og visning
+
+## fix_language.py – tekniske noter
+- Kjøres via GitHub Actions workflow `fix_language.yml` (bruker bot-token med separat kvote)
+- Tre deteksjonstyper, prioritert i denne rekkefølgen per rad:
+  1. **Engelske episoder med norsk tekst** (`needs_fix_english`): regex på norske ord som ikke finnes i engelsk (og, er, på, med, ikke, ble, o.l.) — regenererer `main_topics` + `rating_notes` på engelsk
+  2. **Norske episoder med engelsk tekst** (`needs_fix_norwegian`): regex på engelske metadata-typiske ord (episode, covers, discusses, explores, o.l.) — regenererer `main_topics` + `rating_notes` på norsk bokmål
+  3. **Kjedelig start på begrunnelse** (`needs_fix_style`): matcher `^(The|This|Episode)\s+episode\b|^Episode\b` — regenererer kun `rating_notes`, rører ikke `main_topics`
+- Hvert tilfelle har eget system-prompt; norsk-prompt krever alltid æ/ø/å og bokmål
+- Kjører automatisk `sync_html.py` hvis hoved-CSV ble endret
+- Støtter `--dry-run` for testing uten å skrive filer
+
+## backfill_guests.py – tekniske noter
+- Kjøres via GitHub Actions workflow `backfill_guests.yml` (bruker bot-token med separat kvote); støtter `--dry-run`
+- Finner episoder i hoved-CSV uten gjest (tom `Guest(s)`-kolonne) og kaller gpt-4o-mini med kun podcast-navn, tittel og språk — ingen RSS-beskrivelse tilgjengelig for godkjente episoder
+- To falsk-positiv-filtre: (1) enkeltord-svar forkastes (f.eks. «Nathan»), (2) svar som matcher vertsnavnet forkastes
+- Idempotent — hopper over rader som allerede har gjest
 
 ## rejected_episodes.csv – format og bruk
 - Columns: `Podcast Name`, `Episode Title` (header row required)
