@@ -43,6 +43,7 @@ This project collects and curates podcast episodes on artificial intelligence (A
 - **Unrated episodes (Rating=0)** lagres i `pending_episodes.csv` — aldri i hoved-CSV.
 - Always update the CSV **before** the HTML when making data changes. CSV is the source of truth.
 - Do not add short videos, teasers, trailers, or highlight compilations — full-length episodes only.
+- **Språkregler:** Engelske episoder skal ha engelsk tekst i **alle** felter (Host, Guest, Main Topic(s), Rating Notes). Norske episoder skal ha norsk tekst i alle felter. Ingen blanding. Bruk `fix_language.py` (via GitHub Actions) hvis det oppdages feil språk i eksisterende data.
 
 ## Rating rubric (1–6)
 
