@@ -37,6 +37,8 @@ NORWEGIAN_ONLY_RE = re.compile(
     re.IGNORECASE,
 )
 
+THE_EPISODE_RE = re.compile(r'^(The|This|Episode)\s+episode\b|^Episode\b', re.IGNORECASE)
+
 # Engelske ord typiske i metadata som ikke opptrer i norsk tekst
 ENGLISH_ONLY_RE = re.compile(
     r'\b(episode|covers|discusses|explores|provides|presents|examines|features|'
@@ -52,18 +54,32 @@ SYSTEM_PROMPT_EN = """You are a podcast metadata editor. Fix metadata for Englis
 
 Rules:
 - main_topics: short comma-separated topic keywords in English
-- rating_notes: 1-2 sentences in English — focus on content value; avoid phrases like "exceptional guest" or "guest-friendly"
+- rating_notes: 1-2 sentences in English — focus on content value; avoid phrases like "exceptional guest" or "guest-friendly"; do NOT start with "The episode" or "This episode" — instead lead with what is discussed, who participates, or what makes it valuable
 - Keep the same factual content, just in English
 - Never mix languages
 
 Respond with valid JSON only:
 {"main_topics": "...", "rating_notes": "..."}"""
 
+SYSTEM_PROMPT_STYLE = """You are a podcast metadata editor. Rewrite the rating_notes for an English-language AI podcast episode.
+
+The current text starts with "The episode" or "This episode" which is formulaic and repetitive.
+Rewrite it so it leads with something more specific: what is actually discussed, who participates, or what makes it valuable.
+
+Rules:
+- Keep exactly the same facts and rating justification — only change how it starts
+- 1-2 sentences in English
+- Do NOT start with "The episode" or "This episode"
+- Avoid phrases like "exceptional guest" or "guest-friendly"
+
+Respond with valid JSON only:
+{"rating_notes": "..."}"""
+
 SYSTEM_PROMPT_NO = """Du er en podkast-metadataeditor. Rett opp metadata for norskspråklige AI-podkast-episoder der main_topics eller rating_notes ved en feil er skrevet på engelsk.
 
 Regler:
 - main_topics: korte kommaseparerte emneord på norsk (bokmål)
-- rating_notes: 1-2 setninger på norsk (bokmål) — fokuser på innholdsverdi; unngå fraser som «fremragende gjest» eller «gjestevennlig»
+- rating_notes: 1-2 setninger på norsk (bokmål) — fokuser på innholdsverdi; unngå fraser som «fremragende gjest» eller «gjestevennlig»; ikke begynn med «Episoden» eller «Denne episoden» — start heller med hva som diskuteres, hvem som deltar, eller hva som gjør episoden verdifull
 - Behold det faktiske innholdet, bare på norsk
 - Aldri bland språk
 - Bruk alltid korrekte tegn: æ, ø, å
@@ -84,6 +100,12 @@ def needs_fix_norwegian(row: list) -> bool:
     return bool(ENGLISH_ONLY_RE.search(row[6]) or ENGLISH_ONLY_RE.search(row[8]))
 
 
+def needs_fix_style(row: list) -> bool:
+    if len(row) < 9 or row[2].strip().lower() != "english":
+        return False
+    return bool(THE_EPISODE_RE.match(row[8].strip()))
+
+
 def _call_api(client: OpenAI, row: list, target_lang: str) -> dict | None:
     podcast = row[0]
     title   = row[1]
@@ -100,6 +122,13 @@ def _call_api(client: OpenAI, row: list, target_lang: str) -> dict | None:
             f"Rating: {rating}\n"
             f"Current main_topics (fix to English): {topics}\n"
             f"Current rating_notes (fix to English): {notes}"
+        )
+    elif target_lang == "style":
+        system = SYSTEM_PROMPT_STYLE
+        user_msg = (
+            f"Podcast: {podcast}\nTitle: {title}\nHost: {host}\nGuest: {guest}\n"
+            f"Rating: {rating}\n"
+            f"Current rating_notes (rewrite to not start with 'The episode'): {notes}"
         )
     else:
         system = SYSTEM_PROMPT_NO
@@ -150,14 +179,17 @@ def fix_csv(client: OpenAI, path: str, dry_run: bool) -> int:
             to_fix.append((i, r, "english"))
         elif needs_fix_norwegian(r):
             to_fix.append((i, r, "norwegian"))
+        elif needs_fix_style(r):
+            to_fix.append((i, r, "style"))
 
     print(f"  {os.path.basename(path)}: {len(to_fix)} episoder å fikse\n")
 
     updated = 0
     for i, row, target_lang in to_fix:
-        direction = "→ EN" if target_lang == "english" else "→ NO"
+        direction = {"english": "→ EN", "norwegian": "→ NO", "style": "✎ STYLE"}[target_lang]
         print(f"  {direction} [{row[3]}] {row[0][:25]:<25} {row[1][:50]}")
-        print(f"    topics : {row[6][:80]}")
+        if target_lang != "style":
+            print(f"    topics : {row[6][:80]}")
         print(f"    notes  : {row[8][:80]}")
 
         if dry_run:
@@ -169,18 +201,24 @@ def fix_csv(client: OpenAI, path: str, dry_run: bool) -> int:
             print("    -> FEIL, hopper over\n")
             continue
 
-        new_topics = result.get("main_topics", "").strip()
-        new_notes  = result.get("rating_notes", "").strip()
-
-        if not new_topics or not new_notes:
+        new_notes = result.get("rating_notes", "").strip()
+        if not new_notes:
             print("    -> tomt svar, hopper over\n")
             continue
 
-        print(f"    -> topics : {new_topics[:80]}")
-        print(f"    -> notes  : {new_notes[:80]}\n")
+        if target_lang == "style":
+            print(f"    -> notes  : {new_notes[:80]}\n")
+            rows[i][8] = new_notes
+        else:
+            new_topics = result.get("main_topics", "").strip()
+            if not new_topics:
+                print("    -> tomt svar, hopper over\n")
+                continue
+            print(f"    -> topics : {new_topics[:80]}")
+            print(f"    -> notes  : {new_notes[:80]}\n")
+            rows[i][6] = new_topics
+            rows[i][8] = new_notes
 
-        rows[i][6] = new_topics
-        rows[i][8] = new_notes
         updated += 1
 
     if not dry_run and updated > 0:
