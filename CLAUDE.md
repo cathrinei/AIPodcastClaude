@@ -137,7 +137,7 @@ Bruk disse navnene konsekvent ved rating av nye episoder:
 
 ### Metadata-utfylling
 - **Dato**: alltid fra RSS `<pubDate>` — alltid `YYYY-MM-DD`
-- **Host(s)**: hentes fra `HOST_OVERRIDES`-dict (18 kjente podkaster) → deretter RSS `itunes:author`/`dc:creator` på item- og kanalnivå (kun hvis det ser ut som et personnavn). `auto_rate.py` kan korrigere ved behov. Legg nye faste verter til i `HOST_OVERRIDES` i `update_podcasts.py`.
+- **Host(s)**: hentes fra `HOST_OVERRIDES`-dict (18 kjente podkaster) → deretter RSS `itunes:author`/`dc:creator` på item- og kanalnivå (kun hvis det ser ut som et personnavn) → til sist `HOST_FALLBACK`-dict (siste utvei for podkaster uten fast personnavn-vert, f.eks. `The Journal (WSJ)` → `WSJ Reporters`). Legg nye faste verter til i `HOST_OVERRIDES`; legg generiske fallback-verdier til i `HOST_FALLBACK`.
 - **Guest(s)**: utledes i to trinn: (1) `extract_guest_from_title()` i `update_podcasts.py` — podcast-spesifikke mønstre for podcaster i `GUEST_FROM_TITLE`-settet (inkl. `Win-Win with Liv Boeree`), pluss generelt fallback-regex for `w/ [Navn]` og `with [Navn]` (2–4 ord med stor forbokstav, minst én liten bokstav per ord — ekskluderer forkortelser som AI/CEO); (2) `auto_rate.py` søker aktivt i tittel OG RSS-beskrivelse etter gjestmønstre og kan overstyre. Verifiser alltid manuelt — kan gi feil.
 - **`LANGUAGE_OVERRIDE`-dict**: tvinger riktig språk for norske podcaster der RSS-feeden mangler eller returnerer feil `<language>`-tag. Legg til nye norske podcaster her ved behov.
 
