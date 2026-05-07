@@ -7,6 +7,15 @@ with open('AI_KI_Podcasts.csv', encoding='utf-8') as f:
 
 data_rows = rows[1:]
 
+# Kjente tag-verdier — skal aldri stå i Platform/Link-kolonnen
+KNOWN_TAGS = {"vibe", "openclaw", "agents"}
+
+for r in data_rows:
+    if len(r) > 10:
+        link = r[10].strip()
+        if link in KNOWN_TAGS:
+            print(f'ADVARSEL: Platform/Link inneholder tag-verdi "{link}" for: [{r[0]}] {r[1][:60]}')
+
 def js_str(s):
     return s.replace('\\', '\\\\').replace('"', '\\"')
 
