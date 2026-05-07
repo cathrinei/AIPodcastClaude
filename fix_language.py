@@ -52,7 +52,7 @@ SYSTEM_PROMPT_EN = """You are a podcast metadata editor. Fix metadata for Englis
 
 Rules:
 - main_topics: short comma-separated topic keywords in English
-- rating_notes: 1-2 sentences in English — focus on content value; avoid phrases like "exceptional guest" or "guest-friendly"
+- rating_notes: 1-2 sentences in English — focus on content value; avoid phrases like "exceptional guest" or "guest-friendly"; do NOT start with "The episode" or "This episode" — instead lead with what is discussed, who participates, or what makes it valuable
 - Keep the same factual content, just in English
 - Never mix languages
 
@@ -63,7 +63,7 @@ SYSTEM_PROMPT_NO = """Du er en podkast-metadataeditor. Rett opp metadata for nor
 
 Regler:
 - main_topics: korte kommaseparerte emneord på norsk (bokmål)
-- rating_notes: 1-2 setninger på norsk (bokmål) — fokuser på innholdsverdi; unngå fraser som «fremragende gjest» eller «gjestevennlig»
+- rating_notes: 1-2 setninger på norsk (bokmål) — fokuser på innholdsverdi; unngå fraser som «fremragende gjest» eller «gjestevennlig»; ikke begynn med «Episoden» eller «Denne episoden» — start heller med hva som diskuteres, hvem som deltar, eller hva som gjør episoden verdifull
 - Behold det faktiske innholdet, bare på norsk
 - Aldri bland språk
 - Bruk alltid korrekte tegn: æ, ø, å
