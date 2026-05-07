@@ -87,7 +87,7 @@ Bruk disse navnene konsekvent ved rating av nye episoder:
 
 - `data[]`-arrayet i HTML er en innebygd kopi av CSV — alltid oppdater CSV først, kjør deretter `sync_html.py`
 - På GitHub Pages lastes CSV automatisk via `fetch('./AI_KI_Podcasts.csv')` ved sidestart og erstatter `data[]`; faller stille tilbake til innebygd array ved `file://` eller nettverksfeil
-- `sync_html.py` bruker regex til å erstatte hele `const data = [...]`-blokken i HTML-filen
+- `sync_html.py` bruker regex til å erstatte hele `const data = [...]`-blokken i HTML-filen; advarer med `ADVARSEL:`-melding hvis `Platform / Link`-kolonnen inneholder en kjent tag-verdi (`vibe`, `openclaw`, `agents`) — indikerer feilaktig manuell dataregistrering
 - «Last inn CSV»-knappen er skjult (`style="display:none"`) — fjern attributtet for å aktivere manuell fallback
 - Filter-rad (én linje): Søk · Språk · Podkast · Min. karakter · Favoritter · Nullstill · Vis arkiv. «Del», «Eksporter CSV» og «Siste 3 mnd» er skjult (`display:none`) men beholdt i DOM for JS
 - Header-subtitle viser rullerende 3-månedersperiode beregnet i JS: `today - 3 måneder` → `today`, format `dd.mm.yy – dd.mm.yy`
